@@ -23,16 +23,16 @@ export default function PartnersSection({ partnersLayerRef, partnersContentRef }
             <div className="flex flex-col items-center w-full md:w-auto">
               <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md">Platinum Partners</h4>
               <div className="flex flex-wrap justify-center items-center gap-[30px] md:gap-[50px]">
-                <Image unoptimized src={`${basePath}/Logos/Generation%20Alpha.jpg.jpeg`} alt="Gen ALPHA" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
-                <Image unoptimized src={`${basePath}/Logos/Slasscom.png`} alt="Slasscom" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
-                <Image unoptimized src={`${basePath}/Logos/ictfromabc1.png`} alt="ictfromabc" width={120} height={70} className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                <Image unoptimized src={`${basePath}/assets/Logos/Generation%20Alpha.jpg.jpeg`} alt="Gen ALPHA" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                <Image unoptimized src={`${basePath}/assets/Logos/Slasscom.png`} alt="Slasscom" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                <Image unoptimized src={`${basePath}/assets/Logos/ictfromabc1.png`} alt="ictfromabc" width={120} height={70} className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
               </div>
             </div>
 
             <div className="flex flex-col items-center w-full md:w-auto">
               <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md leading-tight">School Phase<br />Platinum Partner</h4>
               <div className="flex flex-wrap justify-center items-center h-full">
-                <Image unoptimized src={`${basePath}/Logos/Generation%20Alpha.jpg.jpeg`} alt="Gen ALPHA" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                <Image unoptimized src={`${basePath}/assets/Logos/Generation%20Alpha.jpg.jpeg`} alt="Gen ALPHA" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
               </div>
             </div>
           </div>
@@ -40,8 +40,8 @@ export default function PartnersSection({ partnersLayerRef, partnersContentRef }
           <div className="flex flex-col items-center w-full md:w-auto">
             <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md">Knowledge Partners</h4>
             <div className="flex flex-wrap justify-center items-center gap-[40px] md:gap-[70px]">
-              <Image unoptimized src={`${basePath}/Logos/Slasscom.png`} alt="Slasscom" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
-              <Image unoptimized src={`${basePath}/Logos/ictfromabc1.png`} alt="ictfromabc" width={120} height={70} className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+              <Image unoptimized src={`${basePath}/assets/Logos/Slasscom.png`} alt="Slasscom" width={120} height={55} className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+              <Image unoptimized src={`${basePath}/assets/Logos/ictfromabc1.png`} alt="ictfromabc" width={120} height={70} className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
             </div>
           </div>
         </div>

@@ -25,7 +25,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
             phone: "+94 70 246 6805",
             linkedin: "www.linkedin.com/in/naveenjayathissa99",
             linkedinLink: "https://www.linkedin.com/in/naveenjayathissa99",
-            image: "/naveen.png"
+            image: "/assets/team/naveen.png"
           },
           {
             name: "Thanuj Abeyrathne",
@@ -34,7 +34,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
             phone: "+94 71 307 3108",
             linkedin: "www.linkedin.com/in/thanuj-abeyrathne-096614242",
             linkedinLink: "https://www.linkedin.com/in/thanuj-abeyrathne-096614242",
-            image: "/thanuj.png"
+            image: "/assets/team/thanuj.png"
           },
           {
             name: "Vidmal Senanayake",
@@ -43,7 +43,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
             phone: "+94 74 107 4448",
             linkedin: "www.linkedin.com/in/vidmal-senanayake",
             linkedinLink: "https://www.linkedin.com/in/vidmal-senanayake",
-            image: "/vidmal.png"
+            image: "/assets/team/vidmal.png"
           },
           {
             name: "Janishka Madushan",
@@ -52,7 +52,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
             phone: "+94 76 782 6947",
             linkedin: "www.linkedin.com/in/janishka",
             linkedinLink: "https://www.linkedin.com/in/janishka",
-            image: "/janishka.png"
+            image: "/assets/team/janishka.png"
           },
           {
             name: "Chathuni Fernando",
@@ -61,7 +61,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
             phone: "+94 75 275 3568",
             linkedin: "www.linkedin.com/in/chathuni-fernando-26a1a0383",
             linkedinLink: "https://www.linkedin.com/in/chathuni-fernando-26a1a0383",
-            image: "/chathuni.png"
+            image: "/assets/team/chathuni.png"
           }
         ].map((member, i) => (
           <div key={i} className="w-[260px] md:w-[300px] h-[380px] md:h-[420px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border pointer-events-auto transition-transform hover:-translate-y-2 group">
