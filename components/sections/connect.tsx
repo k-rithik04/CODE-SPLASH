@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { RefObject } from "react";
 import { basePath } from "@/lib/utils";
 
@@ -55,7 +54,7 @@ export default function ConnectSection({ connectLayerRef }: ConnectSectionProps)
         </div>
 
         <div className="w-full flex justify-center mb-4">
-          <Image unoptimized src={`${basePath}/assets/CSSALogo.png`} alt="CSSA Logo" width={250} height={100} className="max-w-[200px] md:max-w-[250px] h-auto object-contain opacity-90" />
+          <img src={`${basePath}/assets/CSSALogo.png`} alt="CSSA Logo" loading="lazy" className="max-w-[200px] md:max-w-[250px] h-auto object-contain opacity-90" />
         </div>
 
         <div className="text-[0.65rem] md:text-[0.75rem] text-white/60 tracking-[0.5px] text-center flex items-center justify-center gap-2 flex-wrap pb-4">

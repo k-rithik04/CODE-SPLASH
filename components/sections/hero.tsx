@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { RefObject } from "react";
 import { basePath } from "@/lib/utils";
 
@@ -15,7 +14,7 @@ export default function HeroSection({ heroLayerRef, heroContentRef, scrollArrowR
       <section ref={heroLayerRef} className="absolute inset-0 w-full h-screen flex flex-col justify-center items-start pl-[5%] lg:pl-[15%] opacity-0 will-change-[transform,opacity]">
         <div ref={heroContentRef} className="flex flex-col items-start w-[85%] max-w-[450px] md:max-w-[550px] lg:max-w-[650px] relative">
           {/* Removed -ml-2 logic */}
-          <Image priority loading="eager" unoptimized src={`${basePath}/assets/CodeSplash.png`} alt="CodeSplash Logo" width={800} height={200} className="w-[90%] md:w-[85%] h-auto object-contain mb-4 filter drop-shadow-[0_4px_20px_rgba(255,107,0,0.15)]" />
+          <img src={`${basePath}/assets/CodeSplash.png`} alt="CodeSplash Logo" loading="eager" className="w-[90%] md:w-[85%] h-auto object-contain mb-4 filter drop-shadow-[0_4px_20px_rgba(255,107,0,0.15)]" />
           {/* Changed text-justify to text-left */}
           <p className="w-full text-[0.75rem] md:text-[0.9rem] font-normal text-white/70 leading-relaxed tracking-[0.3px] text-left max-w-[480px]">
             A Nation-wide hackathon organized by CSSA university of Kelaniya, empowering innovation through inspiration from the timeless legacy of the pyramids.
