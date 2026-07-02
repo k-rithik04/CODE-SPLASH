@@ -3,11 +3,12 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, School } from "lucide-react";
+import { basePath } from "@/lib/utils";
 
 export default function RegisterPage() {
   return (
     <div className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed flex items-center justify-center p-4"
-      style={{ backgroundImage: `url('/assets/register-bg.png')` }}>
+      style={{ backgroundImage: `url('${basePath}/assets/register-bg.png')` }}>
 
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-0"></div>

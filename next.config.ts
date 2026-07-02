@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
+
 const nextConfig: NextConfig = {
-  output: process.env.NEXT_STATIC_EXPORT === "true" ? "export" : undefined,
+  output: isStaticExport ? "export" : undefined,
+  basePath: isStaticExport ? "/CODE-SPLASH" : undefined,
   images: {
-    unoptimized: process.env.NEXT_STATIC_EXPORT === "true",
+    unoptimized: isStaticExport,
   },
 };
 

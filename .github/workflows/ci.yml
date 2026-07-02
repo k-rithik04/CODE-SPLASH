@@ -98,6 +98,7 @@ jobs:
         run: npm run build
         env:
           NEXT_STATIC_EXPORT: "true"
+          NEXT_PUBLIC_BASE_PATH: "/CODE-SPLASH"
           NEXT_TELEMETRY_DISABLED: 1
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

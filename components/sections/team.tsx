@@ -1,4 +1,5 @@
 import { RefObject } from "react";
+import { basePath } from "@/lib/utils";
 
 interface TeamSectionProps {
   teamLayerRef: RefObject<HTMLDivElement | null>;
@@ -65,7 +66,7 @@ export default function TeamSection({ teamLayerRef, teamTrackRef }: TeamSectionP
         ].map((member, i) => (
           <div key={i} className="w-[260px] md:w-[300px] h-[380px] md:h-[420px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border pointer-events-auto transition-transform hover:-translate-y-2 group">
 
-            <div className="h-[60%] w-full bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url('${member.image}')` }}>
+            <div className="h-[60%] w-full bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url('${basePath}${member.image}')` }}>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             </div>
 

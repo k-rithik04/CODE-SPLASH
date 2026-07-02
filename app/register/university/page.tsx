@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { basePath } from "@/lib/utils";
 
 export default function UniversityRegistrationPage() {
   const [step, setStep] = useState(1);
@@ -123,7 +124,7 @@ export default function UniversityRegistrationPage() {
   return (
     <div 
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-foreground"
-      style={{ backgroundImage: `url('/assets/register-bg.png')` }}
+      style={{ backgroundImage: `url('${basePath}/assets/register-bg.png')` }}
     >
       <div className="container mx-auto max-w-3xl py-10 px-4">
         {/* Progress Bar */}

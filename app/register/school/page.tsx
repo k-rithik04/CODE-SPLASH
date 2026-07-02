@@ -8,6 +8,7 @@ import { Card, CardContent, /* CardDescription, */ CardFooter, CardHeader, CardT
 // import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 // import { validateRequired, validateSriLankanPhone, checkRateLimit, recordSubmissionTimestamp } from "@/lib/validator";
 // import { useSchoolFormStore } from "@/lib/store";
+import { basePath } from "@/lib/utils";
 
 export default function SchoolRegistrationPage() {
   /* ──────────────────────────────────────────────
@@ -17,7 +18,7 @@ export default function SchoolRegistrationPage() {
   return (
     <div
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-foreground"
-      style={{ backgroundImage: `url('/assets/register-bg.png')` }}
+      style={{ backgroundImage: `url('${basePath}/assets/register-bg.png')` }}
     >
       <div className="container mx-auto max-w-3xl py-10 px-4">
 
