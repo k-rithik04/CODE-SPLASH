@@ -3,6 +3,10 @@ self.onmessage = async function (e) {
 
   const pad = (n) => String(n).padStart(3, '0');
 
+  // Detect basePath from the worker's own URL (e.g. /CODE-SPLASH/preloader.worker.js)
+  const workerPath = self.location.pathname;
+  const basePath = workerPath.replace(/\/preloader\.worker\.js$/, '');
+
   const targets = new Set();
   for (let i = 1; i <= firstCount; i++) targets.add(i);
   for (let i = totalFrames - lastCount + 1; i <= totalFrames; i++) targets.add(i);
@@ -15,7 +19,7 @@ self.onmessage = async function (e) {
     const cache = await caches.open('code-splash-frames');
 
     for (const frameNum of sorted) {
-      const url = `/assets/frames/frame_${pad(frameNum)}.webp`;
+      const url = `${basePath}/assets/frames/frame_${pad(frameNum)}.webp`;
 
       let resp = await cache.match(url);
       if (!resp) {

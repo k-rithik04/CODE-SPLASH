@@ -11,6 +11,7 @@ import TeamSection from "@/components/sections/team";
 import FaqSection from "@/components/sections/faq";
 import CtaSection from "@/components/sections/cta";
 import ConnectSection from "@/components/sections/connect";
+import { basePath } from "@/lib/utils";
 
 export default function Home() {
   const lenis = useLenis();
@@ -85,7 +86,7 @@ export default function Home() {
     let safetyTimer: ReturnType<typeof setTimeout>;
 
     try {
-      const worker = new Worker("/preloader.worker.js");
+      const worker = new Worker(`${basePath}/preloader.worker.js`);
 
       worker.onmessage = (e) => {
         const { type, loaded, total } = e.data;
@@ -183,7 +184,7 @@ export default function Home() {
 
     for (let i = 1; i <= frameCount; i++) {
       const img = new window.Image();
-      img.src = `/assets/frames/frame_${i.toString().padStart(3, "0")}.webp`;
+      img.src = `${basePath}/assets/frames/frame_${i.toString().padStart(3, "0")}.webp`;
       imagesRef.current.push(img);
     }
 
