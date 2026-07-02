@@ -51,6 +51,8 @@ jobs:
           NEXT_STATIC_EXPORT: "true"
           NEXT_PUBLIC_BASE_PATH: "/CODE-SPLASH"
           NEXT_TELEMETRY_DISABLED: 1
+      - name: Create .nojekyll for GitHub Pages
+        run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

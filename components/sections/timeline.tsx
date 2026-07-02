@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { RefObject } from "react";
-
+import { basePath } from "@/lib/utils";
 
 interface TimelineSectionProps {
   timelineLayerRef: RefObject<HTMLDivElement | null>;
@@ -51,7 +51,7 @@ export default function TimelineSection({ timelineLayerRef, timelineTrackRef }: 
           <div className="relative w-full flex justify-center timeline-node center-side mt-4 pb-[20vh]">
             <div className="t-dot"></div>
             <div className="t-card !w-[80%] md:!w-[50%] relative !mt-4 bg-black/20 border-2 border-orange/50 rounded-3xl p-5 md:p-8 shadow-[0_15px_30px_rgba(255,107,0,0.2)] pointer-events-auto group" style={{ backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)' }}>
-              <Image unoptimized src="/crown.png" alt="Crown" width={80} height={80} className="w-12 md:w-20 absolute -top-5 -right-5 md:-top-7 md:-right-7 z-20 drop-shadow-[0_0_15px_rgba(255,107,0,0.8)] rotate-[25deg] object-contain" />
+              <Image unoptimized src={`${basePath}/crown.png`} alt="Crown" width={80} height={80} className="w-12 md:w-20 absolute -top-5 -right-5 md:-top-7 md:-right-7 z-20 drop-shadow-[0_0_15px_rgba(255,107,0,0.8)] rotate-[25deg] object-contain" />
               <div className="text-orange font-extrabold text-[0.6rem] md:text-[0.7rem] tracking-wider mb-1 opacity-80 mt-2">Mar 28</div>
               <h4 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 group-hover:text-orange transition-colors">Grand Finale</h4>
               <p className="text-white/70 text-[0.6rem] md:text-[0.8rem] leading-tight">24-hour hackathon.</p>
