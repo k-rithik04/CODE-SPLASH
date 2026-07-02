@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://codesplash.cssa.org/CODE-SPLASH/sitemap.xml

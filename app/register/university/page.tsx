@@ -107,12 +107,90 @@ export default function UniversityRegistrationPage() {
   
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.removeItem("university-form-data");
-    localStorage.removeItem("university-form-step");
-    console.log("Payload ready for Google Forms:", formData);
-    alert("Registration payload logged to console!");
+
+    if (!formData.agreeRules || !formData.agreeAccurate) {
+      alert("You must agree to both declarations to submit.");
+      return;
+    }
+
+    const formParams = new URLSearchParams();
+
+    formParams.append("registrationType", formData.registrationType);
+
+    if (formData.registrationType === "Individual") {
+      formParams.append("fullName", formData.fullName);
+      formParams.append("gender", formData.gender);
+      formParams.append("email", formData.email);
+      formParams.append("phone", formData.phone);
+      formParams.append("university", formData.university);
+      formParams.append("yearOfStudy", formData.yearOfStudy);
+    }
+
+    if (formData.registrationType === "Team") {
+      formParams.append("teamName", formData.teamName);
+      formParams.append("teamSize", formData.teamSize);
+      formParams.append("university", formData.university);
+      formParams.append("leaderName", formData.leaderName);
+      formParams.append("leaderGender", formData.leaderGender);
+      formParams.append("leaderEmail", formData.leaderEmail);
+      formParams.append("leaderPhone", formData.leaderPhone);
+      formParams.append("leaderYear", formData.leaderYear);
+
+      const visibleMembers = parseInt(formData.teamSize) - 1;
+      for (let i = 0; i < visibleMembers; i++) {
+        const member = formData.members[i];
+        formParams.append(`member${i + 2}Name`, member.name);
+        formParams.append(`member${i + 2}Gender`, member.gender);
+        formParams.append(`member${i + 2}Email`, member.email);
+        formParams.append(`member${i + 2}Phone`, member.phone);
+        formParams.append(`member${i + 2}Year`, member.year);
+      }
+    }
+
+    formData.technologies.forEach((tech) => formParams.append("technologies", tech));
+    formData.languages.forEach((lang) => formParams.append("languages", lang));
+    formParams.append("hackathonExp", formData.hackathonExp);
+    formParams.append("hackathonDetails", formData.hackathonDetails);
+    formParams.append("links", formData.links);
+
+    formParams.append("projectWorkedOn", formData.projectWorkedOn);
+    formParams.append("problemToSolve", formData.problemToSolve);
+    formData.interestedAreas.forEach((area) => formParams.append("interestedAreas", area));
+    formParams.append("hearAbout", formData.hearAbout);
+
+    formParams.append("agreeRules", "true");
+    formParams.append("agreeAccurate", "true");
+
+    try {
+      const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL;
+      const apiUrl = webhookUrl || "/api/register";
+
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formParams.toString(),
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { success: res.ok };
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Submission failed");
+      }
+
+      localStorage.removeItem("university-form-data");
+      localStorage.removeItem("university-form-step");
+      alert("Registration submitted successfully!");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Submission failed. Please check your connection and try again.");
+    }
   };
 
   const techOptions = ["Web Development", "Mobile App Development", "AI / Machine Learning", "Cybersecurity", "Cloud Computing", "UI/UX Design", "Data Science", "IoT", "Game Development", "Other"];

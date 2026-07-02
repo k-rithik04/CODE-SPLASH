@@ -21,6 +21,44 @@ npm run dev
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Git LFS
+
+Binary assets (images, WebP frames) are tracked via Git LFS. After cloning, run:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+If you see broken images, LFS pull likely failed. Re-run the commands above.
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Required | Description |
+|---|---|---|
+| `WEBHOOK_URL` | No | Google Apps Script webhook URL for the school registration API route |
+| `NEXT_PUBLIC_WEBHOOK_URL` | No | Same webhook URL, exposed to the client for GitHub Pages submissions |
+
+## Build & Deploy
+
+### GitHub Pages (static export)
+
+```bash
+NEXT_STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/CODE-SPLASH npm run build
+```
+
+The `NEXT_STATIC_EXPORT` flag enables `output: "export"` and sets `basePath` + `assetPrefix` automatically.
+
+### Vercel (production)
+
+Deploy directly — no special env vars needed. The API route (`/api/register`) works on Vercel.
+
 ## GitHub Workflow
 
 All developers have contributor access, but every change must be made in a dedicated branch.
@@ -40,10 +78,12 @@ Use this pattern for branch names:
 
 ## Tech Stack
 
-- [Next.js](https://nextjs.org)
+- [Next.js](https://nextjs.org) (App Router, React 19)
 - [TailwindCSS for styling](https://tailwindcss.com/)
 - [ShadCN](https://ui.shadcn.com)
 - [Lucide React](https://lucide.dev/)
+- [Zustand](https://github.com/pmndrs/zustand) for state management
+- [Lenis](https://github.com/darkroomengineering/lenis) for smooth scrolling
 
 ## UI Rules
 
@@ -73,3 +113,4 @@ You can replace `combobox` with any other supported ShadCN component name.
 - Prefer existing ShadCN components before creating custom UI.
 - Run the app with `npm run dev` while developing.
 - Install packages with `npm i` when dependencies are added or updated.
+- Run `npm run lint` before committing to ensure code quality.

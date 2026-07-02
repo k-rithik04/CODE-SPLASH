@@ -165,23 +165,6 @@ export default function Home() {
     bgCanvas.height = 1080;
     const frameCount = 1265;
 
-    // --- VIDEO SETUP (old: loadedmetadata) ---
-    // let videoReady = false;
-    // const onVideoReady = () => { videoReady = true; };
-    // video.addEventListener("loadedmetadata", onVideoReady);
-    // video.currentTime = 0;
-
-    // --- VIDEO SETUP (new: canplay + race condition fix) ---
-    // let videoReady = false;
-    // const onVideoCanPlay = () => {
-    //   videoReady = true;
-    //   video.play().then(() => video.pause()).catch(() => { });
-    // };
-    // video.addEventListener("canplay", onVideoCanPlay);
-    // if (video.readyState >= 3) {
-    //   videoReady = true;
-    // }
-
     for (let i = 1; i <= frameCount; i++) {
       const img = new window.Image();
       img.src = `${basePath}/assets/frames/frame_${i.toString().padStart(3, "0")}.webp`;
@@ -330,14 +313,6 @@ export default function Home() {
           lastDrawnFrame.current = frameIndex;
         }
       }
-
-      // --- VIDEO SCRUBBING (commented out) ---
-      // if (videoReady && video.duration && isFinite(video.duration)) {
-      //   const targetTime = sp * video.duration;
-      //   if (!video.seeking && Math.abs(video.currentTime - targetTime) > 0.04) {
-      //     video.currentTime = targetTime;
-      //   }
-      // }
 
       updateParticles();
 

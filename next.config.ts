@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: isStaticExport,
   },
+  poweredByHeader: false,
+  compress: true,
 };
 
 export default nextConfig;
