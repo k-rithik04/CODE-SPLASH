@@ -1,10 +1,42 @@
 const GOOGLE_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSdDPajTF-UsQieALRZbrIpqjyL0wPReSATrBeXMG_QkNF7gBQ/formResponse";
 
+function validateRequired(value: string | null): boolean {
+  return value !== null && value.trim().length > 0;
+}
+
+function validateEmail(value: string | null): boolean {
+  if (!value) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function validateSriLankanPhone(value: string | null): boolean {
+  if (!value) return false;
+  const cleaned = value.replace(/[\s-]/g, "");
+  return /^(?:(?:0|94|\+94)(?:7\d{8}|[1-9]\d{8}))$/.test(cleaned);
+}
+
+function validateParams(params: URLSearchParams): string | null {
+  if (!validateRequired(params.get("teamName"))) return "teamName is required";
+  if (!validateRequired(params.get("noOfMembers"))) return "noOfMembers is required";
+  if (!validateRequired(params.get("school"))) return "school is required";
+  if (!validateRequired(params.get("district"))) return "district is required";
+  if (!validateEmail(params.get("teacherEmail"))) return "teacherEmail is invalid";
+  if (!validateSriLankanPhone(params.get("teacherPhone"))) return "teacherPhone is invalid";
+  if (!validateEmail(params.get("leaderEmail"))) return "leaderEmail is invalid";
+  if (!validateSriLankanPhone(params.get("leaderPhone"))) return "leaderPhone is invalid";
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     const text = await request.text();
     const params = new URLSearchParams(text);
+
+    const validationError = validateParams(params);
+    if (validationError) {
+      return Response.json({ success: false, error: validationError }, { status: 400 });
+    }
 
     const webhookUrl = process.env.WEBHOOK_URL;
 

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { validateRequired, validateSriLankanPhone, checkRateLimit, recordSubmissionTimestamp } from "@/lib/validator";
+import { validateRequired, validateEmail, validateName, validateSriLankanPhone, validateLength, checkRateLimit, recordSubmissionTimestamp } from "@/lib/validate";
 import { useSchoolFormStore } from "@/lib/store";
 import { basePath } from "@/lib/utils";
 
@@ -35,24 +35,25 @@ export default function SchoolRegistrationPage() {
 
   const validateStep = (): string | null => {
     if (step === 1) {
-      if (!validateRequired(formData.teamName)) return "Team Name is required";
+      if (!validateLength(formData.teamName, 2, 50)) return "Team Name is required (2-50 characters)";
+      if (!validateRequired(formData.noOfMembers)) return "Please select the number of team members";
       if (!validateRequired(formData.school)) return "School is required";
       if (!validateRequired(formData.schoolAddress)) return "School Address is required";
       if (!validateRequired(formData.district)) return "District is required";
-      if (!validateRequired(formData.teacherName)) return "Teacher Name is required";
-      if (!validateRequired(formData.teacherEmail)) return "Teacher Email is required";
+      if (!validateName(formData.teacherName)) return "Teacher Name must contain only letters and spaces";
+      if (!validateEmail(formData.teacherEmail)) return "Please enter a valid email address for the teacher";
       if (!validateSriLankanPhone(formData.teacherPhone)) return "Please enter a valid Sri Lankan phone number for the teacher";
     }
     if (step === 2) {
-      if (!validateRequired(formData.leaderName)) return "Leader Name is required";
+      if (!validateName(formData.leaderName)) return "Leader Name must contain only letters and spaces";
       if (!validateRequired(formData.leaderGrade)) return "Leader Grade is required";
-      if (!validateRequired(formData.leaderEmail)) return "Leader Email is required";
+      if (!validateEmail(formData.leaderEmail)) return "Please enter a valid email address for the leader";
       if (!validateSriLankanPhone(formData.leaderPhone)) return "Please enter a valid Sri Lankan phone number for the leader";
     }
     if (step === 3) {
       const visibleCount = parseInt(formData.noOfMembers) - 1;
       for (let i = 0; i < visibleCount; i++) {
-        if (!validateRequired(formData.members[i].name)) return `Member ${i + 2} Name is required`;
+        if (!validateName(formData.members[i].name)) return `Member ${i + 2} Name must contain only letters and spaces`;
         if (!validateRequired(formData.members[i].grade)) return `Member ${i + 2} Grade is required`;
         if (!validateSriLankanPhone(formData.members[i].phone)) return `Please enter a valid Sri Lankan phone number for Member ${i + 2}`;
       }
@@ -126,7 +127,13 @@ export default function SchoolRegistrationPage() {
         body: formParams.toString(),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { success: res.ok };
+      }
 
       if (!data.success) {
         throw new Error(data.error || "Submission failed");
