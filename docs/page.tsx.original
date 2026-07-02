@@ -1,0 +1,1084 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+export default function Home() {
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loadingText, setLoadingText] = useState("Going backwards in time...");
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
+  const [isLoaderRemoved, setIsLoaderRemoved] = useState(false);
+
+  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  const partCanvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number>(0);
+  const currentScroll = useRef(0);
+  const targetScroll = useRef(0);
+  const lastDrawnFrame = useRef(-1);
+  const lastActiveIndex = useRef(-1);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+
+  const layoutMetrics = useRef({ width: 0, height: 0, maxScroll: 1 });
+
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const dialWindowRef = useRef<HTMLDivElement>(null);
+  const dialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const heroLayerRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+
+  const chaptersLayerRef = useRef<HTMLDivElement>(null);
+  const chaptersContentRef = useRef<HTMLDivElement>(null);
+  const chaptersTitleRef = useRef<HTMLHeadingElement>(null);
+  const chapterCardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const prizesLayerRef = useRef<HTMLDivElement>(null);
+  const prizesContentRef = useRef<HTMLDivElement>(null);
+
+  const timelineLayerRef = useRef<HTMLDivElement>(null);
+  const timelineTrackRef = useRef<HTMLDivElement>(null);
+
+  const partnersLayerRef = useRef<HTMLDivElement>(null);
+  const partnersContentRef = useRef<HTMLDivElement>(null);
+
+  const teamLayerRef = useRef<HTMLDivElement>(null);
+  const teamTrackRef = useRef<HTMLDivElement>(null);
+
+  const faqLayerRef = useRef<HTMLDivElement>(null);
+  const faqTitleRef = useRef<HTMLHeadingElement>(null);
+  const faqItemsRef = useRef<(HTMLDetailsElement | null)[]>([]);
+
+  const ctaLayerRef = useRef<HTMLDivElement>(null);
+  const ctaTextRef = useRef<HTMLDivElement>(null);
+  const connectLayerRef = useRef<HTMLDivElement>(null);
+
+  const mapRange = (value: number, inMin: number, inMax: number, outMin: number, outMax: number) => {
+    const clamped = Math.max(inMin, Math.min(value, inMax));
+    return ((clamped - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+  };
+
+  // --- PRELOADER  ---
+  useEffect(() => {
+    let progress = 0;
+    const loadInterval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadInterval);
+      }
+      setLoadProgress(progress);
+    }, 150);
+
+    const stories = ["Initializing...", "Loading assets...", "Preparing..."];
+    let storyIndex = 0;
+    const storyInterval = setInterval(() => {
+      storyIndex = (storyIndex + 1) % stories.length;
+      setLoadingText(stories[storyIndex]);
+    }, 1200);
+
+    setTimeout(() => {
+      setIsLoaderVisible(false);
+      setTimeout(() => setIsLoaderRemoved(true), 600);
+    }, 2000);
+
+    return () => {
+      clearInterval(loadInterval);
+      clearInterval(storyInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const bgCanvas = bgCanvasRef.current;
+    const partCanvas = partCanvasRef.current;
+    if (!bgCanvas || !partCanvas) return;
+
+    const bgCtx = bgCanvas.getContext("2d", { alpha: false });
+    const pCtx = partCanvas.getContext("2d");
+    if (!bgCtx || !pCtx) return;
+
+    bgCanvas.width = 1920;
+    bgCanvas.height = 1080;
+    const frameCount = 1265;
+
+    // Load Images 
+    for (let i = 1; i <= frameCount; i++) {
+      const img = new window.Image();
+      img.src = `/frames/frame_${i.toString().padStart(3, "0")}.webp`;
+      imagesRef.current.push(img);
+    }
+
+    // Particle
+    let particles: any[] = [];
+    const mouse = { x: null as number | null, y: null as number | null, radius: 140 };
+
+    const updateMetrics = () => {
+      layoutMetrics.current.width = window.innerWidth;
+      layoutMetrics.current.height = window.innerHeight;
+      let maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      layoutMetrics.current.maxScroll = maxScroll <= 0 ? 1 : maxScroll;
+    };
+
+    const initParticles = () => {
+      updateMetrics();
+      partCanvas.width = window.innerWidth;
+      partCanvas.height = window.innerHeight;
+      particles = [];
+      const particleDensity = Math.min(Math.floor(window.innerWidth / 14), 80);
+      for (let i = 0; i < particleDensity; i++) {
+        particles.push({
+          x: Math.random() * partCanvas.width,
+          y: Math.random() * partCanvas.height,
+          baseX: Math.random() * partCanvas.width,
+          baseY: Math.random() * partCanvas.height,
+          size: Math.random() * 2 + 1,
+          density: Math.random() * 30 + 10,
+          alpha: Math.random() * 0.05 + 0.01,
+        });
+      }
+    };
+
+    initParticles();
+    setTimeout(updateMetrics, 500);
+
+    const handleResize = () => {
+      updateMetrics();
+      initParticles();
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+    const handleScroll = () => {
+      targetScroll.current = window.scrollY;
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Particle Logic
+    const updateParticles = () => {
+      pCtx.clearRect(0, 0, partCanvas.width, partCanvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.baseY -= 0.2;
+        if (p.baseY < -10) p.baseY = partCanvas.height + 10;
+        p.baseX += Math.sin(p.baseY / 30) * 0.1;
+
+        if (mouse.x != null && mouse.y != null) {
+          let dx = mouse.x - p.x;
+          let dy = mouse.y - p.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < mouse.radius) {
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let force = (mouse.radius - distance) / mouse.radius;
+            p.x -= forceDirectionX * force * p.density;
+            p.y -= forceDirectionY * force * p.density;
+          } else {
+            if (p.x !== p.baseX) p.x += (p.baseX - p.x) * 0.08;
+            if (p.y !== p.baseY) p.y += (p.baseY - p.y) * 0.08;
+          }
+        } else {
+          if (p.x !== p.baseX) p.x += (p.baseX - p.x) * 0.08;
+          if (p.y !== p.baseY) p.y += (p.baseY - p.y) * 0.08;
+        }
+
+        pCtx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        pCtx.fill();
+      }
+    };
+
+    const updateDialCenter = (activeIndex: number) => {
+      const activeItem = dialItemsRef.current[activeIndex];
+      if (!activeItem || !dialWindowRef.current) return;
+      const itemCenter = activeItem.offsetLeft + activeItem.offsetWidth / 2;
+      const scrollPos = itemCenter - layoutMetrics.current.width / 2;
+      dialWindowRef.current.scrollTo({ left: scrollPos, behavior: "smooth" });
+    };
+
+    const renderLoop = () => {
+      const maxScroll = layoutMetrics.current.maxScroll;
+      const innerWidth = layoutMetrics.current.width;
+      const innerHeight = layoutMetrics.current.height;
+      const isDesktop = innerWidth >= 768;
+
+      currentScroll.current += (targetScroll.current - currentScroll.current) * 0.12;
+      const sp = Math.min(Math.max(currentScroll.current / maxScroll, 0), 1);
+
+      //timeedit
+      const t = {
+        hero: { fadeStart: 0.04, end: 0.08 },
+        chapters: { start: 0.07, inEnd: 0.11, outStart: 0.16, outEnd: 0.18, end: 0.19 },
+        prizes: { start: 0.23, inEnd: 0.26, outStart: 0.33, outEnd: 0.36, end: 0.36 },
+        timeline: { start: 0.34, inEnd: 0.34, outStart: 0.45, outEnd: 0.50, end: 0.50 },
+        partners: { start: 0.53, inEnd: 0.56, outStart: 0.61, outEnd: 0.65, end: 0.65 },
+        team: { start: 0.64, inEnd: 0.68, outStart: 0.77, outEnd: 0.81, end: 0.81 },
+        faq: { start: 0.80, inEnd: 0.84, pointerStart: 0.82, pointerEnd: 0.91, outStart: 0.90, outEnd: 0.93, end: 0.93 },
+        cta: { start: 0.92, inEnd: 0.95, end: 1.0 }
+      };
+
+      const frameIndex = Math.floor(sp * (frameCount - 1));
+      const images = imagesRef.current;
+      if (images[frameIndex] && images[frameIndex].complete && images[frameIndex].naturalWidth > 0) {
+        if (frameIndex !== lastDrawnFrame.current) {
+          bgCtx.drawImage(images[frameIndex], 0, 0, bgCanvas.width, bgCanvas.height);
+          lastDrawnFrame.current = frameIndex;
+        }
+      }
+      updateParticles();
+
+      let activeIndex = 0;
+      if (sp < 0.08) activeIndex = 0;
+      else if (sp < 0.18) activeIndex = 1;
+      else if (sp < 0.30) activeIndex = 2;
+      else if (sp < 0.42) activeIndex = 3;
+      else if (sp < 0.55) activeIndex = 4;
+      else if (sp < 0.68) activeIndex = 5;
+      else if (sp < 0.80) activeIndex = 6;
+      else if (sp < 0.90) activeIndex = 7;
+      else activeIndex = 8;
+
+      if (activeIndex !== lastActiveIndex.current) {
+        lastActiveIndex.current = activeIndex;
+        dialItemsRef.current.forEach((item, index) => {
+          if (!item) return;
+          item.classList.remove("active", "sibling");
+          const dist = Math.abs(index - activeIndex);
+          if (dist === 0) item.classList.add("active");
+          else if (dist === 1) item.classList.add("sibling");
+        });
+        updateDialCenter(activeIndex);
+      }
+
+      // 1. HERO
+      if (heroLayerRef.current && heroContentRef.current) {
+        if (sp <= t.hero.end) {
+          let op = mapRange(sp, t.hero.fadeStart, t.hero.end, 1, 0);
+          heroLayerRef.current.style.opacity = op.toString();
+          heroLayerRef.current.style.pointerEvents = op > 0.01 ? "auto" : "none";
+          let xOffset = mapRange(sp, 0, t.hero.end, 0, innerWidth * 0.7);
+          heroContentRef.current.style.transform = `translate3d(${xOffset}px, 0, 0)`;
+        } else {
+          heroLayerRef.current.style.opacity = "0";
+          heroLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 2. CHAPTERS 
+      if (chaptersLayerRef.current && chaptersContentRef.current) {
+        if (sp >= t.chapters.start && sp <= t.chapters.end) {
+          let op = 1;
+
+          if (sp < t.chapters.inEnd) {
+            op = mapRange(sp, t.chapters.start, t.chapters.inEnd, 0, 1);
+            
+            if (isDesktop) {
+              // 2/3 thing
+              const groupTx = mapRange(sp, t.chapters.start, t.chapters.inEnd, innerWidth * 0.3, 0);
+              const clipRight = mapRange(sp, t.chapters.start, t.chapters.inEnd, 65, 0);
+              chaptersContentRef.current.style.transform = `translate3d(${groupTx}px, 0, 0)`;
+              chaptersContentRef.current.style.clipPath = `inset(0 ${clipRight}% 0 0)`;
+            } else {
+              const groupTx = mapRange(sp, t.chapters.start, t.chapters.inEnd, innerWidth, 0);
+              chaptersContentRef.current.style.transform = `translate3d(${groupTx}px, 0, 0)`;
+              chaptersContentRef.current.style.clipPath = 'none';
+            }
+            
+            if (chaptersTitleRef.current) chaptersTitleRef.current.style.transform = 'translate3d(0, 0, 0)';
+            chapterCardsRef.current.forEach(el => { if (el) el.style.transform = 'translate3d(0, 0, 0)'; });
+
+          } else if (sp > t.chapters.outStart) {
+            op = mapRange(sp, t.chapters.outStart, t.chapters.outEnd, 1, 0);
+            chaptersContentRef.current.style.transform = `translate3d(0, 0, 0)`;
+            chaptersContentRef.current.style.clipPath = 'none';
+            
+            const outProg = mapRange(sp, t.chapters.outStart, t.chapters.outEnd, 0, 1);
+            
+            // Move title UP alongside the upward card
+            const titleY = -innerHeight * 0.5 * outProg;
+            if (chaptersTitleRef.current) chaptersTitleRef.current.style.transform = `translate3d(0, ${titleY}px, 0)`;
+
+            if (isDesktop) {
+              if (chapterCardsRef.current[0]) chapterCardsRef.current[0].style.transform = `translate3d(${outProg * -innerWidth * 0.5}px, 0, 0)`;
+              if (chapterCardsRef.current[1]) chapterCardsRef.current[1].style.transform = `translate3d(0, ${outProg * -innerHeight * 0.5}px, 0)`;
+              if (chapterCardsRef.current[2]) chapterCardsRef.current[2].style.transform = `translate3d(${outProg * innerWidth * 0.5}px, 0, 0)`;
+            } else {
+              // Small Devices: 0 goes UP, 1 goes LEFT, 2 goes RIGHT
+              if (chapterCardsRef.current[0]) chapterCardsRef.current[0].style.transform = `translate3d(0, ${outProg * -innerHeight * 0.5}px, 0)`;
+              if (chapterCardsRef.current[1]) chapterCardsRef.current[1].style.transform = `translate3d(${outProg * -innerWidth * 0.5}px, 0, 0)`;
+              if (chapterCardsRef.current[2]) chapterCardsRef.current[2].style.transform = `translate3d(${outProg * innerWidth * 0.5}px, 0, 0)`;
+            }
+
+          } else {
+            chaptersContentRef.current.style.transform = `translate3d(0, 0, 0)`;
+            chaptersContentRef.current.style.clipPath = 'none';
+            if (chaptersTitleRef.current) chaptersTitleRef.current.style.transform = 'translate3d(0, 0, 0)';
+            chapterCardsRef.current.forEach(el => { if (el) el.style.transform = 'translate3d(0, 0, 0)'; });
+          }
+
+          chaptersLayerRef.current.style.opacity = op.toString();
+          chaptersLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+        } else {
+          chaptersLayerRef.current.style.opacity = "0";
+          chaptersLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 3. PRIZES
+      if (prizesLayerRef.current && prizesContentRef.current) {
+        if (sp >= t.prizes.start && sp <= t.prizes.end) {
+          let op = 1, s = 1;
+          if (sp < t.prizes.inEnd) {
+            op = mapRange(sp, t.prizes.start, t.prizes.inEnd, 0, 1);
+            s = mapRange(sp, t.prizes.start, t.prizes.inEnd, 0.9, 1);
+          } else if (sp > t.prizes.outStart) {
+            op = mapRange(sp, t.prizes.outStart, t.prizes.outEnd, 1, 0);
+            s = mapRange(sp, t.prizes.outStart, t.prizes.outEnd, 1, 1.1);
+          }
+          prizesLayerRef.current.style.opacity = op.toString();
+          prizesLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+          prizesContentRef.current.style.transform = `scale(${s})`;
+        } else {
+          prizesLayerRef.current.style.opacity = "0";
+          prizesLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 4. TIMELINE
+      if (timelineLayerRef.current && timelineTrackRef.current) {
+        if (sp >= t.timeline.start && sp <= t.timeline.end) {
+          let op = 1;
+          if (sp < t.timeline.inEnd) op = mapRange(sp, t.timeline.start, t.timeline.inEnd, 0, 1);
+          else if (sp > t.timeline.outStart) op = mapRange(sp, t.timeline.outStart, t.timeline.outEnd, 1, 0);
+
+          timelineLayerRef.current.style.opacity = op.toString();
+          timelineLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+          let scrollY = mapRange(sp, t.timeline.start, t.timeline.outStart, 0, -75);
+          timelineTrackRef.current.style.transform = `translate3d(0, ${scrollY}%, 0)`;
+        } else {
+          timelineLayerRef.current.style.opacity = "0";
+          timelineLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 5. PARTNERS
+      if (partnersLayerRef.current && partnersContentRef.current) {
+        if (sp >= t.partners.start && sp <= t.partners.end) {
+          let op = 1, s = 1;
+          if (sp < t.partners.inEnd) {
+            op = mapRange(sp, t.partners.start, t.partners.inEnd, 0, 1);
+            s = mapRange(sp, t.partners.start, t.partners.inEnd, 0.4, 1);
+          } else if (sp > t.partners.outStart) {
+            op = mapRange(sp, t.partners.outStart, t.partners.outEnd, 1, 0);
+            s = mapRange(sp, t.partners.outStart, t.partners.outEnd, 1, 1.5);
+          }
+          partnersLayerRef.current.style.opacity = op.toString();
+          partnersLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+          partnersContentRef.current.style.transform = `scale(${s})`;
+        } else {
+          partnersLayerRef.current.style.opacity = "0";
+          partnersLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 6. TEAM
+      if (teamLayerRef.current && teamTrackRef.current) {
+        if (sp >= t.team.start && sp <= t.team.end) {
+          let op = 1;
+          if (sp < t.team.inEnd) op = mapRange(sp, t.team.start, t.team.inEnd, 0, 1);
+          else if (sp > t.team.outStart) op = mapRange(sp, t.team.outStart, t.team.outEnd, 1, 0);
+
+          teamLayerRef.current.style.opacity = op.toString();
+          teamLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+
+          const cardHalfWidth = innerWidth < 768 ? 130 : 160;
+          const startPx = -cardHalfWidth;
+          const endPx = startPx - innerWidth * 1.5;
+          const tx = mapRange(sp, t.team.inEnd, t.team.end, startPx, endPx);
+          teamTrackRef.current.style.transform = `translate3d(${tx}px, 0, 0)`;
+        } else {
+          teamLayerRef.current.style.opacity = "0";
+          teamLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 7. FAQ
+      if (faqLayerRef.current && faqTitleRef.current) {
+        if (sp >= t.faq.start && sp <= t.faq.end) {
+          let opMain = sp > t.faq.pointerStart && sp < t.faq.pointerEnd ? 1 : 0;
+          faqLayerRef.current.style.opacity = "1";
+          faqLayerRef.current.style.pointerEvents = opMain ? "auto" : "none";
+
+          let titleOp = 1;
+          if (sp < t.faq.inEnd) titleOp = mapRange(sp, t.faq.start, t.faq.inEnd, 0, 1);
+          else if (sp > t.faq.outStart) titleOp = mapRange(sp, t.faq.outStart, t.faq.outEnd, 1, 0);
+          faqTitleRef.current.style.opacity = titleOp.toString();
+
+          let inProgress = mapRange(sp, t.faq.start, t.faq.inEnd, 0, 1);
+          let outProgress = mapRange(sp, t.faq.outStart, t.faq.outEnd, 0, 1);
+
+          faqItemsRef.current.forEach((item, idx) => {
+            if (!item) return;
+            let dir = idx % 2 === 0 ? -1 : 1;
+            let startX = 60 * dir;
+            let currentX = 0;
+            let currentOp = 1;
+
+            if (sp < t.faq.inEnd) {
+              currentX = mapRange(inProgress, 0, 1, startX, 0);
+              currentOp = mapRange(inProgress, 0, 1, 0, 1);
+            } else if (sp > t.faq.outStart) {
+              currentX = mapRange(outProgress, 0, 1, 0, startX);
+              currentOp = mapRange(outProgress, 0, 1, 1, 0);
+            }
+
+            item.style.transform = `translate3d(${currentX}vw, 0, 0)`;
+            item.style.opacity = currentOp.toString();
+            item.style.pointerEvents = currentOp > 0.1 ? "auto" : "none";
+          });
+        } else {
+          faqLayerRef.current.style.opacity = "0";
+          faqLayerRef.current.style.pointerEvents = "none";
+        }
+      }
+
+      // 8. CTA & CONNECT
+      if (ctaLayerRef.current && ctaTextRef.current && canvasWrapperRef.current && connectLayerRef.current) {
+        if (sp >= t.cta.start) {
+          ctaLayerRef.current.style.opacity = "1";
+          ctaLayerRef.current.style.pointerEvents = "auto";
+
+          let op = 1, s = 1;
+          if (sp < t.cta.inEnd) {
+            op = mapRange(sp, t.cta.start, t.cta.inEnd, 0, 1);
+            s = mapRange(sp, t.cta.start, t.cta.inEnd, 0.8, 1);
+          }
+
+          let pushUpY = 0;
+          if (sp >= t.cta.inEnd) {
+            pushUpY = mapRange(sp, t.cta.inEnd, t.cta.end, 0, -35);
+          }
+
+          ctaTextRef.current.style.opacity = op.toString();
+          const mobileOffset = innerWidth < 768 ? 15 : 5;
+          ctaTextRef.current.style.transform = `translate3d(-50%, calc(-50% + ${pushUpY}vh - ${mobileOffset}vh), 0) scale(${s})`;
+          canvasWrapperRef.current.style.transform = `translate3d(0, ${pushUpY}vh, 0)`;
+
+          if (sp >= t.cta.inEnd) {
+            const connectY = mapRange(sp, t.cta.inEnd, t.cta.end, 120, 0);
+            connectLayerRef.current.style.transform = `translate3d(0, ${connectY}%, 0)`;
+            connectLayerRef.current.style.pointerEvents = "auto";
+          } else {
+            connectLayerRef.current.style.transform = `translate3d(0, 120%, 0)`;
+            connectLayerRef.current.style.pointerEvents = "none";
+          }
+        } else {
+          ctaLayerRef.current.style.opacity = "0";
+          ctaLayerRef.current.style.pointerEvents = "none";
+          canvasWrapperRef.current.style.transform = `translate3d(0, 0, 0)`;
+          connectLayerRef.current.style.transform = `translate3d(0, 200%, 0)`;
+        }
+      }
+
+      animationFrameRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(renderLoop);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("scroll", handleScroll);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, []);
+
+  const handleDialClick = (targetPercentage: number) => {
+    const maxScroll = layoutMetrics.current.maxScroll;
+    window.scrollTo({ top: targetPercentage * maxScroll, behavior: "smooth" });
+  };
+
+  const jumpToCurrentWeek = () => {
+    const track = timelineTrackRef.current;
+    if (!track) return;
+    const nodes = Array.from(track.querySelectorAll(".timeline-node"));
+    const currentIdx = nodes.findIndex((n) => n.classList.contains("current-week"));
+
+    if (currentIdx !== -1) {
+      const progress = currentIdx / Math.max(1, nodes.length - 1);
+      const targetSp = 0.34 + progress * (0.45 - 0.34);
+      const maxScroll = layoutMetrics.current.maxScroll;
+      window.scrollTo({ top: targetSp * maxScroll, behavior: "smooth" });
+    }
+  };
+
+  const handlePrizeFlip = (e: React.MouseEvent<HTMLDivElement>) => {
+    const innerCard = e.currentTarget.querySelector('.flip-card-inner') as HTMLDivElement;
+    if (innerCard) {
+      if (innerCard.style.transform === 'rotateY(180deg)') {
+        innerCard.style.transform = '';
+      } else {
+        innerCard.style.transform = 'rotateY(180deg)';
+      }
+    }
+  };
+
+  return (
+    <>
+      {/* LOADER */}
+      {!isLoaderRemoved && (
+        <div
+          className="fixed inset-0 bg-bg z-[200] flex flex-col justify-center items-center gap-4 font-bold tracking-[3px] text-[0.9rem] transition-opacity duration-600"
+          style={{ opacity: isLoaderVisible ? 1 : 0 }}
+        >
+          <div className="text-[0.75rem] text-white/50 font-medium tracking-[2px] mb-5 uppercase transition-opacity duration-300">
+            {loadingText}
+          </div>
+          <div>CODESPLASH SYSTEM STARTING</div>
+          <div className="w-[200px] md:w-[250px] h-[3px] bg-white/5 relative overflow-hidden rounded">
+            <div
+              className="absolute top-0 left-0 h-full bg-orange shadow-[0_0_15px_#ff6b00,0_0_30px_#ff6b00] rounded transition-all duration-150"
+              style={{ width: `${loadProgress}%` }}
+            ></div>
+          </div>
+          <div className="text-orange mt-2 text-[1.2rem]">
+            {Math.floor(loadProgress)}%
+          </div>
+        </div>
+      )}
+
+      {/* BACKGROUND */}
+      <div
+        ref={canvasWrapperRef}
+        style={{ opacity: 0.8 }}
+        className="fixed inset-0 w-screen h-screen pointer-events-none overflow-visible z-[-1] will-change-transform"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-bg via-[#110600] to-bg z-0"></div>
+        <canvas
+          ref={bgCanvasRef}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-[100vw] min-h-[100vh] w-auto h-auto max-w-none block z-10"
+        ></canvas>
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/10 to-bg/50 z-20"></div>
+        <canvas
+          ref={partCanvasRef}
+          className="absolute inset-0 w-full h-full block z-30"
+        ></canvas>
+
+        {/* Fill Gap underneath for the scroll effect */}
+        <div className="absolute top-full left-0 w-full h-[50vh] bg-bg z-50"></div>
+
+        <div className="absolute inset-0 pointer-events-none z-[45] flex flex-col justify-between">
+          <div
+            className="w-full h-[20vh] bg-bg/60 backdrop-blur-xl"
+            style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)' }}
+          ></div>
+          <div
+            className="w-full h-[20vh] bg-bg/60 backdrop-blur-xl"
+            style={{ maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)' }}
+          ></div>
+        </div>
+      </div>
+
+      {/* NAVIGATION */}
+      <div
+        ref={dialWindowRef}
+        className="fixed bottom-0 left-0 w-screen h-[70px] md:h-[80px] overflow-x-auto hide-scrollbar z-[100] pointer-events-auto flex items-center scroll-smooth"
+      >
+        <nav className="flex items-center gap-[40px] md:gap-[60px] w-max px-[50vw]">
+          {[
+            { label: "Gateway", target: 0.0 },
+            { label: "Chapters", target: 0.12 },
+            { label: "Treasury", target: 0.24 },
+            { label: "Journey", target: 0.36 },
+            { label: "Partners", target: 0.48 },
+            { label: "Creators", target: 0.60 },
+            { label: "FAQ", target: 0.72 },
+            { label: "Register", target: 0.85 },
+            { label: "Connect", target: 0.98 },
+          ].map((item, index) => (
+            <div
+              key={index}
+              ref={(el) => { dialItemsRef.current[index] = el; }}
+              className={`dial-item ${index === 0 ? "active" : ""}`}
+              onClick={() => handleDialClick(item.target)}
+            >
+              {item.label}
+            </div>
+          ))}
+        </nav>
+      </div>
+
+      <main>
+        {/* 1. HERO */}
+        <div className="fixed inset-0 w-full lg:w-[50vw] h-screen overflow-hidden pointer-events-none z-10">
+          <section ref={heroLayerRef} className="absolute inset-0 w-full h-screen flex flex-col justify-center items-start pl-[5%] lg:pl-[15%] opacity-0 will-change-[transform,opacity]">
+            <div ref={heroContentRef} className="flex flex-col items-start w-[85%] max-w-[450px] md:max-w-[550px] lg:max-w-[650px]">
+              {/* Removed -ml-2 logic */}
+              <img src="/codesplash.png" alt="CodeSplash Logo" className="w-[90%] md:w-[85%] h-auto object-contain mb-4 filter drop-shadow-[0_4px_20px_rgba(255,107,0,0.15)]" />
+              {/* Changed text-justify to text-left */}
+              <p className="w-full text-[0.75rem] md:text-[0.9rem] font-normal text-white/70 leading-relaxed tracking-[0.3px] text-left max-w-[480px]">
+                A Nation-wide hackathon organized by CSSA university of Kelaniya, empowering innovation through inspiration from the timeless legacy of the pyramids.
+              </p>
+              <button onClick={jumpToCurrentWeek} className="jump-btn group pointer-events-auto mt-6">
+                <span>Ongoing Challenge</span>
+                <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        {/* 2. CHAPTERS*/}
+        <section ref={chaptersLayerRef} className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10">
+          <div ref={chaptersContentRef} className="w-full max-w-[1200px] px-[5%] text-center">
+            <h2 ref={chaptersTitleRef} className="text-[clamp(1.8rem,4vw,3.5rem)] font-extrabold tracking-tight mb-6 md:mb-12">
+              <span className="text-orange">Chapters</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 pointer-events-auto">
+
+              <div
+                ref={el => { chapterCardsRef.current[0] = el; }}
+                className="relative bg-glass-bg border border-glass-border rounded-2xl p-4 md:p-8 backdrop-blur-md flex flex-col items-center justify-start shadow-lg hover:-translate-y-2 group overflow-hidden cursor-pointer"
+              >
+                <span className="absolute top-0 left-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[450ms] group-hover:delay-[0ms] z-10"></span>
+                <span className="absolute top-0 right-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[300ms] group-hover:delay-[150ms] z-10"></span>
+                <span className="absolute bottom-0 right-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[150ms] group-hover:delay-[300ms] z-10"></span>
+                <span className="absolute bottom-0 left-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[0ms] group-hover:delay-[450ms] z-10"></span>
+
+                <h3 className="text-md md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-orange transition-colors">University Hackathon</h3>
+                <p className="text-white/60 text-[0.75rem] md:text-sm">Elite coding battles for undergrads building scalable, production-ready solutions.</p>
+              </div>
+
+              <div
+                ref={el => { chapterCardsRef.current[1] = el; }}
+                className="relative bg-glass-bg border border-glass-border rounded-2xl p-4 md:p-8 backdrop-blur-md flex flex-col items-center justify-start shadow-lg hover:-translate-y-2 group overflow-hidden cursor-pointer"
+              >
+                <span className="absolute top-0 left-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[450ms] group-hover:delay-[0ms] z-10"></span>
+                <span className="absolute top-0 right-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[300ms] group-hover:delay-[150ms] z-10"></span>
+                <span className="absolute bottom-0 right-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[150ms] group-hover:delay-[300ms] z-10"></span>
+                <span className="absolute bottom-0 left-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[0ms] group-hover:delay-[450ms] z-10"></span>
+
+                <h3 className="text-md md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-orange transition-colors">School Hackathon</h3>
+                <p className="text-white/60 text-[0.75rem] md:text-sm">Igniting young minds to solve local problems using fundamental tech skills.</p>
+              </div>
+
+              <div
+                ref={el => { chapterCardsRef.current[2] = el; }}
+                className="relative bg-glass-bg border border-glass-border rounded-2xl p-4 md:p-8 backdrop-blur-md flex flex-col items-center justify-start shadow-lg hover:-translate-y-2 group overflow-hidden cursor-pointer"
+              >
+                <span className="absolute top-0 left-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[450ms] group-hover:delay-[0ms] z-10"></span>
+                <span className="absolute top-0 right-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[300ms] group-hover:delay-[150ms] z-10"></span>
+                <span className="absolute bottom-0 right-0 h-[2px] bg-orange transition-all duration-[150ms] ease-linear w-0 group-hover:w-full delay-[150ms] group-hover:delay-[300ms] z-10"></span>
+                <span className="absolute bottom-0 left-0 w-[2px] bg-orange transition-all duration-[150ms] ease-linear h-0 group-hover:h-full delay-[0ms] group-hover:delay-[450ms] z-10"></span>
+
+                <h3 className="text-md md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-orange transition-colors">Designerthon</h3>
+                <p className="text-white/60 text-[0.75rem] md:text-sm">A dedicated UI/UX sprint focused on human-centric digital experiences.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* 3. PRIZES */}
+        <section
+          ref={prizesLayerRef}
+          className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10"
+        >
+          <div ref={prizesContentRef} className="w-full text-center transform scale-[0.9] will-change-transform flex flex-col items-center px-[5%] md:px-0">
+            {/* Clamped title to be smaller on SE */}
+            <h2 className="text-[clamp(1.5rem,7vw,3.5rem)] font-extrabold tracking-tight mb-8 md:mb-12 relative z-10 w-full text-center whitespace-nowrap md:whitespace-normal">
+              The <span className="text-orange">Prize Pool</span>
+            </h2>
+
+            {/* Changed from Grid to horizontal scroll on mobile */}
+            <div className="flex flex-row overflow-x-auto md:grid md:grid-cols-3 gap-5 md:gap-8 relative z-10 w-full max-w-[1150px] mx-auto pb-6 md:pb-0 snap-x snap-mandatory hide-scrollbar">
+
+              {/* CARD 1 */}
+              <div
+                className="w-[85vw] md:w-full flex-shrink-0 snap-center h-full min-h-[220px] md:min-h-[280px] [perspective:1000px] group pointer-events-auto cursor-pointer"
+                onClick={handlePrizeFlip}
+              >
+                <div className="flip-card-inner relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] md:group-hover:[transform:rotateY(180deg)] pointer-events-none">
+                  <div className="absolute inset-0 [backface-visibility:hidden] bg-glass-bg border border-glass-border backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center overflow-hidden shadow-lg transition-all duration-300 md:group-hover:border-orange/50 md:group-hover:shadow-[0_15px_30px_rgba(255,107,0,0.15)] pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-b from-orange/0 to-orange/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <h4 className="relative z-10 text-[1.1rem] md:text-xl font-extrabold text-white mb-2 md:mb-3 text-center leading-tight drop-shadow-md group-hover:text-orange transition-colors">
+                      Pharaoh's Legacy Prize
+                    </h4>
+                    <span className="relative z-10 text-orange uppercase tracking-[1.5px] text-[0.6rem] md:text-[0.65rem] mb-3 md:mb-5 font-bold border border-orange/30 bg-orange/10 px-4 py-1.5 rounded-full">
+                      University Phase
+                    </span>
+                    <h3 className="relative z-10 text-xl md:text-4xl font-black text-white drop-shadow-lg">
+                      LKR 150,0000
+                    </h3>
+                  </div>
+                  <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-glass-bg border border-orange/50 backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center text-center shadow-lg pointer-events-none">
+                    <h4 className="text-orange text-[1rem] md:text-lg font-bold mb-2 md:mb-3 uppercase tracking-[2px]">The Leaders</h4>
+                    <p className="text-[0.7rem] md:text-[0.85rem] text-white/90 leading-relaxed font-medium">
+                      Awarded to the university team that demonstrates exceptional innovation, technical excellence and teamwork while conquering the toughest challenges on the journey to victory.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 2 */}
+              <div
+                className="w-[85vw] md:w-full flex-shrink-0 snap-center h-full min-h-[220px] md:min-h-[280px] [perspective:1000px] group pointer-events-auto cursor-pointer"
+                onClick={handlePrizeFlip}
+              >
+                <div className="flip-card-inner relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] md:group-hover:[transform:rotateY(180deg)] pointer-events-none">
+                  <div className="absolute inset-0 [backface-visibility:hidden] bg-glass-bg border border-glass-border backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center overflow-hidden shadow-lg transition-all duration-300 md:group-hover:border-orange/50 md:group-hover:shadow-[0_15px_30px_rgba(255,107,0,0.15)] pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-b from-orange/0 to-orange/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <h4 className="relative z-10 text-[1.1rem] md:text-xl font-extrabold text-white mb-2 md:mb-3 text-center leading-tight drop-shadow-md group-hover:text-orange transition-colors">
+                      Rising Explorer's Prize
+                    </h4>
+                    <span className="relative z-10 text-orange uppercase tracking-[1.5px] text-[0.6rem] md:text-[0.65rem] mb-3 md:mb-5 font-bold border border-orange/30 bg-orange/10 px-4 py-1.5 rounded-full">
+                      School Phase
+                    </span>
+                    <h3 className="relative z-10 text-xl md:text-4xl font-black text-white drop-shadow-lg">
+                      LKR 100,000
+                    </h3>
+                  </div>
+                  <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-glass-bg border border-orange/50 backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center text-center shadow-lg pointer-events-none">
+                    <h4 className="text-orange text-[1rem] md:text-lg font-bold mb-2 md:mb-3 uppercase tracking-[2px]">The Leaders</h4>
+                    <p className="text-[0.7rem] md:text-[0.85rem] text-white/90 leading-relaxed font-medium">
+                      Celebrating young innovators who showcase outstanding creativity, determination and problem-solving skills as they take their first steps toward greatness.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 3 */}
+              <div
+                className="w-[85vw] md:w-full flex-shrink-0 snap-center h-full min-h-[220px] md:min-h-[280px] [perspective:1000px] group pointer-events-auto cursor-pointer"
+                onClick={handlePrizeFlip}
+              >
+                <div className="flip-card-inner relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] md:group-hover:[transform:rotateY(180deg)] pointer-events-none">
+                  <div className="absolute inset-0 [backface-visibility:hidden] bg-glass-bg border border-glass-border backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center overflow-hidden shadow-lg transition-all duration-300 md:group-hover:border-orange/50 md:group-hover:shadow-[0_15px_30px_rgba(255,107,0,0.15)] pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-b from-orange/0 to-orange/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <h4 className="relative z-10 text-[1.1rem] md:text-xl font-extrabold text-white mb-2 md:mb-3 text-center leading-tight drop-shadow-md group-hover:text-orange transition-colors">
+                      Artisan of the Nile Award
+                    </h4>
+                    <span className="relative z-10 text-orange uppercase tracking-[1.5px] text-[0.6rem] md:text-[0.65rem] mb-3 md:mb-5 font-bold border border-orange/30 bg-orange/10 px-4 py-1.5 rounded-full">
+                      Designathon
+                    </span>
+                    <h3 className="relative z-10 text-xl md:text-4xl font-black text-white drop-shadow-lg">
+                      LKR 50,000
+                    </h3>
+                  </div>
+                  <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-glass-bg border border-orange/50 backdrop-blur-md p-4 md:p-8 rounded-3xl flex flex-col justify-center items-center text-center shadow-lg pointer-events-none">
+                    <h4 className="text-orange text-[1rem] md:text-lg font-bold mb-2 md:mb-3 uppercase tracking-[2px]">The Leaders</h4>
+                    <p className="text-[0.7rem] md:text-[0.85rem] text-white/90 leading-relaxed font-medium">
+                      Honoring the designers who transform imagination into remarkable experiences through creativity, originality and outstanding visual storytelling.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* 4. TIMELINE */}
+        <section ref={timelineLayerRef} className="fixed inset-0 w-screen h-screen opacity-0 pointer-events-none z-10 flex flex-col items-center overflow-hidden">
+          <h3 className="absolute top-[8vh] left-0 w-full px-5 text-center italic text-[0.7rem] md:text-[0.9rem] text-white/60 tracking-[0.5px] z-30 drop-shadow-md pointer-events-none">
+            "A code is born, in bits and bytes we play, <br className="block md:hidden" /> Through weeks of toil, towards the finale day."
+          </h3>
+          <div
+            className="w-[90%] md:w-full max-w-[900px] h-[75vh] absolute top-[14vh] overflow-hidden"
+            style={{
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)'
+            }}
+          >
+
+            <div ref={timelineTrackRef} className="absolute w-full flex flex-col py-[25vh] gap-3 md:gap-6 z-10">
+              {[
+                { date: "Feb 01", title: "Inception", desc: "CodeSplash reveal.", side: "left-side" },
+                { date: "Feb 16", title: "Registrations Open", desc: "Form your squad.", side: "right-side" },
+                { date: "Feb 23", title: "Teams Growing", desc: "Institution list grows.", side: "left-side" },
+                { date: "Mar 01", title: "Entries Close", desc: "Gates close.", side: "right-side" },
+                { date: "Mar 03", title: "Preliminary Prep", desc: "Mentors assign.", side: "left-side" },
+                { date: "Mar 05", title: "Prelims Kick-off", desc: "Hacking starts.", side: "right-side current-week" },
+                { date: "Mar 15", title: "Prelims Judging", desc: "Experts evaluate.", side: "left-side" },
+                { date: "Mar 20", title: "Finalists Revealed", desc: "Top teams advance.", side: "right-side" },
+                { date: "Mar 22", title: "Finalist Mentorship", desc: "Intensive sessions.", side: "left-side" },
+                { date: "Mar 26", title: "Finalist Submission", desc: "Last polish.", side: "right-side" },
+                { date: "Mar 27", title: "Grand Finale Prep", desc: "Last checklists.", side: "left-side" }
+              ].map((node, i) => (
+                <div key={i} className={`relative w-full flex ${node.side.includes("left") ? "justify-start" : "justify-end"} timeline-node ${node.side}`}>
+                  <div className="t-line"></div> <div className="t-dot"></div>
+
+                  <div className="t-card bg-glass-bg backdrop-blur-[40px] border border-glass-border rounded-2xl p-4 md:p-6 shadow-lg transition-all duration-300 hover:border-orange/50 hover:shadow-[0_15px_30px_rgba(255,107,0,0.15)] group pointer-events-auto">
+                    {node.side.includes("current") && <span className="current-badge">Current</span>}
+                    <div className="text-orange font-extrabold text-[0.6rem] md:text-[0.7rem] tracking-wider mb-0.5">{node.date}</div>
+                    <h4 className="text-sm md:text-lg font-bold text-white mb-0.5 md:mb-1 group-hover:text-orange transition-colors">{node.title}</h4>
+                    <p className="text-white/70 text-[0.6rem] md:text-[0.75rem] leading-tight">{node.desc}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* last card */}
+              <div className="relative w-full flex justify-center timeline-node center-side mt-4 pb-[20vh]">
+                <div className="t-dot"></div>
+                <div className="t-card !w-[80%] md:!w-[50%] relative !mt-4 bg-glass-bg backdrop-blur-[40px] border-2 border-orange/50 rounded-3xl p-5 md:p-8 shadow-[0_15px_30px_rgba(255,107,0,0.2)] pointer-events-auto group">
+                  <img src="/crown.png" alt="Crown" className="w-12 md:w-20 absolute -top-5 -right-5 md:-top-7 md:-right-7 z-20 drop-shadow-[0_0_15px_rgba(255,107,0,0.8)] rotate-[25deg] object-contain" />
+                  <div className="text-orange font-extrabold text-[0.6rem] md:text-[0.7rem] tracking-wider mb-1 opacity-80 mt-2">Mar 28</div>
+                  <h4 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 group-hover:text-orange transition-colors">Grand Finale</h4>
+                  <p className="text-white/70 text-[0.6rem] md:text-[0.8rem] leading-tight">24-hour hackathon.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. PARTNERS */}
+        <section
+          ref={partnersLayerRef}
+          className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10"
+        >
+          <h3 className="absolute top-[12vh] left-0 w-full px-5 text-center italic text-[0.7rem] md:text-[0.9rem] text-white/60 tracking-[0.5px] z-20 pointer-events-none drop-shadow-md">
+            "United in purpose, building the future bright."
+          </h3>
+
+          <div ref={partnersContentRef} className="w-full text-center relative top-[3vh] overflow-y-auto hide-scrollbar max-h-[70vh]">
+            <div className="flex flex-col gap-[50px] md:gap-[80px] w-full max-w-[1200px] mx-auto px-5 items-center">
+              <div className="flex flex-col md:flex-row w-full justify-center items-start gap-12 md:gap-24">
+                <div className="flex flex-col items-center w-full md:w-auto">
+                  <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md">Platinum Partners</h4>
+                  <div className="flex flex-wrap justify-center items-center gap-[30px] md:gap-[50px]">
+                    <img src="/logos/Generation Alpha.jpg.jpeg" alt="Gen ALPHA" className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                    <img src="/logos/Slasscom.png" alt="Slasscom" className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                    <img src="/logos/ictfromabc1.png" alt="ictfromabc" className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center w-full md:w-auto">
+                  <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md leading-tight">School Phase<br />Platinum Partner</h4>
+                  <div className="flex flex-wrap justify-center items-center h-full">
+                    <img src="/logos/Generation Alpha.jpg.jpeg" alt="Gen ALPHA" className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center w-full md:w-auto">
+                <h4 className="text-orange text-[1rem] md:text-[1.2rem] font-bold uppercase tracking-[2px] mb-6 md:mb-8 drop-shadow-md">Knowledge Partners</h4>
+                <div className="flex flex-wrap justify-center items-center gap-[40px] md:gap-[70px]">
+                  <img src="/logos/Slasscom.png" alt="Slasscom" className="h-auto max-h-[35px] md:max-h-[55px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                  <img src="/logos/ictfromabc1.png" alt="ictfromabc" className="h-auto max-h-[45px] md:max-h-[70px] object-contain transition-all hover:drop-shadow-[0_0_15px_#ff6b00]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. TEAM */}
+        <section
+          ref={teamLayerRef}
+          className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10 overflow-hidden"
+        >
+          <h3 className="absolute top-[10vh] md:top-[12vh] left-0 w-full px-5 text-center italic text-[0.7rem] md:text-[0.9rem] text-white/60 tracking-[0.5px] z-20 pointer-events-none drop-shadow-md">
+            "Logic on their minds, passion in their soul."
+          </h3>
+
+          <div ref={teamTrackRef} className="flex gap-8 md:gap-16 absolute left-[50%] items-center h-[70vh] top-[15vh]">
+            {[
+              {
+                name: "Naveen Jayathissa",
+                role: "CSSA President",
+                email: "naveenjayathis@gmail.com",
+                phone: "+94 70 246 6805",
+                linkedin: "www.linkedin.com/in/naveenjayathissa99",
+                linkedinLink: "https://www.linkedin.com/in/naveenjayathissa99"
+              },
+              {
+                name: "Thanuj Abeyrathne",
+                role: "CSSA Secretary",
+                email: "thanujabeyrathne06@gmail.com",
+                phone: "+94 71 307 3108",
+                linkedin: "www.linkedin.com/in/thanuj-abeyrathne-096614242",
+                linkedinLink: "https://www.linkedin.com/in/thanuj-abeyrathne-096614242"
+              },
+              {
+                name: "Vidmal Senanayake",
+                role: "Co-Chair",
+                email: "vidmalsenanayake@gmail.com",
+                phone: "+94 74 107 4448",
+                linkedin: "www.linkedin.com/in/vidmal-senanayake",
+                linkedinLink: "https://www.linkedin.com/in/vidmal-senanayake"
+              },
+              {
+                name: "Janishka Madushan",
+                role: "Co-Chair",
+                email: "janishkaofficial@gmail.com",
+                phone: "+94 76 782 6947",
+                linkedin: "www.linkedin.com/in/janishka",
+                linkedinLink: "https://www.linkedin.com/in/janishka"
+              },
+              {
+                name: "Chathuni Fernando",
+                role: "Delegates Team Lead",
+                email: "chathunifernando88@gmail.com",
+                phone: "+94 75 275 3568",
+                linkedin: "www.linkedin.com/in/chathuni-fernando-26a1a0383",
+                linkedinLink: "https://www.linkedin.com/in/chathuni-fernando-26a1a0383"
+              }
+            ].map((member, i) => (
+              <div key={i} className="w-[260px] md:w-[300px] h-[380px] md:h-[420px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border pointer-events-auto transition-transform hover:-translate-y-2 group">
+
+                <div className="h-[60%] w-full bg-cover bg-center border-b border-white/10 relative" style={{ backgroundImage: "url('/CARD.PNG')" }}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                </div>
+
+                <div className="h-[40%] w-full p-4 flex flex-col">
+                  <div className="text-center mb-3">
+                    <h4 className="font-bold text-white text-md md:text-xl leading-tight mb-1">{member.name}</h4>
+                    <p className="text-orange text-[0.65rem] md:text-[0.75rem] uppercase tracking-[1.5px] font-semibold">{member.role}</p>
+                  </div>
+
+                  <div className="flex flex-col gap-[6px] text-[0.65rem] md:text-[0.7rem] text-white/70 w-full px-2">
+                    <span className="flex items-center gap-3">
+                      <svg className="w-3.5 h-3.5 text-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+                      {member.email}
+                    </span>
+                    <span className="flex items-center gap-3">
+                      <svg className="w-3.5 h-3.5 text-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+                      {member.phone}
+                    </span>
+                    <span className="flex items-center gap-3">
+                      <svg className="w-3.5 h-3.5 text-orange flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                      <a href={member.linkedinLink} target="_blank" rel="noopener noreferrer" className="hover:text-orange transition-colors">
+                        {member.linkedin}
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. FAQ */}
+        <section
+          ref={faqLayerRef}
+          className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10"
+        >
+          <h2 ref={faqTitleRef} className="text-[clamp(1.5rem,4vw,2.5rem)] font-extrabold tracking-tight mb-6 md:mb-10 text-white relative z-10">
+            Frequently Asked <span className="text-orange">Questions</span>
+          </h2>
+
+          <div className="w-[90%] max-w-[800px] flex flex-col gap-3 md:gap-4 h-[55vh] overflow-y-auto hide-scrollbar pb-10 overflow-x-hidden relative top-[2vh]">
+            {[
+              { q: "What is the required team size?", a: "Teams must consist of 3 to 5 members from the same institution." },
+              { q: "Is there a registration fee?", a: "No, registration is completely free for all eligible students." },
+              { q: "Will accommodation be provided?", a: "Yes, food and rest areas are provided for Top 20 finalists on-site." },
+              { q: "Can I participate in multiple tracks?", a: "No, you may only register for one specific track to keep things fair." },
+              { q: "Who owns the IP of the final product?", a: "The intellectual property remains entirely with the creators." },
+              { q: "What tech stack should we use?", a: "You are free to use any languages, frameworks, or cloud platforms." },
+              { q: "Are we allowed to use AI tools like Copilot?", a: "Yes, standard assistants are allowed, but blind copy-pasting is discouraged." }
+            ].map((faq, i) => (
+
+              <details key={i} ref={el => { faqItemsRef.current[i] = el; }} className="bg-glass-bg backdrop-blur-[40px] border border-glass-border shadow-lg rounded-xl p-4 md:p-5 cursor-pointer group transition-all hover:border-orange/50 pointer-events-auto">
+                <summary className="font-bold text-white text-[0.85rem] md:text-[1.05rem] outline-none flex justify-between items-center group-open:text-orange transition-colors">
+                  {faq.q} <span className="text-xl group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p className="text-[0.75rem] md:text-sm text-white/70 mt-3 leading-relaxed">{faq.a}</p>
+              </details>
+
+            ))}
+          </div>
+        </section>
+
+        {/* 8. REGISTER CTA */}
+        <section
+          ref={ctaLayerRef}
+          className="fixed inset-0 w-screen h-screen opacity-0 pointer-events-none z-20 overflow-hidden"
+        >
+          <div
+            ref={ctaTextRef}
+            className="absolute top-1/2 left-1/2 w-full max-w-[700px] flex flex-col justify-center items-center px-5 will-change-transform"
+            style={{ transform: "translate3d(-50%, -50%, 0)" }}
+          >
+            <h2 className="text-[clamp(1.5rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-1px] md:tracking-[-2px]">
+              Ready to dive in?
+            </h2>
+            <button className="interactive-btn pointer-events-auto mt-4 transform scale-90 md:scale-100 origin-top">
+              Register Now
+            </button>
+          </div>
+        </section>
+
+        {/* 9. CONNECT */}
+        <section
+          ref={connectLayerRef}
+          className="fixed bottom-0 left-0 w-full h-[65vh] md:h-[60vh] z-30 flex flex-col justify-end pointer-events-none will-change-transform bg-gradient-to-t from-black via-black to-transparent"
+          style={{ transform: "translate3d(0, 200%, 0)" }}
+        >
+          <div className="w-full flex-1 flex flex-col items-center justify-end px-[5%] pb-[100px] relative mt-[10vh]">
+            <p className="text-[0.75rem] md:text-[0.9rem] text-white/70 italic tracking-[0.5px] mb-8 text-center">
+              “Every great journey begins with a conversation”
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-4">
+              <a href="mailto:uok.cssa@gmail.com" className="connect-btn pointer-events-auto">
+                <svg className="w-4 h-4 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                uok.cssa@gmail.com
+              </a>
+              <a href="mailto:codesplash.cssa@gmail.com" className="connect-btn pointer-events-auto">
+                <svg className="w-4 h-4 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                codesplash.cssa@gmail.com
+              </a>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-8">
+              <a href="https://www.linkedin.com/company/cssauok/" target="_blank" className="connect-btn !px-3 md:!px-4 pointer-events-auto">
+                <img src="/LI_ICON.PNG" alt="LinkedIn" className="w-4 md:w-5 h-4 md:h-5 object-contain" onError={(e) => { e.currentTarget.src = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z'/></svg>"; }} />
+              </a>
+              <a href="https://www.facebook.com/cssa_uok" target="_blank" className="connect-btn !px-3 md:!px-4 pointer-events-auto">
+                <img src="/FB_ICON.PNG" alt="Facebook" className="w-4 md:w-5 h-4 md:h-5 object-contain" onError={(e) => { e.currentTarget.src = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z'/></svg>"; }} />
+              </a>
+              <a href="https://youtube.com/@cssauok" target="_blank" className="connect-btn !px-3 md:!px-4 pointer-events-auto">
+                <img src="/YT_ICON.PNG" alt="YouTube" className="w-4 md:w-5 h-4 md:h-5 object-contain" onError={(e) => { e.currentTarget.src = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.015 3.015 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93-.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'/></svg>"; }} />
+              </a>
+              <a href="https://www.instagram.com/cssa_uok/" target="_blank" className="connect-btn !px-3 md:!px-4 pointer-events-auto">
+                <img src="/IG_ICON.PNG" alt="Instagram CSSA" className="w-4 md:w-5 h-4 md:h-5 object-contain" onError={(e) => { e.currentTarget.src = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z'/></svg>"; }} />
+              </a>
+              <a href="https://www.instagram.com/codesplash.cssa" target="_blank" className="connect-btn !px-3 md:!px-4 group relative pointer-events-auto">
+                <img src="/IG_ICON.PNG" alt="Instagram CodeSplash" className="w-4 md:w-5 h-4 md:h-5 object-contain" onError={(e) => { e.currentTarget.src = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z'/></svg>"; }} />
+                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[0.5rem] bg-orange text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  CodeSplash
+                </span>
+              </a>
+            </div>
+
+            <div className="w-full flex justify-center mb-4">
+              <img src="/CSSALogo.png" alt="CSSA Logo" className="max-w-[200px] md:max-w-[250px] h-auto object-contain opacity-90" />
+            </div>
+
+            <div className="text-[0.65rem] md:text-[0.75rem] text-white/60 tracking-[0.5px] text-center flex items-center justify-center gap-2 flex-wrap pb-4">
+              <span>&copy; CodeSplash 2026.</span>
+              <span className="hidden md:inline">|</span>
+              <span>All Rights Reserved.</span>
+              <span className="hidden md:inline">|</span>
+              <span>Organized by University of Kelaniya.</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
