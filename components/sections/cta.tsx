@@ -20,7 +20,7 @@ export default function CtaSection({ ctaLayerRef, ctaTextRef }: CtaSectionProps)
         <h2 className="text-[clamp(1.5rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-1px] md:tracking-[-2px]">
           Ready to dive in?
         </h2>
-        <Link href="/register" className="interactive-btn pointer-events-auto mt-4 transform scale-90 md:scale-100 origin-top inline-flex items-center justify-center">
+        <Link href="/register" className="interactive-btn mt-4 transform scale-90 md:scale-100 origin-top inline-flex items-center justify-center">
           Register Now
         </Link>
       </div>
