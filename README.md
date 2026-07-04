@@ -42,8 +42,8 @@ cp .env.example .env.local
 
 | Variable | Required | Description |
 |---|---|---|
-| `WEBHOOK_URL` | No | Google Apps Script webhook URL for the school registration API route |
-| `NEXT_PUBLIC_WEBHOOK_URL` | No | Same webhook URL, exposed to the client for GitHub Pages submissions |
+| `WEBHOOK_URL` | No | Google Apps Script webhook URL — server writes to both Supabase and Google Sheets |
+| `NEXT_PUBLIC_WEBHOOK_URL` | No | Same webhook URL, exposed to client for university registration on GitHub Pages |
 
 ## Build & Deploy
 

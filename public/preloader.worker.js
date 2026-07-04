@@ -3,35 +3,66 @@ self.onmessage = async function (e) {
 
   const pad = (n) => String(n).padStart(3, '0');
 
-  // Detect basePath from the worker's own URL (e.g. /CODE-SPLASH/preloader.worker.js)
-  const workerPath = self.location.pathname;
-  const basePath = workerPath.replace(/\/preloader\.worker\.js$/, '');
+  const WORKER_URL = self.location.pathname;
+  const BASE_PATH = WORKER_URL.substring(0, WORKER_URL.lastIndexOf('/'));
 
-  const targets = new Set();
-  for (let i = 1; i <= firstCount; i++) targets.add(i);
-  for (let i = totalFrames - lastCount + 1; i <= totalFrames; i++) targets.add(i);
+  const firstTargets = [];
+  for (let i = 1; i <= firstCount; i++) firstTargets.push(i);
 
-  const sorted = [...targets].sort((a, b) => a - b);
-  const total = sorted.length;
+  const lastTargets = [];
+  for (let i = totalFrames - lastCount + 1; i <= totalFrames; i++) lastTargets.push(i);
+
+  const total = firstTargets.length + lastTargets.length;
   let loaded = 0;
+
+  const CONCURRENCY = 8;
+
+  async function loadFrames(frames, cache, onProgress) {
+    let idx = 0;
+    async function worker() {
+      while (idx < frames.length) {
+        const i = idx++;
+        const frameNum = frames[i];
+        const url = `${BASE_PATH}/assets/frames/frame_${pad(frameNum)}.webp`;
+
+        try {
+          let resp = await cache.match(url);
+          if (!resp) {
+            resp = await fetch(url);
+            if (resp.ok) {
+              await cache.put(url, resp.clone());
+            }
+          }
+        } catch {
+          // skip failed frame — will retry on scroll
+        }
+
+        loaded++;
+        onProgress();
+      }
+    }
+
+    const workers = [];
+    for (let i = 0; i < Math.min(CONCURRENCY, frames.length); i++) {
+      workers.push(worker());
+    }
+    await Promise.all(workers);
+  }
 
   try {
     const cache = await caches.open('code-splash-frames');
 
-    for (const frameNum of sorted) {
-      const url = `${basePath}/assets/frames/frame_${pad(frameNum)}.webp`;
+    // Phase 1: Load first 400 frames — no progress updates to main thread
+    // (main thread is running its own 0→20-40 animation)
+    await loadFrames(firstTargets, cache, () => {});
 
-      let resp = await cache.match(url);
-      if (!resp) {
-        resp = await fetch(url);
-        if (resp.ok) {
-          await cache.put(url, resp.clone());
-        }
-      }
+    // Signal first batch done — main thread can now start counting from baseProgress
+    self.postMessage({ type: 'firstBatchComplete', loaded, total });
 
-      loaded++;
+    // Phase 2: Load tail frames — report progress so main thread maps baseProgress→100
+    await loadFrames(lastTargets, cache, () => {
       self.postMessage({ type: 'progress', loaded, total });
-    }
+    });
 
     self.postMessage({ type: 'complete' });
   } catch (err) {

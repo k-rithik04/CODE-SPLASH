@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { basePath } from "@/lib/utils";
+import { STORAGE_BASE_URL } from "@/lib/utils";
 
 export default function UniversityRegistrationPage() {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     registrationType: "",
@@ -115,6 +116,8 @@ export default function UniversityRegistrationPage() {
       return;
     }
 
+    setIsSubmitting(true);
+
     const formParams = new URLSearchParams();
 
     formParams.append("registrationType", formData.registrationType);
@@ -164,10 +167,8 @@ export default function UniversityRegistrationPage() {
     formParams.append("agreeAccurate", "true");
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL;
-      const apiUrl = webhookUrl || "/api/register";
-
-      const res = await fetch(apiUrl, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+      const res = await fetch(`${basePath}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formParams.toString(),
@@ -189,6 +190,7 @@ export default function UniversityRegistrationPage() {
       localStorage.removeItem("university-form-step");
       alert("Registration submitted successfully!");
     } catch (err) {
+      setIsSubmitting(false);
       alert(err instanceof Error ? err.message : "Submission failed. Please check your connection and try again.");
     }
   };
@@ -202,7 +204,7 @@ export default function UniversityRegistrationPage() {
   return (
     <div 
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-foreground"
-      style={{ backgroundImage: `url('${basePath}/assets/register-bg.png')` }}
+      style={{ backgroundImage: `url('${STORAGE_BASE_URL}/assets/register-bg.webp')` }}
     >
       <div className="container mx-auto max-w-3xl py-10 px-4">
         {/* Progress Bar */}
@@ -592,8 +594,8 @@ export default function UniversityRegistrationPage() {
                   Next <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white" disabled={!formData.agreeRules || !formData.agreeAccurate}>
-                  Submit Registration <CheckCircle2 className="ml-2 h-4 w-4" />
+                <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white" disabled={!formData.agreeRules || !formData.agreeAccurate || isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Registration"} <CheckCircle2 className="ml-2 h-4 w-4" />
                 </Button>
               )}
             </CardFooter>

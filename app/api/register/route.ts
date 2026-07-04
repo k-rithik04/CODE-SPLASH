@@ -1,5 +1,11 @@
-const GOOGLE_FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdDPajTF-UsQieALRZbrIpqjyL0wPReSATrBeXMG_QkNF7gBQ/formResponse";
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp, sanitizeInput } from "@/lib/sanitize";
+
+const REGISTER_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const REGISTER_MAX_ATTEMPTS = 10;
+const MAX_FIELD_LENGTH = 500;
 
 function validateRequired(value: string | null): boolean {
   return value !== null && value.trim().length > 0;
@@ -16,7 +22,7 @@ function validateSriLankanPhone(value: string | null): boolean {
   return /^(?:(?:0|94|\+94)(?:7\d{8}|[1-9]\d{8}))$/.test(cleaned);
 }
 
-function validateParams(params: URLSearchParams): string | null {
+function validateSchoolParams(params: URLSearchParams): string | null {
   if (!validateRequired(params.get("teamName"))) return "teamName is required";
   if (!validateRequired(params.get("noOfMembers"))) return "noOfMembers is required";
   if (!validateRequired(params.get("school"))) return "school is required";
@@ -28,79 +34,198 @@ function validateParams(params: URLSearchParams): string | null {
   return null;
 }
 
-export async function POST(request: Request) {
-  try {
-    const text = await request.text();
-    const params = new URLSearchParams(text);
+function validateUniversityParams(params: URLSearchParams): string | null {
+  if (!validateRequired(params.get("university"))) return "university is required";
 
-    const validationError = validateParams(params);
-    if (validationError) {
-      return Response.json({ success: false, error: validationError }, { status: 400 });
+  const regType = params.get("registrationType");
+  if (regType === "Individual") {
+    if (!validateRequired(params.get("fullName"))) return "fullName is required";
+    if (!validateEmail(params.get("email"))) return "email is invalid";
+    if (!validateSriLankanPhone(params.get("phone"))) return "phone is invalid";
+  } else {
+    if (!validateEmail(params.get("leaderEmail"))) return "leaderEmail is invalid";
+    if (!validateSriLankanPhone(params.get("leaderPhone"))) return "leaderPhone is invalid";
+  }
+  return null;
+}
+
+function getParam(params: URLSearchParams, key: string): string | null {
+  const val = params.get(key);
+  if (!val) return null;
+  return sanitizeInput(val).slice(0, MAX_FIELD_LENGTH);
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Rate limit by IP
+    const ip = getClientIp(request);
+    const rateLimitKey = `register:${ip}`;
+    const { allowed, retryAfterMs } = checkRateLimit(
+      rateLimitKey,
+      REGISTER_MAX_ATTEMPTS,
+      REGISTER_WINDOW_MS
+    );
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) },
+        }
+      );
     }
 
+    // Validate content type
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/x-www-form-urlencoded")) {
+      return NextResponse.json({ error: "Invalid request." }, { status: 415 });
+    }
+
+    // Limit body size (100KB max)
+    const text = await request.text();
+    if (text.length > 100_000) {
+      return NextResponse.json({ error: "Request too large." }, { status: 413 });
+    }
+
+    const params = new URLSearchParams(text);
+    const isUniversity = params.has("registrationType");
+    const supabase = createServerClient();
     const webhookUrl = process.env.WEBHOOK_URL;
 
-    if (webhookUrl) {
-      const res = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params.toString(),
-      });
-
-      if (!res.ok) {
-        const body = await res.text();
-        return Response.json({ success: false, error: `Webhook returned ${res.status}: ${body}` }, { status: 502 });
+    if (isUniversity) {
+      const validationError = validateUniversityParams(params);
+      if (validationError) {
+        return NextResponse.json({ success: false, error: validationError }, { status: 400 });
       }
 
-      return Response.json({ success: true });
+      const regType = params.get("registrationType");
+      const isIndiv = regType === "Individual";
+
+      const row: Record<string, unknown> = {
+        email: getParam(params, "email"),
+        team_name: isIndiv ? null : getParam(params, "teamName"),
+        university: getParam(params, "university"),
+        faculty: getParam(params, "faculty"),
+        team_size: isIndiv ? 1 : (params.get("teamSize") ? parseInt(params.get("teamSize")!, 10) : null),
+        leader_name: isIndiv ? getParam(params, "fullName") : getParam(params, "leaderName"),
+        leader_gender: isIndiv ? getParam(params, "gender") : getParam(params, "leaderGender"),
+        leader_email: isIndiv ? getParam(params, "email") : getParam(params, "leaderEmail"),
+        leader_phone: isIndiv ? getParam(params, "phone") : getParam(params, "leaderPhone"),
+        leader_year: isIndiv ? getParam(params, "yearOfStudy") : getParam(params, "leaderYear"),
+        technologies: getParam(params, "technologies"),
+        languages: getParam(params, "languages"),
+        hackathon_exp: getParam(params, "hackathonExp"),
+        hackathon_details: getParam(params, "hackathonDetails"),
+        github_link: getParam(params, "links"),
+        project_worked_on: getParam(params, "projectWorkedOn"),
+        problem_to_solve: getParam(params, "problemToSolve"),
+        interested_area: getParam(params, "interestedAreas"),
+        hear_about: getParam(params, "hearAbout"),
+      };
+
+      const memberFields = ["member2", "member3", "member4", "member5"];
+      for (const m of memberFields) {
+        const name = getParam(params, `${m}Name`);
+        if (name) {
+          row[`${m}_name`] = name;
+          row[`${m}_gender`] = getParam(params, `${m}Gender`);
+          row[`${m}_email`] = getParam(params, `${m}Email`);
+          row[`${m}_phone`] = getParam(params, `${m}Phone`);
+          row[`${m}_year`] = getParam(params, `${m}Year`);
+        }
+      }
+
+      const [dbResult, webhookResult] = await Promise.allSettled([
+        supabase.from("university_registrations").insert(row),
+        webhookUrl
+          ? fetch(webhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: params.toString(),
+            })
+          : Promise.resolve(null),
+      ]);
+
+      const dbFailed =
+        dbResult.status === "rejected" || (dbResult.status === "fulfilled" && dbResult.value.error);
+      if (dbFailed) {
+        console.error("[REG] University insert failed");
+        return NextResponse.json(
+          { success: false, error: "Registration failed. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      if (webhookResult.status === "rejected") {
+        console.error("[REG] Webhook failed — data saved to Supabase only");
+      }
+
+      return NextResponse.json({ success: true });
     }
 
-    const fbzx = "-" + Math.floor(Math.random() * 9e15);
-    const googleParams = new URLSearchParams();
-    googleParams.append("fvv", "1");
-    googleParams.append("partialResponse", `[null,null,"${fbzx}"]`);
-    googleParams.append("pageHistory", "0");
-    googleParams.append("fbzx", fbzx);
-    googleParams.append("submissionTimestamp", "-1");
-    googleParams.append("entry.513388183", params.get("teamName") || "");
-    googleParams.append("entry.1524738553", params.get("noOfMembers") || "");
-    googleParams.append("entry.808824461", params.get("school") || "");
-    googleParams.append("entry.633673339", params.get("schoolAddress") || "");
-    googleParams.append("entry.926788461", params.get("district") || "");
-    googleParams.append("entry.180762254", params.get("teacherName") || "");
-    googleParams.append("entry.671533921", params.get("teacherEmail") || "");
-    googleParams.append("entry.1133042947", params.get("teacherPhone") || "");
-    googleParams.append("entry.592646243", params.get("leaderName") || "");
-    googleParams.append("entry.66150412", params.get("leaderGrade") || "");
-    googleParams.append("entry.1568628242", params.get("leaderEmail") || "");
-    googleParams.append("entry.1662204579", params.get("leaderPhone") || "");
-    googleParams.append("entry.1857094506", params.get("member2Name") || "");
-    googleParams.append("entry.257314000", params.get("member2Grade") || "");
-    googleParams.append("entry.645021358", params.get("member2Phone") || "");
-    googleParams.append("entry.2027445754", params.get("member3Name") || "");
-    googleParams.append("entry.1136034145", params.get("member3Grade") || "");
-    googleParams.append("entry.740297592", params.get("member3Phone") || "");
-    googleParams.append("entry.342321623", params.get("member4Name") || "");
-    googleParams.append("entry.1722537157", params.get("member4Grade") || "");
-    googleParams.append("entry.845613086", params.get("member4Phone") || "");
-    googleParams.append("entry.209868013", params.get("member5Name") || "");
-    googleParams.append("entry.284807289", params.get("member5Grade") || "");
-    googleParams.append("entry.1146723309", params.get("member5Phone") || "");
-    googleParams.append("entry.1957467435", params.get("declaration") || "");
-
-    const res = await fetch(GOOGLE_FORM_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: googleParams.toString(),
-    });
-
-    if (!res.ok && res.status !== 200) {
-      return Response.json({ success: false, error: `Google Forms returned ${res.status}` }, { status: 502 });
+    // School registration flow
+    const validationError = validateSchoolParams(params);
+    if (validationError) {
+      return NextResponse.json({ success: false, error: validationError }, { status: 400 });
     }
 
-    return Response.json({ success: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return Response.json({ success: false, error: message }, { status: 500 });
+    const [dbResult, webhookResult] = await Promise.allSettled([
+      supabase.from("school_registrations").insert({
+        team_name: getParam(params, "teamName") || "",
+        no_of_team_members: parseInt(params.get("noOfMembers") || "3", 10),
+        school: getParam(params, "school") || "",
+        school_address: getParam(params, "schoolAddress") || "",
+        district: getParam(params, "district") || "",
+        teacher_name: getParam(params, "teacherName") || "",
+        teacher_email: getParam(params, "teacherEmail") || "",
+        teacher_phone: getParam(params, "teacherPhone") || "",
+        leader_name: getParam(params, "leaderName") || "",
+        leader_grade: getParam(params, "leaderGrade") || "",
+        leader_email: getParam(params, "leaderEmail") || "",
+        leader_phone: getParam(params, "leaderPhone") || "",
+        member2_name: getParam(params, "member2Name"),
+        member2_grade: getParam(params, "member2Grade"),
+        member2_phone: getParam(params, "member2Phone"),
+        member3_name: getParam(params, "member3Name"),
+        member3_grade: getParam(params, "member3Grade"),
+        member3_phone: getParam(params, "member3Phone"),
+        member4_name: getParam(params, "member4Name"),
+        member4_grade: getParam(params, "member4Grade"),
+        member4_phone: getParam(params, "member4Phone"),
+        member5_name: getParam(params, "member5Name"),
+        member5_grade: getParam(params, "member5Grade"),
+        member5_phone: getParam(params, "member5Phone"),
+        declaration: getParam(params, "declaration") || "",
+      }),
+      webhookUrl
+        ? fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString(),
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const dbFailed =
+      dbResult.status === "rejected" || (dbResult.status === "fulfilled" && dbResult.value.error);
+    if (dbFailed) {
+      console.error("[REG] School insert failed");
+      return NextResponse.json(
+        { success: false, error: "Registration failed. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    if (webhookResult.status === "rejected") {
+      console.error("[REG] Webhook failed — data saved to Supabase only");
+    }
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Registration failed. Please try again." },
+      { status: 500 }
+    );
   }
 }

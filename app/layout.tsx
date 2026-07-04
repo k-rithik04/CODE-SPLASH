@@ -53,6 +53,10 @@ export default function RootLayout({
           "bg-bg text-white font-main overflow-x-hidden hide-scrollbar"
         )}
       >
+        <link rel="preload" href="/font/Rebeca-yYx23.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+        <link rel="preload" href="/assets/frames/frame_001.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/assets/frames/frame_002.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/assets/frames/frame_003.webp" as="image" type="image/webp" />
         <SmoothScrolling>
           <TooltipProvider>{children}</TooltipProvider>
         </SmoothScrolling>

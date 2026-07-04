@@ -6,3 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+
+export const STORAGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/cms-images`
+
+export function imageUrl(path: string): string {
+  if (path.startsWith("http")) return path
+  return `${STORAGE_BASE_URL}${path}`
+}

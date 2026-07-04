@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { validateRequired, validateEmail, validateName, validateSriLankanPhone, validateLength, checkRateLimit, recordSubmissionTimestamp } from "@/lib/validate";
 import { useSchoolFormStore } from "@/lib/store";
-import { basePath } from "@/lib/utils";
+import { STORAGE_BASE_URL } from "@/lib/utils";
 
 export default function SchoolRegistrationPage() {
   const {
@@ -118,10 +118,8 @@ export default function SchoolRegistrationPage() {
     }
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL;
-      const apiUrl = webhookUrl || "/api/register";
-
-      const res = await fetch(apiUrl, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+      const res = await fetch(`${basePath}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formParams.toString(),
@@ -143,16 +141,15 @@ export default function SchoolRegistrationPage() {
       useSchoolFormStore.getState().reset();
       setIsSubmitted(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Submission failed. Please check your connection and try again.");
-    } finally {
       setIsSubmitting(false);
+      alert(err instanceof Error ? err.message : "Submission failed. Please check your connection and try again.");
     }
   };
 
   return (
     <div
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-foreground"
-      style={{ backgroundImage: `url('${basePath}/assets/register-bg.png')` }}
+      style={{ backgroundImage: `url('${STORAGE_BASE_URL}/assets/register-bg.webp')` }}
     >
       <div className="container mx-auto max-w-3xl py-10 px-4">
 
