@@ -1,0 +1,12 @@
+export { default as Loader } from "./Loader";
+export { default as Background } from "./Background";
+export { default as Navigation } from "./Navigation";
+export { default as Hero } from "./Hero";
+export { default as Chapters } from "./Chapters";
+export { default as Prizes } from "./Prizes";
+export { default as Timeline } from "./Timeline";
+export { default as Partners } from "./Partners";
+export { default as Team } from "./Team";
+export { default as FAQ } from "./FAQ";
+export { default as CTA } from "./CTA";
+export { default as Connect } from "./Connect";
