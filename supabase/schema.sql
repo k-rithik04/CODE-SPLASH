@@ -45,8 +45,10 @@ DECLARE
   r RECORD;
 BEGIN
   FOR r IN
-    SELECT tgname, relname FROM pg_trigger
-    WHERE tgname LIKE 'audit_%' AND NOT tgisinternal
+    SELECT t.tgname, c.relname
+    FROM pg_trigger t
+    JOIN pg_class c ON t.tgrelid = c.oid
+    WHERE t.tgname LIKE 'audit_%' AND NOT t.tgisinternal
   LOOP
     EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I', r.tgname, r.relname);
   END LOOP;
