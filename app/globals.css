@@ -278,12 +278,15 @@
   mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
 }
 
-.t-line {
+.timeline-node .t-line {
   @apply absolute left-1/2 top-[20px] w-[2px] bg-white/20 -translate-x-1/2 z-0;
   height: calc(100% + 1rem); 
 }
+.timeline-node:last-child .t-line {
+  display: none;
+}
 @media (min-width: 768px) {
-  .t-line { height: calc(100% + 2rem); }
+  .timeline-node .t-line { height: calc(100% + 2rem); }
 }
 
 .timeline-node .current-badge { display: none; }
