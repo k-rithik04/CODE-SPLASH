@@ -140,7 +140,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                         rel="noopener noreferrer"
                         className="flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/item"
                       >
-                        <div className="w-full md:w-[30%] flex justify-center items-center bg-white/40 rounded-2xl p-4 min-h-[90px]">
+                        <div className="w-full md:w-[30%] flex justify-center items-center bg-white/50 rounded-2xl p-4 min-h-[90px]">
                           <PartnerLogo src={partner.logo} alt={partner.name} width={75} height={60} className="object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover/item:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/item:scale-105" style={{ width: "auto", height: "60px" }} />
                         </div>
                         <div className="w-full md:w-[70%] flex flex-col text-center md:text-left">
@@ -159,7 +159,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                     rel="noopener noreferrer"
                     className="flex flex-col md:flex-row items-center gap-6 md:gap-10 w-full hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/single"
                   >
-                    <div className="w-full md:w-[35%] flex justify-center items-center bg-white/40 rounded-2xl p-4 min-h-[120px]">
+                    <div className="w-full md:w-[35%] flex justify-center items-center bg-white/50 rounded-2xl p-4 min-h-[120px]">
                       <PartnerLogo src={node.logo || ""} alt={node.name || ""} width={100} height={80} className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover/single:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/single:scale-105" style={{ width: "auto", height: "80px" }} />
                     </div>
                     <div className="w-full md:w-[65%] flex flex-col text-center md:text-left">
