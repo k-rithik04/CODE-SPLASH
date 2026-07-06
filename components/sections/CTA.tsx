@@ -30,7 +30,7 @@ const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
             {data?.heading ?? "Ready to dive in?"}
           </h2>
 
-          <div className="relative mt-4 flex flex-col items-center w-full max-w-[280px]">
+          <div className="relative mt-4 flex flex-col items-center w-full max-w-[380px] pointer-events-auto">
             <Button
               onClick={(e) => {
                 if (!isActive) return;

@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:ghpages": "NEXT_PUBLIC_STATIC_EXPORT=true next build",
+    "build:vercel": "next build",
     "start": "next start",
     "lint": "eslint"
   },

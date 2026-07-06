@@ -27,12 +27,31 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "kcfwibhzmfwipipwbzrw.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "gcymcwaocowoczvvsaxw.supabase.co",
       },
     ],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
+  compress: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react", "radix-ui", "gsap"],
   },
   async headers() {
     return [
+      {
+        source: "/frames/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/(.*)",
         headers: securityHeaders,
