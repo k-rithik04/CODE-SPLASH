@@ -107,7 +107,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                         className="flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/item"
                       >
                         <div className="w-full md:w-[30%] flex justify-center items-center bg-white/10 rounded-2xl p-4 min-h-[90px]">
-                          <Image src={partner.logo} alt={partner.name} width={75} height={60} unoptimized className="max-h-[60px] md:max-h-[75px] w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover/item:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/item:scale-105" style={{ height: "auto" }} />
+                          <Image src={partner.logo} alt={partner.name} width={75} height={60} unoptimized className="max-h-[60px] md:max-h-[75px] object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover/item:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/item:scale-105" style={{ width: "auto", height: "auto" }} />
                         </div>
                         <div className="w-full md:w-[70%] flex flex-col text-center md:text-left">
                           <h4 className="text-xl md:text-2xl font-bold text-white mb-1 group-hover/item:text-orange transition-colors">{partner.name}</h4>
@@ -126,7 +126,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                     className="flex flex-col md:flex-row items-center gap-6 md:gap-10 w-full hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/single"
                   >
                     <div className="w-full md:w-[35%] flex justify-center items-center bg-white/10 rounded-2xl p-4 min-h-[120px]">
-                      <Image src={node.logo || ""} alt={node.name || ""} width={100} height={80} unoptimized className="max-h-[80px] md:max-h-[100px] w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover/single:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/single:scale-105" style={{ height: "auto" }} />
+                      <Image src={node.logo || ""} alt={node.name || ""} width={100} height={80} unoptimized className="max-h-[80px] md:max-h-[100px] object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover/single:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/single:scale-105" style={{ width: "auto", height: "auto" }} />
                     </div>
                     <div className="w-full md:w-[65%] flex flex-col text-center md:text-left">
                       <h4 className="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3 group-hover/single:text-orange transition-colors">{node.name}</h4>

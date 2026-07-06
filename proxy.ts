@@ -46,6 +46,37 @@ const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 100; // requests per window
 
+// Registration status cache (in-memory, 60s TTL)
+let registrationCache: { isOpen: boolean; fetchedAt: number } | null = null;
+const REGISTRATION_CACHE_TTL = 60 * 1000;
+
+async function isRegistrationOpen(): Promise<boolean> {
+  const now = Date.now();
+  if (registrationCache && now - registrationCache.fetchedAt < REGISTRATION_CACHE_TTL) {
+    return registrationCache.isOpen;
+  }
+
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      registrationCache = { isOpen: true, fetchedAt: now };
+      return true;
+    }
+
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/cta_content?id=eq.1&select=is_active`,
+      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    const isOpen = rows?.[0]?.is_active ?? true;
+    registrationCache = { isOpen, fetchedAt: now };
+    return isOpen;
+  } catch {
+    return true;
+  }
+}
+
 function getRateLimitKey(request: NextRequest): string {
   return (
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -95,21 +126,24 @@ export async function proxy(request: NextRequest) {
     return new NextResponse("Not Found", { status: 404 });
   }
 
-  // Global rate limiting (all routes)
-  const clientKey = getRateLimitKey(request);
-  if (!checkGlobalRateLimit(clientKey)) {
-    return new NextResponse(
-      JSON.stringify({ error: "Too many requests. Please try again later." }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          "Retry-After": "60",
-          "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
-          "X-RateLimit-Remaining": "0",
-        },
-      }
-    );
+  // Skip rate limiting for static assets (HMR chunks, CSS, JS)
+  if (!pathname.startsWith("/_next/")) {
+    // Global rate limiting (all routes)
+    const clientKey = getRateLimitKey(request);
+    if (!checkGlobalRateLimit(clientKey)) {
+      return new NextResponse(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": "60",
+            "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
   }
 
   // Block large request bodies (prevent memory exhaustion)
@@ -126,6 +160,14 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const sub = pathname.replace("/admin", "") || "/login";
     return NextResponse.redirect(new URL("/cms" + sub, request.url));
+  }
+
+  // Registration gate: block /register/school and /register/university when closed
+  if (pathname === "/register/school" || pathname === "/register/university") {
+    const isOpen = await isRegistrationOpen();
+    if (!isOpen) {
+      return NextResponse.redirect(new URL("/register", request.url));
+    }
   }
 
   if (!pathname.startsWith("/cms")) return NextResponse.next();

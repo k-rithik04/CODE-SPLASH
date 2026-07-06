@@ -631,10 +631,17 @@ export default function Home() {
 
   const jumpToCurrentWeek = () => {
     const maxScroll = layoutMetrics.current.maxScroll;
+    const currentWeekIndex = cms.timeline.findIndex((item) => item.is_current);
+    const scrollProgress = currentWeekIndex > 0 && cms.timeline.length > 1
+      ? currentWeekIndex / (cms.timeline.length - 1)
+      : 0;
+    const pagePercent = SECTION_TIMING.timeline.holdStart
+      + scrollProgress * (SECTION_TIMING.timeline.scrollEnd - SECTION_TIMING.timeline.holdStart);
+    const target = Math.min(pagePercent, 1) * maxScroll;
     if (lenisRef.current) {
-      lenisRef.current.scrollTo(0.37 * maxScroll);
+      lenisRef.current.scrollTo(target);
     } else {
-      window.scrollTo({ top: 0.37 * maxScroll, behavior: "smooth" });
+      window.scrollTo({ top: target, behavior: "smooth" });
     }
   };
 
@@ -697,6 +704,8 @@ export default function Home() {
           onRegister={() => handleDialClick(0.95)}
           onOngoing={jumpToCurrentWeek}
           data={cms.hero}
+          registrationOpen={cms.cta?.is_active ?? true}
+          ctaText={cms.cta?.button_text ?? "Register Now"}
         />
 
         <Chapters

@@ -89,7 +89,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
         </div>
 
         <div className="w-full flex justify-center mb-4">
-          <Image src={data?.cssa_logo_url ? getStorageUrl(data.cssa_logo_url) : "/CSSALogo.png"} alt="CSSA Logo" width={250} height={80} unoptimized className="max-w-[200px] md:max-w-[250px] w-auto h-auto object-contain opacity-90" style={{ width: "auto", height: "auto" }} />
+          <Image src={data?.cssa_logo_url ? getStorageUrl(data.cssa_logo_url) : "/CSSALogo.png"} alt="CSSA Logo" width={250} height={80} unoptimized className="max-w-[200px] md:max-w-[250px] object-contain opacity-90" style={{ width: "auto", height: "auto" }} />
         </div>
 
         <div className="text-[0.65rem] md:text-[0.75rem] text-white/60 tracking-[0.5px] text-center flex items-center justify-center gap-2 flex-wrap pb-4">

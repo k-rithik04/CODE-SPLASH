@@ -9,7 +9,7 @@
  *  - Forged JWT with wrong role is rejected
  */
 
-import { createForgedJWT, request, log, record } from "./helpers.js";
+import { createForgedJWT, request, log, record, summary } from "./helpers.js";
 import { SignJWT } from "jose";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || "ci-build-placeholder-not-for-production");

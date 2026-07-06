@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /register
+Allow: /register/school
+Allow: /register/university
+Allow: /credits
+
+Disallow: /cms/
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://codesplash.cssa.lk/sitemap.xml

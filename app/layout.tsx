@@ -263,6 +263,10 @@ export default function RootLayout({
       )}
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://kcfwibhzmfwipipwbzrw.supabase.co" />
+        <link rel="preconnect" href="https://gcymcwaocowoczvvsaxw.supabase.co" />
         <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"

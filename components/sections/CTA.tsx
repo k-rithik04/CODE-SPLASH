@@ -38,9 +38,11 @@ const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
                 e.stopPropagation();
                 onToggleDropdown();
               }}
-              className="interactive-btn transform scale-90 md:scale-100 origin-top flex items-center justify-center w-full uppercase"
+              className={`interactive-btn transform scale-90 md:scale-100 origin-top flex items-center justify-center w-full uppercase ${
+                !isActive ? "opacity-60 cursor-not-allowed" : ""
+              }`}
             >
-              {data?.button_text ?? "Register Now"}
+              {isActive ? (data?.button_text ?? "Register Now") : "Registrations Are Closed"}
             </Button>
 
             {isDropdownOpen && isActive && (

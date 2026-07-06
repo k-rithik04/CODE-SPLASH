@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { createServerClient } from "@/lib/supabase/server";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -31,11 +33,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function UniversityLayout({
+export default async function UniversityLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("cta_content")
+    .select("is_active")
+    .eq("id", 1)
+    .single();
+
+  if (data && !data.is_active) {
+    redirect("/register");
+  }
+
   return (
     <>
       <Breadcrumbs
