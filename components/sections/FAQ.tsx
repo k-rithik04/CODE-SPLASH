@@ -40,7 +40,7 @@ const FAQ = React.forwardRef<HTMLDivElement, FAQProps>(
                     +
                   </span>
                 </summary>
-                <div className="text-[0.65rem] sm:text-[0.75rem] md:text-sm px-2.5 sm:px-3 md:px-5 text-white/70 mt-1.5 md:mt-3 leading-relaxed">
+                <div className="text-[0.65rem] sm:text-[0.75rem] md:text-sm px-2.5 sm:px-3 md:px-5 pb-2.5 sm:pb-3 md:pb-5 text-white/70 mt-1.5 md:mt-3 leading-relaxed">
                   {faq.answer}
                 </div>
               </details>
