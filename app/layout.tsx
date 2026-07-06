@@ -66,7 +66,7 @@ export const metadata: Metadata = {
       { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/CodeSplash.png", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {

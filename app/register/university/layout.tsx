@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "University Registration",
@@ -35,5 +36,15 @@ export default function UniversityLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Breadcrumbs
+        items={[
+          { name: "Register", url: "https://codesplash.cssa.lk/register" },
+          { name: "University", url: "https://codesplash.cssa.lk/register/university" },
+        ]}
+      />
+      {children}
+    </>
+  );
 }
