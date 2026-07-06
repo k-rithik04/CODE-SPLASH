@@ -69,7 +69,6 @@ function TeamCard({ member }: { member: TeamMember }) {
             onLoad={() => setLoaded(true)}
             onError={() => setError(true)}
             className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
-            style={{ width: "auto", height: "auto" }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
