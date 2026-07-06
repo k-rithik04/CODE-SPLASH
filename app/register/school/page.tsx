@@ -4,10 +4,21 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { validateRequired, validateEmail, validateName, validateSriLankanPhone, validateLength, checkRateLimit, recordSubmissionTimestamp } from "@/lib/validate";
 import { useSchoolFormStore } from "@/lib/store";
+
+const districts = [
+  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Galle",
+  "Gampaha", "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle",
+  "Kilinochchi", "Kurunegala", "Mannar", "Matale", "Matara", "Monaragala",
+  "Mullaitivu", "Nuwara Eliya", "Polonnaruwa", "Puttalam", "Ratnapura",
+  "Trincomalee", "Vavuniya",
+];
 
 export default function SchoolRegistrationPage() {
   const {
@@ -18,30 +29,33 @@ export default function SchoolRegistrationPage() {
 
   const totalSteps = 4;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    if (type === "checkbox" && name === "declaration") {
-      updateField("declaration", (e.target as HTMLInputElement).checked);
-    } else {
-      updateField(name as keyof typeof formData, value);
-    }
+  const handleRadioChange = (name: string, value: string) => {
+    updateField(name as keyof typeof formData, value);
   };
 
-  const handleMemberChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    updateMember(index, name as "name" | "grade" | "phone", value);
+  const handleSelectChange = (name: string, value: string) => {
+    updateField(name as keyof typeof formData, value);
+  };
+
+  const handleMemberChange = (index: number, field: "name" | "grade" | "phone", value: string) => {
+    updateMember(index, field, value);
   };
 
   const validateStep = (): string | null => {
     if (step === 1) {
       if (!validateLength(formData.teamName, 2, 50)) return "Team Name is required (2-50 characters)";
       if (!validateRequired(formData.noOfMembers)) return "Please select the number of team members";
-      if (!validateRequired(formData.school)) return "School is required";
-      if (!validateRequired(formData.schoolAddress)) return "School Address is required";
+      if (!validateRequired(formData.studentType)) return "Please select a registration type";
+      if (formData.studentType === "Government") {
+        if (!validateRequired(formData.school)) return "School is required";
+        if (!validateRequired(formData.schoolAddress)) return "School Address is required";
+      }
       if (!validateRequired(formData.district)) return "District is required";
-      if (!validateName(formData.teacherName)) return "Teacher Name must contain only letters and spaces";
-      if (!validateEmail(formData.teacherEmail)) return "Please enter a valid email address for the teacher";
-      if (!validateSriLankanPhone(formData.teacherPhone)) return "Please enter a valid Sri Lankan phone number for the teacher";
+      if (formData.studentType === "Government") {
+        if (!validateName(formData.teacherName)) return "Teacher Name must contain only letters and spaces";
+        if (!validateEmail(formData.teacherEmail)) return "Please enter a valid email address for the teacher";
+        if (!validateSriLankanPhone(formData.teacherPhone)) return "Please enter a valid Sri Lankan phone number for the teacher";
+      }
     }
     if (step === 2) {
       if (!validateName(formData.leaderName)) return "Leader Name must contain only letters and spaces";
@@ -146,6 +160,13 @@ export default function SchoolRegistrationPage() {
     }
   };
 
+  const stepLabels: Record<number, string> = {
+    1: "Team Information",
+    2: "Leader Details",
+    3: "Member Details",
+    4: "Consent & Declaration",
+  };
+
   return (
     <div
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-white"
@@ -154,7 +175,7 @@ export default function SchoolRegistrationPage() {
       <div className="container mx-auto max-w-3xl py-10 px-4">
 
         {isSubmitted ? (
-          <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl">
+          <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl text-white">
             <CardHeader>
               <CardTitle className="text-2xl text-white text-center">Registration Submitted!</CardTitle>
             </CardHeader>
@@ -165,7 +186,7 @@ export default function SchoolRegistrationPage() {
             </CardContent>
             <CardFooter className="justify-center">
               <Link href="/">
-                <Button variant="outline" className="px-8">Back to Home</Button>
+                <Button variant="outline" className="px-8 text-white border-white/20 hover:bg-white/10">Back to Home</Button>
               </Link>
             </CardFooter>
           </Card>
@@ -173,14 +194,9 @@ export default function SchoolRegistrationPage() {
         <>
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-4">
+          <div className="flex items-center justify-between text-sm font-medium text-gray-300 mb-4">
             <span className="text-primary font-bold">Step {step} of {totalSteps}</span>
-            <span>
-              {step === 1 && "Team Information"}
-              {step === 2 && "Leader Details"}
-              {step === 3 && "Member Details"}
-              {step === 4 && "Consent & Declaration"}
-            </span>
+            <span>{stepLabels[step]}</span>
           </div>
           <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
             <div
@@ -190,7 +206,7 @@ export default function SchoolRegistrationPage() {
           </div>
         </div>
 
-        <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl">
+        <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl text-white">
           <form onSubmit={handleSubmit}>
 
             {/* --- SECTION 1: TEAM INFORMATION --- */}
@@ -204,95 +220,85 @@ export default function SchoolRegistrationPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Team Name <span className="text-red-500">*</span></Label>
-                    <Input name="teamName" value={formData.teamName} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Name <span className="text-red-500">*</span></Label>
+                    <Input name="teamName" value={formData.teamName} onChange={(e) => updateField("teamName", e.target.value)} required className="text-white" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>No of Team Members <span className="text-red-500">*</span></Label>
-                      <div className="flex flex-col space-y-2 mt-2">
+                      <Label className="text-white">No of Team Members <span className="text-red-500">*</span></Label>
+                      <RadioGroup
+                        value={formData.noOfMembers}
+                        onValueChange={(value) => handleRadioChange("noOfMembers", value)}
+                        className="mt-2"
+                      >
                         {["3", "4", "5"].map((num) => (
-                          <label key={num} className="flex items-center space-x-2 cursor-pointer">
-                            <input type="radio" name="noOfMembers" value={num} checked={formData.noOfMembers === num} onChange={handleInputChange} className="h-4 w-4 text-primary bg-background border-input" required />
-                            <span>{num}</span>
-                          </label>
+                          <div key={num} className="flex items-center space-x-2">
+                            <RadioGroupItem value={num} id={`members-${num}`} />
+                            <Label htmlFor={`members-${num}`} className="text-white font-normal cursor-pointer">{num}</Label>
+                          </div>
                         ))}
-                      </div>
+                      </RadioGroup>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Registration Type <span className="text-red-500">*</span></Label>
-                      <div className="flex flex-col space-y-2 mt-2">
+                      <Label className="text-white">Registration Type <span className="text-red-500">*</span></Label>
+                      <RadioGroup
+                        value={formData.studentType}
+                        onValueChange={(value) => handleRadioChange("studentType", value)}
+                        className="mt-2"
+                      >
                         {["Government", "Private"].map((type) => (
-                          <label key={type} className="flex items-center space-x-2 cursor-pointer">
-                            <input type="radio" name="studentType" value={type} checked={formData.studentType === type} onChange={handleInputChange} className="h-4 w-4 text-primary bg-background border-input" required />
-                            <span>{type}</span>
-                          </label>
+                          <div key={type} className="flex items-center space-x-2">
+                            <RadioGroupItem value={type} id={`type-${type}`} />
+                            <Label htmlFor={`type-${type}`} className="text-white font-normal cursor-pointer">{type}</Label>
+                          </div>
                         ))}
-                      </div>
+                      </RadioGroup>
                     </div>
                   </div>
 
                   {formData.studentType === "Government" && (
                     <>
                       <div className="space-y-2">
-                        <Label>School <span className="text-red-500">*</span></Label>
-                        <Input name="school" value={formData.school} onChange={handleInputChange} required />
+                        <Label className="text-white">School <span className="text-red-500">*</span></Label>
+                        <Input name="school" value={formData.school} onChange={(e) => updateField("school", e.target.value)} required className="text-white" />
                       </div>
 
                       <div className="space-y-2">
-                        <Label>School Address <span className="text-red-500">*</span></Label>
-                        <Input name="schoolAddress" value={formData.schoolAddress} onChange={handleInputChange} required />
+                        <Label className="text-white">School Address <span className="text-red-500">*</span></Label>
+                        <Input name="schoolAddress" value={formData.schoolAddress} onChange={(e) => updateField("schoolAddress", e.target.value)} required className="text-white" />
                       </div>
                     </>
                   )}
 
                   <div className="space-y-2">
-                    <Label>District <span className="text-red-500">*</span></Label>
-                    <select name="district" value={formData.district} onChange={handleInputChange} required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                      <option value="">Select District</option>
-                        <option value="Ampara">Ampara</option>
-                        <option value="Anuradhapura">Anuradhapura</option>
-                        <option value="Badulla">Badulla</option>
-                        <option value="Batticaloa">Batticaloa</option>
-                        <option value="Colombo">Colombo</option>
-                        <option value="Galle">Galle</option>
-                        <option value="Gampaha">Gampaha</option>
-                        <option value="Hambanthota">Hambanthota</option>
-                        <option value="Jaffna">Jaffna</option>
-                        <option value="Kaluthara">Kaluthara</option>
-                        <option value="Kandy">Kandy</option>
-                        <option value="Kegalle">Kegalle</option>
-                        <option value="Kilinochchi">Kilinochchi</option>
-                        <option value="Kurunagala">Kurunagala</option>
-                        <option value="Mannar">Mannar</option>
-                        <option value="Matale">Matale</option>
-                        <option value="Matara">Matara</option>
-                        <option value="Monaragala">Monaragala</option>
-                        <option value="Mullaitivu">Mullaitivu</option>
-                        <option value="Nuwara Eliya">Nuwara Eliya</option>
-                        <option value="Polonnaruwa">Polonnaruwa</option>
-                        <option value="Puttalam">Puttalam</option>
-                        <option value="Ratnapura">Ratnapura</option>
-                        <option value="Trincomalee">Trincomalee</option>
-                        <option value="Vavuniya">Vavuniya</option>
-                    </select>
+                    <Label className="text-white">District <span className="text-red-500">*</span></Label>
+                    <Select value={formData.district} onValueChange={(value) => handleSelectChange("district", value)} required>
+                      <SelectTrigger className="w-full text-white">
+                        <SelectValue placeholder="Select District" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts.map((d) => (
+                          <SelectItem key={d} value={d}>{d}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {formData.studentType === "Government" && (
                     <>
                       <div className="space-y-2">
-                        <Label>Teacher in charge Name <span className="text-red-500">*</span></Label>
-                        <Input name="teacherName" value={formData.teacherName} onChange={handleInputChange} required />
+                        <Label className="text-white">Teacher in charge Name <span className="text-red-500">*</span></Label>
+                        <Input name="teacherName" value={formData.teacherName} onChange={(e) => updateField("teacherName", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Teacher in charge Email Address <span className="text-red-500">*</span></Label>
-                        <Input name="teacherEmail" type="email" value={formData.teacherEmail} onChange={handleInputChange} required />
+                        <Label className="text-white">Teacher in charge Email Address <span className="text-red-500">*</span></Label>
+                        <Input name="teacherEmail" type="email" value={formData.teacherEmail} onChange={(e) => updateField("teacherEmail", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Teacher in charge Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
-                        <Input name="teacherPhone" placeholder="E.g. 0771234567" value={formData.teacherPhone} onChange={handleInputChange} required />
+                        <Label className="text-white">Teacher in charge Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
+                        <Input name="teacherPhone" placeholder="E.g. 0771234567" value={formData.teacherPhone} onChange={(e) => updateField("teacherPhone", e.target.value)} required className="text-white" />
                       </div>
                     </>
                   )}
@@ -309,20 +315,20 @@ export default function SchoolRegistrationPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Team Leader Full Name <span className="text-red-500">*</span></Label>
-                    <Input name="leaderName" placeholder="E.g. K C M Jayathilaka" value={formData.leaderName} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Leader Full Name <span className="text-red-500">*</span></Label>
+                    <Input name="leaderName" placeholder="E.g. K C M Jayathilaka" value={formData.leaderName} onChange={(e) => updateField("leaderName", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Team Leader Grade/Class <span className="text-red-500">*</span></Label>
-                    <Input name="leaderGrade" placeholder="E.g. 12 B" value={formData.leaderGrade} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Leader Grade/Class <span className="text-red-500">*</span></Label>
+                    <Input name="leaderGrade" placeholder="E.g. 12 B" value={formData.leaderGrade} onChange={(e) => updateField("leaderGrade", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Team Leader Email Address <span className="text-red-500">*</span></Label>
-                    <Input name="leaderEmail" type="email" value={formData.leaderEmail} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Leader Email Address <span className="text-red-500">*</span></Label>
+                    <Input name="leaderEmail" type="email" value={formData.leaderEmail} onChange={(e) => updateField("leaderEmail", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Team Leader Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
-                    <Input name="leaderPhone" value={formData.leaderPhone} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Leader Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
+                    <Input name="leaderPhone" value={formData.leaderPhone} onChange={(e) => updateField("leaderPhone", e.target.value)} required className="text-white" />
                   </div>
                 </CardContent>
               </>
@@ -337,19 +343,19 @@ export default function SchoolRegistrationPage() {
                 </CardHeader>
                 <CardContent className="space-y-8">
                   {Array.from({ length: visibleMemberCount }).map((_, index) => (
-                    <div key={index} className="p-5 border rounded-lg bg-white/5 space-y-4">
-                      <h4 className="font-semibold text-lg border-b border-white/20 pb-2">Member {index + 2} Details</h4>
+                    <div key={index} className="p-5 border border-white/10 rounded-2xl bg-white/5 space-y-4">
+                      <h4 className="font-semibold text-lg border-b border-white/20 pb-2 text-white">Member {index + 2} Details</h4>
                       <div className="space-y-2">
-                        <Label>Member {index + 2} Full Name <span className="text-red-500">*</span></Label>
-                        <Input name="name" value={formData.members[index].name} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Member {index + 2} Full Name <span className="text-red-500">*</span></Label>
+                        <Input name="name" value={formData.members[index].name} onChange={(e) => handleMemberChange(index, "name", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Member {index + 2} Grade/Class <span className="text-red-500">*</span></Label>
-                        <Input name="grade" value={formData.members[index].grade} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Member {index + 2} Grade/Class <span className="text-red-500">*</span></Label>
+                        <Input name="grade" value={formData.members[index].grade} onChange={(e) => handleMemberChange(index, "grade", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Member {index + 2} Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
-                        <Input name="phone" value={formData.members[index].phone} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Member {index + 2} Contact Number (Whatsapp) <span className="text-red-500">*</span></Label>
+                        <Input name="phone" value={formData.members[index].phone} onChange={(e) => handleMemberChange(index, "phone", e.target.value)} required className="text-white" />
                       </div>
                     </div>
                   ))}
@@ -364,8 +370,8 @@ export default function SchoolRegistrationPage() {
                   <CardTitle className="text-2xl text-white">SECTION 4 | Consent & Declaration</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-white/5 p-6 rounded-lg text-sm text-gray-200 space-y-4">
-                    <p className="font-bold text-lg mb-4">The Promise We Make Together</p>
+                  <div className="bg-white/5 p-6 rounded-2xl text-sm text-gray-200 space-y-4">
+                    <p className="font-bold text-lg mb-4 text-white">The Promise We Make Together</p>
                     <p>By hitting Submit, you&apos;re agreeing to play fair, be respectful, and make this hackathon awesome.</p>
                     <div className="space-y-3 mt-4">
                       <p><strong>1. Code of Conduct:</strong> We promise to be respectful to teammates, mentors, and other participants.</p>
@@ -376,18 +382,18 @@ export default function SchoolRegistrationPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 border border-red-500/50 rounded-lg bg-red-500/10">
-                    <label className="flex items-start space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="declaration"
+                  <div className="p-4 border border-red-500/50 rounded-2xl bg-red-500/10">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="declaration"
                         checked={formData.declaration}
-                        onChange={handleInputChange}
-                        className="mt-1 h-5 w-5 rounded border-gray-300 text-red-500 bg-background"
-                        required
+                        onCheckedChange={(checked) => updateField("declaration", checked as boolean)}
+                        className="mt-1"
                       />
-                      <span className="text-base font-medium">I have read and agree to the Code of Conduct, Originality and Consent terms above. <span className="text-red-500">*</span></span>
-                    </label>
+                      <Label htmlFor="declaration" className="text-base font-medium text-white cursor-pointer">
+                        I have read and agree to the Code of Conduct, Originality and Consent terms above. <span className="text-red-500">*</span>
+                      </Label>
+                    </div>
                   </div>
                 </CardContent>
               </>
@@ -396,7 +402,7 @@ export default function SchoolRegistrationPage() {
             {/* --- ERROR MESSAGE --- */}
             {errorMsg && (
               <div className="px-6 pb-2">
-                <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-md text-red-200 text-sm flex items-center">
+                <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center">
                   <svg className="w-4 h-4 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
                   <span>{errorMsg}</span>
                 </div>
