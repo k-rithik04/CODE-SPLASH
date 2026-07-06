@@ -72,7 +72,7 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
 function MainContent({ children }: { children: React.ReactNode }) {
   const { open } = useSidebar();
   return (
-    <main className={cn("min-h-screen p-6 md:p-8 transition-all duration-300", open ? "ml-[260px]" : "ml-[72px]")}>
+    <main className={cn("h-screen p-6 md:p-8 transition-all duration-300 overflow-y-auto custom-scrollbar", open ? "ml-[260px]" : "ml-[72px]")}>
       <GSAPWrapper>{children}</GSAPWrapper>
     </main>
   );
