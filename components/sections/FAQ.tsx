@@ -21,17 +21,20 @@ const FAQ = React.forwardRef<HTMLDivElement, FAQProps>(
             ref={titleRef}
             className="font-rebeca text-[clamp(1.25rem,4vw,2.5rem)] font-extrabold tracking-tight mb-3 md:mb-8 text-white text-center transition-opacity duration-500"
           >
-            Frequently Asked <span className="text-orange font-rebeca">Questions</span>
+            Frequently Asked{" "}
+            <span className="text-orange font-rebeca">Questions</span>
           </h2>
           <div className="w-full flex flex-col gap-1.5 sm:gap-2 md:gap-4">
             {data.map((faq, i) => (
               <details
                 key={i}
                 name="faq-accordion"
-                ref={(el) => { itemsRef.current[i] = el; }}
-                className="w-full bg-glass-bg backdrop-blur-[40px] border border-glass-border shadow-lg rounded-xl p-2.5 sm:p-3 md:p-5 cursor-pointer group hover:border-orange/50 transition-all duration-500"
+                ref={(el) => {
+                  itemsRef.current[i] = el;
+                }}
+                className="w-full bg-glass-bg backdrop-blur-[40px] border border-glass-border shadow-lg rounded-xl cursor-pointer group hover:border-orange/50 transition-all duration-500"
               >
-                <summary className="font-bold text-white text-[0.75rem] sm:text-[0.85rem] md:text-[1.05rem] outline-none flex justify-between items-center group-open:text-orange transition-colors">
+                <summary className="font-bold text-white text-[0.75rem] sm:text-[0.85rem] md:text-[1.05rem] p-2.5 sm:p-3 md:p-5 outline-none flex justify-between items-center group-open:text-orange transition-colors">
                   {faq.question}
                   <span className="text-base md:text-xl flex items-center justify-center w-5 h-5 shrink-0 origin-center group-open:rotate-45 transition-transform duration-300">
                     +
@@ -46,7 +49,7 @@ const FAQ = React.forwardRef<HTMLDivElement, FAQProps>(
         </div>
       </section>
     );
-  }
+  },
 );
 FAQ.displayName = "FAQ";
 
