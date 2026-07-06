@@ -5,18 +5,6 @@ Live: [https://codesplash.cssa.lk](https://codesplash.cssa.lk)
 
 ---
 
-## Portfolio Attribution
-
-| Role | Name |
-|------|------|
-| Lead Developer | **Rithika** ([@k-rithik04](https://github.com/k-rithik04)) |
-| Developer | **Pahan** |
-| Developer | **Yasiru** |
-
-Built as a full-stack portfolio project demonstrating end-to-end product engineering: scroll-driven canvas animations, a complete CMS admin panel with RBAC, public registration flows, security hardening, and production deployment.
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
@@ -157,3 +145,15 @@ A comprehensive security audit was performed — see [`SECURITY-AUDIT.md`](./SEC
 ## License
 
 Private repository. Built for CodeSplash 2026 hackathon by CSSA, University of Kelaniya.
+
+---
+
+## Portfolio Attribution
+
+| Role | Name |
+|------|------|
+| Developer | **Rithika** ([@k-rithik04](https://github.com/k-rithik04)) |
+| Developer | **Pahan** |
+| Developer | **Yasiru** |
+
+Built as a full-stack portfolio project demonstrating end-to-end product engineering: scroll-driven canvas animations, a complete CMS admin panel with RBAC, public registration flows, security hardening, and production deployment.
