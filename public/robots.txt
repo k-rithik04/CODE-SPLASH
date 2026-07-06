@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /cms/
-Disallow: /api/
-
-Sitemap: https://codesplash.cssa.lk/sitemap.xml

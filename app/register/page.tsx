@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RegistrationForm from "@/components/RegistrationForm";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 /*
  * Registration Entry Page — CodeSplash 2026
@@ -38,5 +39,10 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegistrationForm />;
+  return (
+    <>
+      <Breadcrumbs items={[{ name: "Register", url: "https://codesplash.cssa.lk/register" }]} />
+      <RegistrationForm />
+    </>
+  );
 }

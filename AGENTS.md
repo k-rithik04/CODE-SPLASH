@@ -13,7 +13,7 @@ CodeSplash 2026 hackathon landing site. Single-page app with scroll-driven canva
 - **Path alias**: `@/*` maps to repo root
 - **Domain**: https://codesplash.cssa.lk
 - **Repo**: https://github.com/cssa-uok/code-splash
-- **Authors**: Rithika (lead), Pahan, Yasiru
+- **Authors**: Rithika, Pahan, Yasiru
 
 ## Commands
 

@@ -142,7 +142,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
             <div className="w-full max-w-[800px] mt-4 mb-[10vh] text-center py-3 px-6 md:py-4 md:px-8">
               <p className="text-white/80 text-[0.9rem] md:text-[1.1rem] tracking-[0.5px]">
                 Interested in exploring a partnership? <br className="block sm:hidden" />
-                Reach out to us at <a href="tel:+94702466805" className="text-orange font-bold hover:text-white transition-colors duration-300 ml-1">+94 74 215 9229 (Manula)</a>
+                Reach out to us at <a href="tel:+94742159229" className="text-orange font-bold hover:text-white transition-colors duration-300 ml-1">+94 74 215 9229 (Manula)</a>
               </p>
             </div>
           </div>

@@ -22,7 +22,7 @@ const rebeca = localFont({
 /*
  * Root Layout — CodeSplash 2026
  * =================================
- * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * Portfolio project by Rithika, Pahan, and Yasiru
  * https://codesplash.cssa.lk
  *
  * Original idea & base code: https://github.com/JanishkaM/code-splash-web (pahan-demo2, performance-updates)
@@ -41,6 +41,7 @@ export const metadata: Metadata = {
     "hackathon",
     "CodeSplash",
     "CSSA",
+    "Computer Science Students Association",
     "University of Kelaniya",
     "Sri Lanka hackathon",
     "coding competition",
@@ -48,6 +49,9 @@ export const metadata: Metadata = {
     "university hackathon",
     "school hackathon",
     "tech event 2026",
+    "inter-university hackathon",
+    "inter-school hackathon",
+    "Agentic AI challenge",
   ],
   authors: [
     { name: "Rithika", url: "https://github.com/k-rithik04" },
@@ -109,20 +113,24 @@ const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
+      "@type": "EducationalOrganization",
       "@id": "https://codesplash.cssa.lk/#organization",
       name: "CSSA — Computer Science Students' Association",
       url: "https://cssa.lk",
       sameAs: [
-        "https://github.com/JanishkaM/code-splash-web/tree/pahan-demo2",
-        "https://github.com/JanishkaM/code-splash-web/tree/performance-updates",
+        "https://www.facebook.com/cssa_uok",
+        "https://www.linkedin.com/company/cssauok/",
+        "https://www.instagram.com/cssa_uok/",
+        "https://youtube.com/@cssauok",
         "https://github.com/k-rithik04/CODE-SPLASH",
         "https://github.com/cssa-uok/code-splash",
+        "https://fct.kln.ac.lk/",
+        "https://fct.kln.ac.lk/degree-programmes/computer-science",
       ],
       parentOrganization: {
         "@type": "CollegeOrUniversity",
         name: "University of Kelaniya",
-        url: "https://keluniya.ac.lk",
+        url: "https://kelaniya.ac.lk",
       },
     },
     {
@@ -143,8 +151,79 @@ const JSON_LD = {
           addressRegion: "Western Province",
         },
       },
+      startDate: "2026-07-04",
+      endDate: "2026-09-02",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       eventStatus: "https://schema.org/EventScheduled",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "LKR",
+        availability: "https://schema.org/InStock",
+        validFrom: "2026-07-04",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://codesplash.cssa.lk/#faq",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "What is CodeSplash?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "CodeSplash is the flagship inter-university hackathon conducted by the Computer Science Students' Association (CSSA) of the University of Kelaniya. At CodeSplash, you get to push your limits in idea generation, build under pressure and create a solution that will work no matter what field it is in.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Who can participate?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "The hackathon will be conducted under two main categories: the inter-school phase and the inter-university phase. The inter-university phase will be open for islandwide university students. The inter-school phase will be open to school students representing various grades and academic levels across the island who are interested in technology, innovation and problem-solving.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How can I participate in this hackathon?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Once registration opens on our official website, fill out the registration form and you'll be ready to join the CodeSplash hackathon.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "What is the competition format?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "CodeSplash '26 is conducted in multiple stages, guiding participants from idea generation to solution development and final presentations. Each stage is designed to evaluate creativity, technical skills and problem-solving ability.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "When do registrations open?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Registration dates will be announced through the official website and social media platforms. Stay tuned for the latest updates and important deadlines.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is participation free?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes! Participation in CodeSplash '26 is completely free, providing every eligible student with an equal opportunity to compete and innovate.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "What rewards can winners expect?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Winning teams will receive exciting prizes, certificates, exclusive recognition and opportunities to showcase their innovations to industry professionals.",
+          },
+        },
+      ],
     },
     {
       "@type": "WebSite",
@@ -184,6 +263,7 @@ export default function RootLayout({
       )}
     >
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
@@ -196,7 +276,7 @@ export default function RootLayout({
         <div
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
-            __html: '<!-- Original idea: JanishkaM/code-splash-web | Rithika: k-rithik04/CODE-SPLASH | Production: cssa-uok/code-splash -->',
+            __html: '<!-- Originally developed by Rithika (github.com/k-rithik04/CODE-SPLASH) | Production deployment at cssa-uok/code-splash -->',
           }}
         />
         <SmoothScroll>

@@ -1,7 +1,7 @@
 /*
  * Auth Shared Utilities — CodeSplash 2026
  * =========================================
- * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * Portfolio project by Rithika, Pahan, and Yasiru
  * https://codesplash.cssa.lk
  *
  * Original idea & base code: https://github.com/JanishkaM/code-splash-web (pahan-demo2, performance-updates)
