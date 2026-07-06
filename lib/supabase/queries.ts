@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
 
 export function getStorageUrl(path: string): string {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const cleanPath = path.replace(/^\/+/, "");
   return `${base}/storage/v1/object/public/cms-images/${cleanPath}`;
