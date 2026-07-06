@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPassword, hashPassword, createSession } from "@/lib/auth-shared";
 import { setSessionCookie, getSessionFromCookies } from "@/lib/auth";
 
@@ -24,7 +24,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "New password must contain at least one letter and one number" }, { status: 400 });
     }
 
-    const supabase = createServerClient();
+    const supabase = await createAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+    }
+
     const { data: profile, error: fetchError } = await supabase
       .from("profiles")
       .select("id, password")
