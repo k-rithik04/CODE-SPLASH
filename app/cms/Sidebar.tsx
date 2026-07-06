@@ -85,15 +85,16 @@ export default function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-orange/10 border border-orange/30 flex items-center justify-center shrink-0">
             <span className="text-orange font-bold text-sm">CS</span>
           </div>
-          {expanded && (
-            <span className="text-sm font-semibold text-white whitespace-nowrap">
-              CodeSplash <span className="text-orange">CMS</span>
-            </span>
-          )}
+          <span className={cn(
+            "text-sm font-semibold text-white whitespace-nowrap transition-opacity duration-300",
+            expanded ? "opacity-100" : "opacity-0"
+          )}>
+            CodeSplash <span className="text-orange">CMS</span>
+          </span>
         </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-none">
         <Link
           href="/cms/dashboard"
           className={cn(
@@ -106,7 +107,10 @@ export default function Sidebar() {
           <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
           </svg>
-          {expanded && "Dashboard"}
+          <span className={cn(
+            "transition-opacity duration-300 whitespace-nowrap",
+            expanded ? "opacity-100" : "opacity-0"
+          )}>Dashboard</span>
         </Link>
 
         {NAV_GROUPS.map((group) => {
@@ -115,11 +119,12 @@ export default function Sidebar() {
 
           return (
             <div key={group.label}>
-              {expanded && (
-                <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white/25">
-                  {group.label}
-                </div>
-              )}
+              <div className={cn(
+                "px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 transition-opacity duration-300 whitespace-nowrap overflow-hidden",
+                expanded ? "opacity-100" : "opacity-0"
+              )}>
+                {group.label}
+              </div>
               <div className="space-y-0.5">
                 {visibleItems.map((item) => (
                   <Link
@@ -135,7 +140,10 @@ export default function Sidebar() {
                     <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                     </svg>
-                    {expanded && item.label}
+                    <span className={cn(
+                      "transition-opacity duration-300 whitespace-nowrap",
+                      expanded ? "opacity-100" : "opacity-0"
+                    )}>{item.label}</span>
                   </Link>
                 ))}
               </div>
@@ -145,8 +153,11 @@ export default function Sidebar() {
       </nav>
 
       <div className="border-t border-white/[0.06] p-3">
-        {user && expanded && (
-          <div className="px-3 mb-2">
+        {user && (
+          <div className={cn(
+            "px-3 mb-2 transition-opacity duration-300 overflow-hidden",
+            expanded ? "opacity-100" : "opacity-0"
+          )}>
             <div className="text-xs text-white/40 truncate">{user.username}</div>
             <div className={cn(
               "text-[10px] font-bold uppercase tracking-wider",
@@ -165,7 +176,10 @@ export default function Sidebar() {
           <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          {expanded && "Logout"}
+          <span className={cn(
+            "transition-opacity duration-300 whitespace-nowrap",
+            expanded ? "opacity-100" : "opacity-0"
+          )}>Logout</span>
         </button>
       </div>
     </aside>

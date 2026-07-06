@@ -98,10 +98,7 @@ self.onmessage = async function (e) {
     // PRIORITY LOAD: Frame 1 first, immediately, for instant display
     const frame1Result = await loadSingleFrame(1, cache);
     if (frame1Result) {
-      self.postMessage(
-        { type: "bitmaps", items: [{ frame: 1, bitmap: frame1Result.bitmap }] },
-        [frame1Result.bitmap]
-      );
+      // Send firstFrameReady with transfer ownership of the bitmap
       self.postMessage({ type: "firstFrameReady", bitmap: frame1Result.bitmap }, [frame1Result.bitmap]);
     }
 

@@ -145,6 +145,7 @@ export default function Home() {
             bgCanvas.height = 1080;
             ctx.drawImage(e.data.bitmap, 0, 0, 1920, 1080);
             frame1DrawnRef.current = true;
+            bitmapsRef.current.set(1, e.data.bitmap);
           }
         }
       } else if (type === "firstBatchComplete") {
@@ -175,6 +176,14 @@ export default function Home() {
         for (const item of e.data.items) {
           bitmapsRef.current.set(item.frame, item.bitmap);
         }
+      } else if (type === "error") {
+        // Worker crashed — dismiss loader anyway so site isn't stuck
+        console.warn("[Preloader] Worker error:", e.data.message);
+        setLoadProgress(100);
+        hideTimer = setTimeout(() => {
+          setIsLoaderVisible(false);
+          removeTimer = setTimeout(() => setIsLoaderRemoved(true), 600);
+        }, 500);
       }
     };
 

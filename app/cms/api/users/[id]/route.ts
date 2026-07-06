@@ -31,11 +31,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
   if (body.must_change_password !== undefined) update.must_change_password = body.must_change_password;
   if (body.password) {
-    if (body.password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
-    }
-    if (!/[a-zA-Z]/.test(body.password) || !/[0-9]/.test(body.password)) {
-      return NextResponse.json({ error: "Password must contain at least one letter and one number" }, { status: 400 });
+    if (!body.must_change_password) {
+      if (body.password.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+      }
+      if (!/[a-zA-Z]/.test(body.password) || !/[0-9]/.test(body.password)) {
+        return NextResponse.json({ error: "Password must contain at least one letter and one number" }, { status: 400 });
+      }
     }
     update.password = await hashPassword(body.password);
   }
