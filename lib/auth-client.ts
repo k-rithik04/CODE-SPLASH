@@ -1,6 +1,8 @@
 import { decodeJwt } from "jose";
 import type { SessionPayload } from "./auth-shared";
 
+export type { SessionPayload };
+
 const SESSION_KEY = "cms_session";
 
 let cachedToken: string | null = null;

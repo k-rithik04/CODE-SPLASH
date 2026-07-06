@@ -360,7 +360,7 @@ CREATE POLICY "Allow CMS writes to connect_content" ON connect_content FOR ALL U
 -- Login needs SELECT to verify credentials. Writes go through
 -- the service-role client (lib/supabase/admin.ts).
 
-CREATE POLICY "Public can read profiles" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Public can read profiles" ON profiles FOR SELECT USING (false);
 CREATE POLICY "No public writes to profiles" ON profiles FOR ALL USING (false) WITH CHECK (false);
 
 -- ─────────────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ CREATE POLICY "No public writes to profiles" ON profiles FOR ALL USING (false) W
 -- All writes (create/update/delete keys) require SQL Editor access.
 
 ALTER TABLE keys ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public can read keys" ON keys FOR SELECT USING (true);
+CREATE POLICY "Public can read keys" ON keys FOR SELECT USING (false);
 CREATE POLICY "No public writes to keys" ON keys FOR ALL USING (false) WITH CHECK (false);
 
 -- ─────────────────────────────────────────────────────────────

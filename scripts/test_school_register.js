@@ -25,7 +25,7 @@ async function runTests() {
 
   // Test 1: Government Student
   await submitForm({
-    studentType: "Government",
+    studentType: "0",
     teamName: "Gov Team Alpha",
     noOfMembers: "3",
     school: "Royal College",
@@ -43,10 +43,15 @@ async function runTests() {
 
   // Test 2: Private Student
   await submitForm({
-    studentType: "Private",
+    studentType: "1",
     teamName: "Private Coders",
     noOfMembers: "3",
+    school: "Private School",
+    schoolAddress: "Kandy",
     district: "Kandy",
+    teacherName: "Mrs. Fernando",
+    teacherEmail: "fernando@private.edu.lk",
+    teacherPhone: "0711223344",
     leaderName: "Nimal Fernando",
     leaderGrade: "11",
     leaderEmail: "nimal.f@example.com",

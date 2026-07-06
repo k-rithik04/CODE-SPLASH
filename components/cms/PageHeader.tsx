@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRole } from "@/app/admin/RoleProviderWrapper";
+import { useRole } from "@/app/cms/RoleProvider";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useRef } from "react";

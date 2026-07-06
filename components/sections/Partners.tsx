@@ -1,9 +1,13 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import type { PartnerRow } from "@/lib/supabase/queries";
+import { getStorageUrl } from "@/lib/supabase/queries";
 
 interface PartnersProps {
   contentRef: React.RefObject<HTMLDivElement | null>;
+  data: PartnerRow[];
 }
 
 interface PartnerItem {
@@ -24,57 +28,56 @@ interface PartnerNode {
   items?: PartnerItem[];
 }
 
-const PARTNERS: PartnerNode[] = [
-  {
-    cat: "Platinum Partners",
-    badgeColor: "text-orange border-orange shadow-[0_0_12px_rgba(255,107,0,0.4)]",
-    isGroup: true,
-    items: [
-      { logo: "/logos/sntnew.png", name: "Super Neat Technology", desc: "As our expedition drifted helplessly along the Nile, Super Neat Technology pulled us ashore with their software engineering expertise, giving our journey the strong technological foundation it needed.", link: "https://superneat.lk/" },
-      { logo: "/logos/orysysnew.png", name: "Orysys", desc: "Just when the desert seemed endless, Orysys emerged like an oasis, guiding us with their expertise in digital innovation and empowering us to keep building for the next generation of developers.", link: "https://orysys.com/" },
-      { logo: "/logos/lakdhanavinew.png", name: "Lakdhanavi", desc: "Lost without a map through the ancient sands, we found Lakdhanavi. As our knowledge partner, they charted the path ahead with industry expertise, helping every step of our journey stay on course.", link: "https://lakdhanavi.lk/" },
-    ],
-  },
-  {
-    cat: "School Face Platinum Partner",
-    badgeColor: "text-yellow-400 border-yellow-400/80 shadow-[0_0_12px_rgba(250,204,21,0.4)]",
-    isGroup: false,
-    logo: "/logos/ictfromabcnew.png",
-    name: "ICT from ABC",
-    desc: "When we wandered through the towering pyramids, Ravindu Bandaranayake became our trusted guide. Through ICT from ABC, his passion for ICT education continues to inspire and direct future innovators.",
-    link: "https://www.ictfromabc.com/",
-  },
-  {
-    cat: "Knowledge Partners",
-    badgeColor: "text-green-400 border-green-500/80 shadow-[0_0_12px_rgba(34,197,94,0.4)]",
-    isGroup: true,
-    items: [
-      { logo: "/logos/Slasscomnew.png", name: "SLASSCOM", desc: "Navigating the digital frontier, SLASSCOM equipped our explorers with essential industry insights, bridging the gap between academic theory and real-world technological environments.", link: "https://slasscom.lk/" },
-      { logo: "/logos/creativesoftware.png", name: "Creative Software", desc: "Bringing decades of software engineering wisdom to our expedition, Creative Software served as a beacon of knowledge, guiding our challengers to build robust and scalable solutions.", link: "https://www.creativesoftware.com/" },
-    ],
-  },
-  {
-    cat: "Media Partner",
-    badgeColor: "text-red-400 border-red-500/80 shadow-[0_0_12px_rgba(239,68,68,0.4)]",
-    isGroup: false,
-    logo: "/logos/derananew.png",
-    name: "TV Derana",
-    desc: "After uncovering the treasures of our expedition, we needed the world to hear our story. TV Derana amplified our message, bringing our journey to audiences across the island through its media network.",
-    link: "https://www.derana.lk/",
-  },
-  {
-    cat: "Bronze Partner",
-    badgeColor: "text-gray-300 border-gray-400/80 shadow-[0_0_12px_rgba(255,255,255,0.3)]",
-    isGroup: false,
-    logo: "/logos/Hayleysnew.png",
-    name: "Hayleys Solar",
-    desc: "When the blazing desert sun tested our resolve, Hayleys Solar became our shelter, harnessing the power of sunlight to energize our expedition with sustainable solar solutions for a brighter future.",
-    link: "https://www.hayleyssolar.com/",
-  },
-];
+function groupPartners(rows: PartnerRow[]): PartnerNode[] {
+  const groups = new Map<string, PartnerRow[]>();
+  for (const row of rows) {
+    if (!groups.has(row.category)) groups.set(row.category, []);
+    groups.get(row.category)!.push(row);
+  }
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    platinum: "Platinum Partners",
+    school_platinum: "School Face Platinum Partner",
+    knowledge: "Knowledge Partners",
+    media: "Media Partner",
+    bronze: "Bronze Partner",
+  };
+
+  const nodes: PartnerNode[] = [];
+  for (const [category, items] of groups) {
+    const label = CATEGORY_LABELS[category] ?? category;
+    const badgeColor = items[0]?.badge_color ?? "";
+    if (items.length === 1) {
+      nodes.push({
+        cat: label,
+        badgeColor,
+        isGroup: false,
+        logo: getStorageUrl(items[0].logo_url),
+        name: items[0].name,
+        desc: items[0].description,
+        link: items[0].link_url,
+      });
+    } else {
+      nodes.push({
+        cat: label,
+        badgeColor,
+        isGroup: true,
+        items: items.map((p) => ({
+          logo: getStorageUrl(p.logo_url),
+          name: p.name,
+          desc: p.description,
+          link: p.link_url,
+        })),
+      });
+    }
+  }
+  return nodes;
+}
 
 const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
-  ({ contentRef }, layerRef) => {
+  ({ contentRef, data }, layerRef) => {
+    const nodes = groupPartners(data);
+
     return (
       <section ref={layerRef} className="fixed inset-0 w-screen h-screen opacity-0 pointer-events-none z-10 flex flex-col items-center overflow-hidden">
         <h3 className="absolute top-[8vh] left-0 w-full px-5 text-center italic text-[0.85rem] md:text-[1.1rem] text-white/60 tracking-[0.5px] z-30 drop-shadow-md pointer-events-none">
@@ -83,7 +86,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
 
         <div className="w-[90%] md:w-full max-w-[900px] h-[75vh] absolute top-[14vh] overflow-hidden">
           <div ref={contentRef} className="absolute w-full flex flex-col py-[25vh] gap-8 md:gap-12 z-10 items-center">
-            {PARTNERS.map((node, i) => (
+            {nodes.map((node, i) => (
               <div
                 key={i}
                 className="relative bg-white/5 border border-white/20 shadow-[0_8px_32px_rgba(255,255,255,0.05)] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-3 md:gap-5 w-full max-w-[800px] mt-4"
@@ -104,7 +107,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                         className="flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/item"
                       >
                         <div className="w-full md:w-[30%] flex justify-center items-center bg-white/10 rounded-2xl p-4 min-h-[90px]">
-                          <img src={partner.logo} alt={partner.name} className="max-h-[60px] md:max-h-[75px] w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover/item:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/item:scale-105" />
+                          <Image src={partner.logo} alt={partner.name} width={75} height={60} unoptimized className="max-h-[60px] md:max-h-[75px] w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover/item:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/item:scale-105" />
                         </div>
                         <div className="w-full md:w-[70%] flex flex-col text-center md:text-left">
                           <h4 className="text-xl md:text-2xl font-bold text-white mb-1 group-hover/item:text-orange transition-colors">{partner.name}</h4>
@@ -123,7 +126,7 @@ const Partners = React.forwardRef<HTMLDivElement, PartnersProps>(
                     className="flex flex-col md:flex-row items-center gap-6 md:gap-10 w-full hover:bg-white/5 p-3 rounded-2xl transition-colors cursor-pointer group/single"
                   >
                     <div className="w-full md:w-[35%] flex justify-center items-center bg-white/10 rounded-2xl p-4 min-h-[120px]">
-                      <img src={node.logo} alt={node.name} className="max-h-[80px] md:max-h-[100px] w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover/single:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/single:scale-105" />
+                      <Image src={node.logo || ""} alt={node.name || ""} width={100} height={80} unoptimized className="max-h-[80px] md:max-h-[100px] w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover/single:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 group-hover/single:scale-105" />
                     </div>
                     <div className="w-full md:w-[65%] flex flex-col text-center md:text-left">
                       <h4 className="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3 group-hover/single:text-orange transition-colors">{node.name}</h4>

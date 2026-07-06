@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { mapRange } from "@/lib/animation";
+import { useCMSData } from "@/lib/useCMSData";
 import {
   Loader,
   Background,
@@ -31,6 +32,7 @@ const SECTION_TIMING = {
 };
 
 export default function Home() {
+  const cms = useCMSData();
   const [loadProgress, setLoadProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Sailing through the river..");
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
@@ -246,7 +248,14 @@ export default function Home() {
       dialWindowRef.current.scrollTo({ left: scrollPos, behavior: "smooth" });
     };
 
-    const renderLoop = () => {
+    let lastRenderTime = 0;
+    const fpsInterval = 1000 / 60;
+
+    const renderLoop = (time: number) => {
+      animationFrameRef.current = requestAnimationFrame(renderLoop);
+      if (time - lastRenderTime < fpsInterval) return;
+      lastRenderTime = time;
+
       const maxScroll = layoutMetrics.current.maxScroll;
       const innerWidth = layoutMetrics.current.width;
       const innerHeight = layoutMetrics.current.height;
@@ -534,7 +543,6 @@ export default function Home() {
         }
       }
 
-      animationFrameRef.current = requestAnimationFrame(renderLoop);
     };
 
     animationFrameRef.current = requestAnimationFrame(renderLoop);
@@ -618,6 +626,7 @@ export default function Home() {
           scrollArrowRef={scrollArrowRef}
           onRegister={() => handleDialClick(0.95)}
           onOngoing={jumpToCurrentWeek}
+          data={cms.hero}
         />
 
         <Chapters
@@ -625,33 +634,39 @@ export default function Home() {
           contentRef={chaptersContentRef}
           titleRef={chaptersTitleRef}
           cardsRef={chapterCardsRef}
+          data={cms.chapters}
         />
 
         <Prizes
           ref={prizesLayerRef}
           contentRef={prizesContentRef}
           onPrizeFlip={handlePrizeFlip}
+          data={cms.prizes}
         />
 
         <Timeline
           ref={timelineLayerRef}
           trackRef={timelineTrackRef}
+          data={cms.timeline}
         />
 
         <Partners
           ref={partnersLayerRef}
           contentRef={partnersContentRef}
+          data={cms.partners}
         />
 
         <Team
           ref={teamLayerRef}
           trackRef={teamTrackRef}
+          data={cms.team}
         />
 
         <FAQ
           ref={faqLayerRef}
           titleRef={faqTitleRef}
           itemsRef={faqItemsRef}
+          data={cms.faq}
         />
 
         <CTA
@@ -659,9 +674,10 @@ export default function Home() {
           textRef={ctaTextRef}
           isDropdownOpen={isDropdownOpen}
           onToggleDropdown={() => setIsDropdownOpen(prev => !prev)}
+          data={cms.cta}
         />
 
-        <Connect ref={connectLayerRef} />
+        <Connect ref={connectLayerRef} data={cms.connect} />
       </main>
     </>
   );

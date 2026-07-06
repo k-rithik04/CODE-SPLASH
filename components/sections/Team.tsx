@@ -1,21 +1,17 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import type { TeamMember } from "@/lib/supabase/queries";
+import { getStorageUrl } from "@/lib/supabase/queries";
 
 interface TeamProps {
   trackRef: React.RefObject<HTMLDivElement | null>;
+  data: TeamMember[];
 }
 
-const TEAM_MEMBERS = [
-  { name: "Naveen Jayathissa", role: "CSSA President", email: "naveenjayathis@gmail.com", phone: "+94 70 246 6805", linkedinLink: "https://www.linkedin.com/in/naveenjayathissa99", image: "/naveen.png" },
-  { name: "Thanuj Abeyrathne", role: "CSSA Secretary", email: "thanujabeyrathne06@gmail.com", phone: "+94 71 307 3108", linkedinLink: "https://www.linkedin.com/in/thanuj-abeyrathne-096614242", image: "/thanuj.png" },
-  { name: "Vidmal Senanayake", role: "Co-Chair", email: "vidmalsenanayake@gmail.com", phone: "+94 74 107 4448", linkedinLink: "https://www.linkedin.com/in/vidmal-senanayake", image: "/vidmal.png" },
-  { name: "Janishka Madushan", role: "Co-Chair", email: "janishkaofficial@gmail.com", phone: "+94 76 782 6947", linkedinLink: "https://www.linkedin.com/in/janishka", image: "/janishka.png" },
-  { name: "Chathuni Fernando", role: "Delegates Team Lead", email: "chathunifernando88@gmail.com", phone: "+94 75 275 3568", linkedinLink: "https://www.linkedin.com/in/chathuni-fernando-26a1a0383", image: "/chathuni.png" },
-];
-
 const Team = React.forwardRef<HTMLDivElement, TeamProps>(
-  ({ trackRef }, layerRef) => {
+  ({ trackRef, data }, layerRef) => {
     return (
       <section ref={layerRef} className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center opacity-0 pointer-events-none z-10 overflow-hidden">
         <h3 className="absolute top-[10vh] md:top-[12vh] left-0 w-full px-5 text-center italic text-[0.7rem] md:text-[0.9rem] text-white/60 tracking-[0.5px] z-20 pointer-events-none drop-shadow-md">
@@ -23,11 +19,18 @@ const Team = React.forwardRef<HTMLDivElement, TeamProps>(
         </h3>
 
         <div ref={trackRef} className="flex gap-8 md:gap-16 absolute left-[50%] items-center h-[70vh] top-[15vh]">
-          {TEAM_MEMBERS.map((member, i) => (
+          {data.map((member, i) => (
             <div key={i} className="w-[280px] md:w-[320px] h-[380px] md:h-[420px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border transition-transform hover:-translate-y-2 group">
-              <div className="h-[65%] w-full bg-cover bg-center border-b border-white/10 relative" style={{ backgroundImage: `url('${member.image}')` }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                <a href={member.linkedinLink} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 rounded-full text-white/90 transition-all duration-300 hover:scale-110 hover:text-orange z-50 drop-shadow-md cursor-pointer">
+              <div className="h-[65%] w-full border-b border-white/10 relative overflow-hidden">
+                <Image
+                  src={getStorageUrl(member.image_url)}
+                  alt={member.name}
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 768px) 320px, 320px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+                <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 rounded-full text-white/90 transition-all duration-300 hover:scale-110 hover:text-orange z-50 drop-shadow-md cursor-pointer">
                   <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                   </svg>

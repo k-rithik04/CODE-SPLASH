@@ -90,6 +90,7 @@ export default function SchoolRegistrationPage() {
 
     const formParams = new URLSearchParams();
 
+    formParams.append("studentType", formData.studentType === "Private" ? "1" : "0");
     formParams.append("teamName", formData.teamName);
     formParams.append("noOfMembers", formData.noOfMembers);
     formParams.append("school", formData.school);

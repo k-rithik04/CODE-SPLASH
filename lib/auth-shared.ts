@@ -2,6 +2,11 @@ import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
 const rawSecret = typeof process !== "undefined" ? process.env?.JWT_SECRET : undefined;
+
+if (!rawSecret && process.env.NODE_ENV === "production") {
+  console.error("FATAL: JWT_SECRET environment variable is not set. Refusing to start with weak fallback in production.");
+}
+
 const SECRET = new TextEncoder().encode(rawSecret || "ci-build-placeholder-not-for-production");
 const ALGORITHM = "HS256";
 const EXPIRY = "1h";

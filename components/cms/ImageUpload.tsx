@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -153,7 +154,7 @@ export default function ImageUpload({
 
   useEffect(() => {
     if (imageSrc && modalOpen) {
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         imageRef.current = img;
         drawCanvas(selectedRatio);
@@ -220,9 +221,12 @@ export default function ImageUpload({
     <div className={`space-y-2 ${className}`}>
       {preview && (
         <div className="relative w-full h-40 rounded-lg overflow-hidden border border-white/10 bg-white/5">
-          <img
+          <Image
             src={preview}
             alt="Preview"
+            width={460}
+            height={160}
+            unoptimized
             className="w-full h-full object-contain"
           />
           <button

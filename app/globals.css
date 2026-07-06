@@ -108,7 +108,7 @@
 /* --- STANDARDIZED BLURRY GLASS PANELS --- */
 @layer utilities {
   .font-rebeca {
-    font-family: var(--font-rebeca), cursive;
+  font-family: var(--font-rebeca), cursive;
   }
 
   .glass-panel {
@@ -193,13 +193,11 @@
 /* --- GLOBAL SECTION TOPIC STYLES --- */
 .section-topic {
   @apply absolute top-[12vh] text-[clamp(1.8rem,4vw,3.5rem)] font-extrabold tracking-tight text-white w-full text-center drop-shadow-md z-20 px-4;
-  font-family: var(--font-rebeca), cursive;
 }
 
 /* --- DIAL NAV ANIMATIONS --- */
 .dial-item {
   @apply text-white text-[0.85rem] md:text-[0.95rem] font-medium cursor-pointer whitespace-nowrap relative;
-  font-family: var(--font-rebeca), cursive;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0.3;
   transform: scale(0.85);

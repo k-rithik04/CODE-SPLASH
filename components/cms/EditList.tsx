@@ -16,13 +16,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
+import ImageUpload from "@/components/cms/ImageUpload";
+import Spreadsheet from "@/components/cms/Spreadsheet";
 
 interface Field {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "url" | "number" | "toggle";
+  type?: "text" | "textarea" | "url" | "number" | "toggle" | "image";
   placeholder?: string;
   hint?: string;
+  folder?: string;
+  aspectRatios?: string[];
 }
 
 interface EditListProps {
@@ -96,7 +100,8 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
     setSaving(true);
     setMessage(null);
 
-    const { error: deleteError } = await supabase.from(tableName).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: deleteError } = await (supabase as any).from(tableName).delete().neq("id", "00000000-0000-0000-0000-000000000000");
     if (deleteError) {
       setMessage({ type: "error", text: deleteError.message });
       setSaving(false);
@@ -109,7 +114,8 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
       return row;
     });
 
-    const { error: insertError } = await supabase.from(tableName).insert(rowsToInsert);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: insertError } = await (supabase as any).from(tableName).insert(rowsToInsert);
     if (insertError) {
       setMessage({ type: "error", text: insertError.message });
     } else {
@@ -121,8 +127,12 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
 
   const inputClass = "bg-white/5 border-white/10 text-white placeholder:text-white/20 hover:border-white/20 focus:border-orange/50 focus:ring-1 focus:ring-orange/50 transition-all rounded-lg";
 
+  const handleImport = (imported: Record<string, unknown>[]) => {
+    setList(imported);
+  };
+
   return (
-    <div ref={containerRef} className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+    <div ref={containerRef} className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-x-auto">
       <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-semibold text-white tracking-tight">{title}</h3>
@@ -133,6 +143,7 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
         <div className="flex items-center gap-3">
           {!readOnly && (
             <>
+              <Spreadsheet title={title} fields={fields} items={list} onImport={handleImport} />
               <Button variant="outline" size="sm" onClick={handleAdd} className="border-white/20 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all">
                 + Add Item
               </Button>
@@ -185,7 +196,7 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
         </div>
       ) : (
         <div className="overflow-x-auto custom-scrollbar p-2">
-          <Table ref={tableRef}>
+          <Table ref={tableRef} className="w-full min-w-[900px]">
             <TableHeader>
               <TableRow className="border-white/10 hover:bg-transparent border-b-2">
                 <TableHead className="w-12 text-white/30 font-semibold pl-4">#</TableHead>
@@ -205,13 +216,21 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
                   <TableCell className="text-white/30 font-mono text-xs align-top pt-5 pl-4">{index + 1}</TableCell>
                   {fields.map((field) => (
                    <TableCell key={field.key} className="py-3">
-                      {field.type === "textarea" ? (
+                      {field.type === "image" ? (
+                        <ImageUpload
+                          currentUrl={(item[field.key] as string) || ""}
+                          onUpload={(url) => handleChange(index, field.key, url)}
+                          folder={field.folder || "cms-images"}
+                          aspectRatios={field.aspectRatios}
+                          className="min-w-[180px]"
+                        />
+                      ) : field.type === "textarea" ? (
                         <Textarea
                           value={(item[field.key] as string) || ""}
                           onChange={(e) => handleChange(index, field.key, e.target.value)}
                           placeholder={field.placeholder}
                           disabled={readOnly}
-                          className={`${inputClass} min-h-[60px] resize-y text-sm px-3 py-2`}
+                          className={`${inputClass} min-h-[60px] resize-y text-sm px-3 py-2 min-w-[200px] w-full`}
                         />
                       ) : field.type === "toggle" ? (
                         <div className="flex items-center gap-3 pt-2">
@@ -236,7 +255,7 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
                           onChange={(e) => handleChange(index, field.key, e.target.value)}
                           placeholder={field.placeholder}
                           disabled={readOnly}
-                          className={`${inputClass} text-sm h-9 px-3`}
+                          className={`${inputClass} text-sm h-9 px-3 min-w-[160px] w-full`}
                         />
                       )}
                     </TableCell>

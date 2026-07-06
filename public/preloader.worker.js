@@ -46,7 +46,7 @@ self.onmessage = async function (e) {
               );
             }
           }
-        } catch (err) {
+        } catch {
           // skip failed frame
         }
 
