@@ -117,11 +117,11 @@ export default function Home() {
     let removeTimer: ReturnType<typeof setTimeout>;
 
     const stories = [
-      "Sailing through the river..",
-      "Decoding the secret map..",
-      "By passing the ancient traps..",
-      "Opening the hidden gates..",
-      "Entering the codesplash arena..",
+      "Sailing through the river...",
+      "Decoding the secret map...",
+      "Bypassing the ancient traps...",
+      "Opening the hidden gates...",
+      "Entering the CodeSplash arena...",
     ];
     let storyIndex = 0;
     const storyInterval = setInterval(() => {
@@ -705,6 +705,7 @@ export default function Home() {
           onOngoing={jumpToCurrentWeek}
           data={cms.hero}
           registrationOpen={cms.cta?.is_active ?? true}
+          ctaText={cms.cta?.button_text || "Register Now"}
         />
 
         <Chapters

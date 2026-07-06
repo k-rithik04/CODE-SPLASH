@@ -597,10 +597,11 @@ export default function UniversityRegistrationPage() {
                     <p>By hitting Submit, you&apos;re agreeing to play fair, be respectful, and make this hackathon awesome.</p>
                     <div className="space-y-3 mt-4">
                       <p><strong>1. Code of Conduct:</strong> We promise to be respectful to teammates, mentors, and other participants.</p>
-                      <p><strong>2. Originality & Work:</strong> All code, designs, and ideas submitted will be created during the hackathon by our team.</p>
+                      <p><strong>2. Originality & Work:</strong> All code, designs, and ideas submitted must be created during the hackathon by our team.</p>
                       <p><strong>3. Media & Data Consent:</strong> We&apos;re okay with photos, videos, and project screenshots being used by the organizers for event promotion.</p>
                       <p><strong>4. Health & Safety:</strong> We confirm that all team members are fit to participate and will follow event rules.</p>
                       <p><strong>5. Declaration:</strong> We confirm that all information provided in this form is true to the best of our knowledge.</p>
+                      <p><strong>6. Judging & Decisions:</strong> We acknowledge that the decisions made by the judging panel are final and binding in all matters relating to the competition.</p>
                     </div>
                   </div>
 
@@ -613,7 +614,7 @@ export default function UniversityRegistrationPage() {
                         className="mt-1"
                       />
                       <Label htmlFor="agreeRules" className="text-base font-medium text-white cursor-pointer">
-                        I agree to follow rules and regulations of CodeSplash 2026 <span className="text-red-500">*</span>
+                        I agree to follow the rules and regulations of CodeSplash 2026 <span className="text-red-500">*</span>
                       </Label>
                     </div>
                     <div className="flex items-start space-x-3">

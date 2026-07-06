@@ -69,7 +69,7 @@ export default function LoginPage() {
 
           <div className="flex flex-col items-center mb-8">
             <Image
-              src={`${STORAGE_BASE_URL}/assets/CodeSplash.webp`}
+              src="/CodeSplash.png"
               alt="CodeSplash"
               width={160}
               height={40}

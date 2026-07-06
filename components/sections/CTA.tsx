@@ -42,7 +42,7 @@ const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
                 !isActive ? "opacity-60 cursor-not-allowed" : ""
               }`}
             >
-              {isActive ? (data?.button_text ?? "Register Now") : "Registrations Are Closed"}
+              {data?.button_text ?? "Register Now"}
             </Button>
 
             {isDropdownOpen && isActive && (
