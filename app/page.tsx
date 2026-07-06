@@ -704,7 +704,7 @@ export default function Home() {
           onRegister={() => (cms.cta?.is_active ?? true) ? handleDialClick(0.95) : undefined}
           onOngoing={jumpToCurrentWeek}
           data={cms.hero}
-          registrationOpen={cms.cta?.is_active ?? false}
+          registrationOpen={cms.cta?.is_active ?? true}
         />
 
         <Chapters

@@ -41,7 +41,7 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
                 {data?.tagline ?? "A Nation-wide hackathon organized by CSSA university of Kelaniya, empowering innovation through inspiration from the timeless legacy of the pyramids."}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-[10px] sm:gap-4 mt-3 z-50">
+              <div suppressHydrationWarning className="flex flex-col sm:flex-row gap-[10px] sm:gap-4 mt-3 z-50">
                 {registrationOpen && (
                   <Button
                     onClick={onRegister}
