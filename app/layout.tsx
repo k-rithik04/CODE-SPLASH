@@ -21,9 +21,13 @@ const rebeca = localFont({
 
 /*
  * Root Layout — CodeSplash 2026
+ * =================================
  * Portfolio project by Rithika (lead), Pahan, and Yasiru
  * https://codesplash.cssa.lk
- * Repo: https://github.com/cssa-uok/code-splash
+ *
+ * Original idea & base code: https://github.com/JanishkaM/code-splash-web (pahan-demo2, performance-updates)
+ * Personal development:     https://github.com/k-rithik04/CODE-SPLASH
+ * Production deployment:    https://github.com/cssa-uok/code-splash
  */
 export const metadata: Metadata = {
   metadataBase: new URL("https://codesplash.cssa.lk"),
@@ -109,6 +113,12 @@ const JSON_LD = {
       "@id": "https://codesplash.cssa.lk/#organization",
       name: "CSSA — Computer Science Students' Association",
       url: "https://cssa.lk",
+      sameAs: [
+        "https://github.com/JanishkaM/code-splash-web/tree/pahan-demo2",
+        "https://github.com/JanishkaM/code-splash-web/tree/performance-updates",
+        "https://github.com/k-rithik04/CODE-SPLASH",
+        "https://github.com/cssa-uok/code-splash",
+      ],
       parentOrganization: {
         "@type": "CollegeOrUniversity",
         name: "University of Kelaniya",
@@ -149,6 +159,11 @@ const JSON_LD = {
           url: "https://github.com/k-rithik04",
         },
       ],
+      copyrightHolder: {
+        "@type": "Person",
+        name: "Rithika",
+        url: "https://github.com/k-rithik04",
+      },
     },
   ],
 };
@@ -178,6 +193,12 @@ export default function RootLayout({
         "min-h-full flex flex-col",
         "bg-bg text-white font-main overflow-x-hidden"
       )}>
+        <div
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: '<!-- Original idea: JanishkaM/code-splash-web | Rithika: k-rithik04/CODE-SPLASH | Production: cssa-uok/code-splash -->',
+          }}
+        />
         <SmoothScroll>
           <SWRegistrar />
           <TooltipProvider>{children}</TooltipProvider>

@@ -59,6 +59,153 @@ export default function CreditsPage() {
           </ul>
         </div>
 
+        <div className="border border-white/10 rounded-lg p-6 space-y-4 bg-white/5">
+          <h2 className="text-lg font-semibold text-white/80">Development History</h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-blue-400 shrink-0" />
+              <div>
+                <p className="font-medium text-white/90">Original Idea & Base Code</p>
+                <p className="text-sm text-gray-400">
+                  Concept and initial implementation by{" "}
+                  <a
+                    href="https://github.com/JanishkaM"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    JanishkaM
+                  </a>
+                </p>
+                <div className="flex gap-2 mt-1">
+                  <a
+                    href="https://github.com/JanishkaM/code-splash-web/tree/pahan-demo2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    pahan-demo2 branch
+                  </a>
+                  <span className="text-gray-600">|</span>
+                  <a
+                    href="https://github.com/JanishkaM/code-splash-web/tree/performance-updates"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    performance-updates branch
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-orange shrink-0" />
+              <div>
+                <p className="font-medium text-white/90">Personal Development</p>
+                <p className="text-sm text-gray-400">
+                  Full-stack rebuild, CMS admin, RBAC, security hardening by{" "}
+                  <a
+                    href="https://github.com/k-rithik04"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    Rithika
+                  </a>
+                </p>
+                <a
+                  href="https://github.com/k-rithik04/CODE-SPLASH"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  k-rithik04/CODE-SPLASH
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-green-400 shrink-0" />
+              <div>
+                <p className="font-medium text-white/90">University Contribution</p>
+                <p className="text-sm text-gray-400">
+                  Production deployment for CSSA, University of Kelaniya
+                </p>
+                <a
+                  href="https://github.com/cssa-uok/code-splash"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  cssa-uok/code-splash
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-purple-400 shrink-0" />
+              <div>
+                <p className="font-medium text-white/90">Live Production</p>
+                <p className="text-sm text-gray-400">
+                  Deployed and running at{" "}
+                  <a
+                    href="https://codesplash.cssa.lk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    codesplash.cssa.lk
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-white/10 rounded-lg p-6 space-y-4 bg-white/5">
+          <h2 className="text-lg font-semibold text-white/80">Development History</h2>
+          <div className="space-y-4 text-sm text-gray-300">
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-blue-400 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-white">Original Development</p>
+                <p>Initially built and iterated in a personal repository.</p>
+                <a
+                  href="https://github.com/k-rithik04/CODE-SPLASH"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  github.com/k-rithik04/CODE-SPLASH
+                </a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-green-400 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-white">University Contribution</p>
+                <p>Contributed to the CSSA organisation repository for production hosting.</p>
+                <a
+                  href="https://github.com/cssa-uok/code-splash"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  github.com/cssa-uok/code-splash
+                </a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 h-2 w-2 rounded-full bg-orange-400 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-white">Production Deployment</p>
+                <p>Live at <span className="text-white">codesplash.cssa.lk</span> on Netlify + Cloudflare.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="border border-white/10 rounded-lg p-6 space-y-3 bg-white/5">
           <h2 className="text-lg font-semibold text-white/80">Tech Stack</h2>
           <div className="flex flex-wrap gap-2">
@@ -71,7 +218,6 @@ export default function CreditsPage() {
               "GSAP",
               "Lenis",
               "ShadCN",
-              "Vercel AI",
             ].map((tech) => (
               <span
                 key={tech}

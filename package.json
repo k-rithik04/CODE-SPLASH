@@ -4,6 +4,7 @@
   "private": true,
   "description": "CodeSplash 2026 — National Level University & School Hackathon. Full-stack Next.js site with scroll-driven canvas animations, CMS admin panel, RBAC, and Supabase integration.",
   "author": "Rithika (lead), Pahan, Yasiru",
+  "homepage": "https://k-rithik04.github.io/CODE-SPLASH/",
   "repository": {
     "type": "git",
     "url": "https://github.com/cssa-uok/code-splash.git"

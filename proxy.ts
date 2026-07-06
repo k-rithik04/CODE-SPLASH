@@ -4,6 +4,10 @@
  * Portfolio project by Rithika (lead), Pahan, and Yasiru
  * https://codesplash.cssa.lk
  *
+ * Original idea & base code: https://github.com/JanishkaM/code-splash-web (pahan-demo2, performance-updates)
+ * Personal development:     https://github.com/k-rithik04/CODE-SPLASH
+ * Production deployment:    https://github.com/cssa-uok/code-splash
+ *
  * Next.js 16 middleware replacement. Handles:
  *  - /admin → /cms redirect (legacy URL compat)
  *  - JWT session verification from HttpOnly cookies

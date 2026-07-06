@@ -5,7 +5,10 @@
  * =====================================
  * Portfolio project by Rithika (lead), Pahan, and Yasiru
  * https://codesplash.cssa.lk
- * Repo: https://github.com/cssa-uok/code-splash
+ *
+ * Original idea & base code: https://github.com/JanishkaM/code-splash-web (pahan-demo2, performance-updates)
+ * Personal development:     https://github.com/k-rithik04/CODE-SPLASH
+ * Production deployment:    https://github.com/cssa-uok/code-splash
  *
  * Scroll-driven canvas animation (1265 frames), particle system,
  * and section transitions powered by GSAP + Lenis smooth scroll.
