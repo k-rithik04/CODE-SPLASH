@@ -109,6 +109,7 @@ export async function POST(request: Request) {
         username: profile.username,
         role: profile.role,
         full_name: profile.full_name,
+        must_change_password: profile.must_change_password ?? false,
       },
     });
   } catch {
