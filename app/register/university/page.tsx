@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 
@@ -70,16 +72,17 @@ export default function UniversityRegistrationPage() {
     } catch {}
   }, [formData, step]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    if (type === "checkbox" && (name === "agreeRules" || name === "agreeAccurate")) {
-      setFormData((prev) => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+  const handleRadioChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (field: "technologies" | "languages" | "interestedAreas", value: string, checked: boolean) => {
+  const handleMemberChange = (index: number, field: "name" | "gender" | "email" | "phone" | "year", value: string) => {
+    const updatedMembers = [...formData.members];
+    updatedMembers[index] = { ...updatedMembers[index], [field]: value };
+    setFormData((prev) => ({ ...prev, members: updatedMembers }));
+  };
+
+  const handleCheckboxArrayChange = (field: "technologies" | "languages" | "interestedAreas", value: string, checked: boolean) => {
     setFormData((prev) => {
       const currentArray = prev[field];
       if (checked) {
@@ -90,16 +93,8 @@ export default function UniversityRegistrationPage() {
     });
   };
 
-  const handleMemberChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const updatedMembers = [...formData.members];
-    updatedMembers[index] = { ...updatedMembers[index], [name]: value };
-    setFormData((prev) => ({ ...prev, members: updatedMembers }));
-  };
-
   const nextStep = () => {
     if (step === 1 && !formData.registrationType) {
-      alert("Please select a registration type.");
       return;
     }
     setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
@@ -111,7 +106,6 @@ export default function UniversityRegistrationPage() {
     e.preventDefault();
 
     if (!formData.agreeRules || !formData.agreeAccurate) {
-      alert("You must agree to both declarations to submit.");
       return;
     }
 
@@ -201,20 +195,21 @@ export default function UniversityRegistrationPage() {
   const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
   return (
-    <div 
+    <div
       className="dark min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed text-white"
       style={{ backgroundImage: `url('https://gcymcwaocowoczvvsaxw.supabase.co/storage/v1/object/public/cms-images/assets/register-bg.gif')` }}
     >
       <div className="container mx-auto max-w-3xl py-10 px-4">
+
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-4">
+          <div className="flex items-center justify-between text-sm font-medium text-gray-300 mb-4">
             <span className="text-primary font-bold">Step {step} of {totalSteps}</span>
             <span>
               {step === 1 && "Registration Type"}
               {formData.registrationType === "Individual" && step === 2 && "Participant Details"}
               {formData.registrationType === "Team" && step === 2 && "Team Information"}
-              {formData.registrationType === "Team" && step === 3 && "Leader's Details"}
+              {formData.registrationType === "Team" && step === 3 && "Leader Details"}
               {formData.registrationType === "Team" && step === 4 && "Member Details"}
               {((formData.registrationType === "Individual" && step === 3) || (formData.registrationType === "Team" && step === 5)) && "Technical Skills"}
               {((formData.registrationType === "Individual" && step === 4) || (formData.registrationType === "Team" && step === 6)) && "Innovation & Problem Solving"}
@@ -229,7 +224,7 @@ export default function UniversityRegistrationPage() {
           </div>
         </div>
 
-        <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl">
+        <Card className="bg-black/70 backdrop-blur-md border-neutral-800 shadow-2xl text-white">
           <form onSubmit={handleSubmit}>
             
             {/* --- STEP 1: REGISTRATION TYPE --- */}
@@ -239,16 +234,20 @@ export default function UniversityRegistrationPage() {
                   <CardTitle className="text-2xl text-white">Registration Type</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <Label className="text-base">Registration Type : <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-3 mt-2">
+                  <div className="space-y-2">
+                    <Label className="text-white">Registration Type <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.registrationType}
+                      onValueChange={(value) => handleRadioChange("registrationType", value)}
+                      className="mt-2"
+                    >
                       {["Individual", "Team"].map((type) => (
-                        <label key={type} className="flex items-center space-x-3 cursor-pointer">
-                          <input type="radio" name="registrationType" value={type} checked={formData.registrationType === type} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span className="text-lg">{type}</span>
-                        </label>
+                        <div key={type} className="flex items-center space-x-2">
+                          <RadioGroupItem value={type} id={`reg-${type}`} />
+                          <Label htmlFor={`reg-${type}`} className="text-white font-normal cursor-pointer">{type}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                 </CardContent>
               </>
@@ -258,46 +257,54 @@ export default function UniversityRegistrationPage() {
             {formData.registrationType === "Individual" && step === 2 && (
               <>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-white">Participant Details (For individual) :</CardTitle>
+                  <CardTitle className="text-2xl text-white">Participant Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Full name : <span className="text-red-500">*</span></Label>
-                    <Input name="fullName" placeholder="Your answer" value={formData.fullName} onChange={handleInputChange} required />
+                    <Label className="text-white">Full Name <span className="text-red-500">*</span></Label>
+                    <Input name="fullName" placeholder="Your answer" value={formData.fullName} onChange={(e) => handleRadioChange("fullName", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Gender : <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2">
+                    <Label className="text-white">Gender <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.gender}
+                      onValueChange={(value) => handleRadioChange("gender", value)}
+                      className="mt-2"
+                    >
                       {["Male", "Female"].map((gen) => (
-                        <label key={gen} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="gender" value={gen} checked={formData.gender === gen} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{gen}</span>
-                        </label>
+                        <div key={gen} className="flex items-center space-x-2">
+                          <RadioGroupItem value={gen} id={`gender-${gen}`} />
+                          <Label htmlFor={`gender-${gen}`} className="text-white font-normal cursor-pointer">{gen}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                   <div className="space-y-2">
-                    <Label>E-mail address : <span className="text-red-500">*</span></Label>
-                    <Input name="email" type="email" placeholder="Your answer" value={formData.email} onChange={handleInputChange} required />
+                    <Label className="text-white">Email Address <span className="text-red-500">*</span></Label>
+                    <Input name="email" type="email" placeholder="Your answer" value={formData.email} onChange={(e) => handleRadioChange("email", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Contact Number (Whatsapp) : <span className="text-red-500">*</span></Label>
-                    <Input name="phone" placeholder="Your answer" value={formData.phone} onChange={handleInputChange} required />
+                    <Label className="text-white">Contact Number (WhatsApp) <span className="text-red-500">*</span></Label>
+                    <Input name="phone" placeholder="E.g. 0771234567" value={formData.phone} onChange={(e) => handleRadioChange("phone", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>University : <span className="text-red-500">*</span></Label>
-                    <Input name="university" placeholder="Your answer" value={formData.university} onChange={handleInputChange} required />
+                    <Label className="text-white">University <span className="text-red-500">*</span></Label>
+                    <Input name="university" placeholder="Your answer" value={formData.university} onChange={(e) => handleRadioChange("university", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Year of Study : <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2">
+                    <Label className="text-white">Year of Study <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.yearOfStudy}
+                      onValueChange={(value) => handleRadioChange("yearOfStudy", value)}
+                      className="mt-2"
+                    >
                       {yearOptions.map((year) => (
-                        <label key={year} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="yearOfStudy" value={year} checked={formData.yearOfStudy === year} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{year}</span>
-                        </label>
+                        <div key={year} className="flex items-center space-x-2">
+                          <RadioGroupItem value={year} id={`year-${year}`} />
+                          <Label htmlFor={`year-${year}`} className="text-white font-normal cursor-pointer">{year}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                 </CardContent>
               </>
@@ -311,23 +318,27 @@ export default function UniversityRegistrationPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Team Name : <span className="text-red-500">*</span></Label>
-                    <Input name="teamName" value={formData.teamName} onChange={handleInputChange} required />
+                    <Label className="text-white">Team Name <span className="text-red-500">*</span></Label>
+                    <Input name="teamName" value={formData.teamName} onChange={(e) => handleRadioChange("teamName", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>University : <span className="text-red-500">*</span></Label>
-                    <Input name="university" value={formData.university} onChange={handleInputChange} required />
+                    <Label className="text-white">University <span className="text-red-500">*</span></Label>
+                    <Input name="university" value={formData.university} onChange={(e) => handleRadioChange("university", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>How many members are in your team <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2 mt-2">
+                    <Label className="text-white">How many members are in your team <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.teamSize}
+                      onValueChange={(value) => handleRadioChange("teamSize", value)}
+                      className="mt-2"
+                    >
                       {["2", "3", "4", "5"].map((num) => (
-                        <label key={num} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="teamSize" value={num} checked={formData.teamSize === num} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{num}</span>
-                        </label>
+                        <div key={num} className="flex items-center space-x-2">
+                          <RadioGroupItem value={num} id={`teamsize-${num}`} />
+                          <Label htmlFor={`teamsize-${num}`} className="text-white font-normal cursor-pointer">{num}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                 </CardContent>
               </>
@@ -337,42 +348,50 @@ export default function UniversityRegistrationPage() {
             {formData.registrationType === "Team" && step === 3 && (
               <>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-white">Team Leader&apos;s details</CardTitle>
+                  <CardTitle className="text-2xl text-white">Team Leader Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Leader&apos;s Full Name : <span className="text-red-500">*</span></Label>
-                    <Input name="leaderName" value={formData.leaderName} onChange={handleInputChange} required />
+                    <Label className="text-white">Leader&apos;s Full Name <span className="text-red-500">*</span></Label>
+                    <Input name="leaderName" value={formData.leaderName} onChange={(e) => handleRadioChange("leaderName", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Gender : <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2">
+                    <Label className="text-white">Gender <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.leaderGender}
+                      onValueChange={(value) => handleRadioChange("leaderGender", value)}
+                      className="mt-2"
+                    >
                       {["Male", "Female"].map((gen) => (
-                        <label key={gen} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="leaderGender" value={gen} checked={formData.leaderGender === gen} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{gen}</span>
-                        </label>
+                        <div key={gen} className="flex items-center space-x-2">
+                          <RadioGroupItem value={gen} id={`leaderGender-${gen}`} />
+                          <Label htmlFor={`leaderGender-${gen}`} className="text-white font-normal cursor-pointer">{gen}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                   <div className="space-y-2">
-                    <Label>E-mail : <span className="text-red-500">*</span></Label>
-                    <Input name="leaderEmail" type="email" value={formData.leaderEmail} onChange={handleInputChange} required />
+                    <Label className="text-white">Email <span className="text-red-500">*</span></Label>
+                    <Input name="leaderEmail" type="email" value={formData.leaderEmail} onChange={(e) => handleRadioChange("leaderEmail", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Contact Number : (Whatsapp) <span className="text-red-500">*</span></Label>
-                    <Input name="leaderPhone" value={formData.leaderPhone} onChange={handleInputChange} required />
+                    <Label className="text-white">Contact Number (WhatsApp) <span className="text-red-500">*</span></Label>
+                    <Input name="leaderPhone" value={formData.leaderPhone} onChange={(e) => handleRadioChange("leaderPhone", e.target.value)} required className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Year of Study :</Label>
-                    <div className="flex flex-col space-y-2">
+                    <Label className="text-white">Year of Study</Label>
+                    <RadioGroup
+                      value={formData.leaderYear}
+                      onValueChange={(value) => handleRadioChange("leaderYear", value)}
+                      className="mt-2"
+                    >
                       {yearOptions.map((year) => (
-                        <label key={year} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="leaderYear" value={year} checked={formData.leaderYear === year} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" />
-                          <span>{year}</span>
-                        </label>
+                        <div key={year} className="flex items-center space-x-2">
+                          <RadioGroupItem value={year} id={`leaderYear-${year}`} />
+                          <Label htmlFor={`leaderYear-${year}`} className="text-white font-normal cursor-pointer">{year}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                 </CardContent>
               </>
@@ -386,41 +405,49 @@ export default function UniversityRegistrationPage() {
                 </CardHeader>
                 <CardContent className="space-y-8">
                   {Array.from({ length: parseInt(formData.teamSize) - 1 }).map((_, index) => (
-                    <div key={index} className="p-5 border rounded-lg bg-white/5 space-y-4">
-                      <h4 className="font-semibold text-lg border-b border-white/20 pb-2 text-white">Member#{index + 1} details</h4>
+                    <div key={index} className="p-5 border border-white/10 rounded-2xl bg-white/5 space-y-4">
+                      <h4 className="font-semibold text-lg border-b border-white/20 pb-2 text-white">Member {index + 2} Details</h4>
                       <div className="space-y-2">
-                        <Label>Full name : <span className="text-red-500">*</span></Label>
-                        <Input name="name" value={formData.members[index].name} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Full Name <span className="text-red-500">*</span></Label>
+                        <Input name="name" value={formData.members[index].name} onChange={(e) => handleMemberChange(index, "name", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Gender : <span className="text-red-500">*</span></Label>
-                        <div className="flex flex-col space-y-2">
+                        <Label className="text-white">Gender <span className="text-red-500">*</span></Label>
+                        <RadioGroup
+                          value={formData.members[index].gender}
+                          onValueChange={(value) => handleMemberChange(index, "gender", value)}
+                          className="mt-2"
+                        >
                           {["Male", "Female"].map((gen) => (
-                            <label key={gen} className="flex items-center space-x-2 cursor-pointer">
-                              <input type="radio" name="gender" value={gen} checked={formData.members[index].gender === gen} onChange={(e) => handleMemberChange(index, e)} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                              <span>{gen}</span>
-                            </label>
+                            <div key={gen} className="flex items-center space-x-2">
+                              <RadioGroupItem value={gen} id={`member${index}-gender-${gen}`} />
+                              <Label htmlFor={`member${index}-gender-${gen}`} className="text-white font-normal cursor-pointer">{gen}</Label>
+                            </div>
                           ))}
-                        </div>
+                        </RadioGroup>
                       </div>
                       <div className="space-y-2">
-                        <Label>E-mail : <span className="text-red-500">*</span></Label>
-                        <Input name="email" type="email" value={formData.members[index].email} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Email <span className="text-red-500">*</span></Label>
+                        <Input name="email" type="email" value={formData.members[index].email} onChange={(e) => handleMemberChange(index, "email", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Contact Number : (Whatsapp) <span className="text-red-500">*</span></Label>
-                        <Input name="phone" value={formData.members[index].phone} onChange={(e) => handleMemberChange(index, e)} required />
+                        <Label className="text-white">Contact Number (WhatsApp) <span className="text-red-500">*</span></Label>
+                        <Input name="phone" value={formData.members[index].phone} onChange={(e) => handleMemberChange(index, "phone", e.target.value)} required className="text-white" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Year of Study :</Label>
-                        <div className="flex flex-col space-y-2">
+                        <Label className="text-white">Year of Study</Label>
+                        <RadioGroup
+                          value={formData.members[index].year}
+                          onValueChange={(value) => handleMemberChange(index, "year", value)}
+                          className="mt-2"
+                        >
                           {yearOptions.map((year) => (
-                            <label key={year} className="flex items-center space-x-2 cursor-pointer">
-                              <input type="radio" name="year" value={year} checked={formData.members[index].year === year} onChange={(e) => handleMemberChange(index, e)} className="h-4 w-4 text-purple-600 bg-background border-input" />
-                              <span>{year}</span>
-                            </label>
+                            <div key={year} className="flex items-center space-x-2">
+                              <RadioGroupItem value={year} id={`member${index}-year-${year}`} />
+                              <Label htmlFor={`member${index}-year-${year}`} className="text-white font-normal cursor-pointer">{year}</Label>
+                            </div>
                           ))}
-                        </div>
+                        </RadioGroup>
                       </div>
                     </div>
                   ))}
@@ -432,56 +459,68 @@ export default function UniversityRegistrationPage() {
             {((formData.registrationType === "Individual" && step === 3) || (formData.registrationType === "Team" && step === 5)) && (
               <>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-white">Technical skills {formData.registrationType === "Team" ? "(For Team)" : "(For individual)"}</CardTitle>
+                  <CardTitle className="text-2xl text-white">Technical Skills</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-8">
                   
                   <div className="space-y-4">
-                    <Label className="text-base">What technologies are {formData.registrationType === "Team" ? "your team" : "you"} familiar with?</Label>
+                    <Label className="text-white">What technologies are {formData.registrationType === "Team" ? "your team" : "you"} familiar with?</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {techOptions.map((tech) => (
-                        <label key={tech} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="checkbox" checked={formData.technologies.includes(tech)} onChange={(e) => handleArrayChange("technologies", tech, e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-purple-600 bg-background" />
-                          <span>{tech}</span>
-                        </label>
+                        <div key={tech} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`tech-${tech}`}
+                            checked={formData.technologies.includes(tech)}
+                            onCheckedChange={(checked) => handleCheckboxArrayChange("technologies", tech, checked as boolean)}
+                          />
+                          <Label htmlFor={`tech-${tech}`} className="text-white font-normal cursor-pointer">{tech}</Label>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-4 border-t border-white/20 pt-6">
-                    <Label className="text-base">Programming Languages known <span className="text-red-500">*</span></Label>
+                    <Label className="text-white">Programming Languages Known <span className="text-red-500">*</span></Label>
                     <div className="flex flex-col space-y-3">
                       {langOptions.map((lang) => (
-                        <label key={lang} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="checkbox" checked={formData.languages.includes(lang)} onChange={(e) => handleArrayChange("languages", lang, e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-purple-600 bg-background" />
-                          <span>{lang}</span>
-                        </label>
+                        <div key={lang} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`lang-${lang}`}
+                            checked={formData.languages.includes(lang)}
+                            onCheckedChange={(checked) => handleCheckboxArrayChange("languages", lang, checked as boolean)}
+                          />
+                          <Label htmlFor={`lang-${lang}`} className="text-white font-normal cursor-pointer">{lang}</Label>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-4 border-t border-white/20 pt-6">
-                    <Label className="text-base">Have {formData.registrationType === "Team" ? "your team members" : "you"} participated in hackathons before? <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2">
+                    <Label className="text-white">Have {formData.registrationType === "Team" ? "your team members" : "you"} participated in hackathons before? <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.hackathonExp}
+                      onValueChange={(value) => handleRadioChange("hackathonExp", value)}
+                      className="mt-2"
+                    >
                       {["Yes", "No"].map((opt) => (
-                        <label key={opt} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="hackathonExp" value={opt} checked={formData.hackathonExp === opt} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{opt}</span>
-                        </label>
+                        <div key={opt} className="flex items-center space-x-2">
+                          <RadioGroupItem value={opt} id={`hackathon-${opt}`} />
+                          <Label htmlFor={`hackathon-${opt}`} className="text-white font-normal cursor-pointer">{opt}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
 
                   {formData.hackathonExp === "Yes" && (
                     <div className="space-y-2">
-                      <Label>If yes, mention previous hackathons or achievements</Label>
-                      <Input name="hackathonDetails" value={formData.hackathonDetails} onChange={handleInputChange} placeholder="Your answer" />
+                      <Label className="text-white">If yes, mention previous hackathons or achievements</Label>
+                      <Input name="hackathonDetails" value={formData.hackathonDetails} onChange={(e) => handleRadioChange("hackathonDetails", e.target.value)} placeholder="Your answer" className="text-white" />
                     </div>
                   )}
 
                   <div className="space-y-2 border-t border-white/20 pt-6">
-                    <Label>GitHub / LinkedIn Links (Optional)</Label>
-                    <Input name="links" value={formData.links} onChange={handleInputChange} placeholder="Your answer" />
+                    <Label className="text-white">GitHub / LinkedIn Links (Optional)</Label>
+                    <Input name="links" value={formData.links} onChange={(e) => handleRadioChange("links", e.target.value)} placeholder="Your answer" className="text-white" />
                   </div>
                 </CardContent>
               </>
@@ -491,48 +530,56 @@ export default function UniversityRegistrationPage() {
             {((formData.registrationType === "Individual" && step === 4) || (formData.registrationType === "Team" && step === 6)) && (
               <>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-white">Innovation & Problem Solving {formData.registrationType === "Team" ? "(For Team)" : "(For individual)"}</CardTitle>
+                  <CardTitle className="text-2xl text-white">Innovation & Problem Solving</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>
-                      {formData.registrationType === "Team" ? "Describe a project your team has worked on before " : "Describe a project you have worked on before "} 
+                    <Label className="text-white">
+                      {formData.registrationType === "Team" ? "Describe a project your team has worked on before " : "Describe a project you have worked on before "}
                       <span className="text-red-500">*</span>
                     </Label>
-                    <Input name="projectWorkedOn" placeholder="" value={formData.projectWorkedOn} onChange={handleInputChange} required />
+                    <Input name="projectWorkedOn" placeholder="Your answer" value={formData.projectWorkedOn} onChange={(e) => handleRadioChange("projectWorkedOn", e.target.value)} required className="text-white" />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>
+                    <Label className="text-white">
                       {formData.registrationType === "Team" ? "What kind of problem does your team want to solve in this hackathon?" : "What kind of problem do you want to solve in this hackathon?"}
                     </Label>
-                    <Input name="problemToSolve" placeholder="" value={formData.problemToSolve} onChange={handleInputChange} />
+                    <Input name="problemToSolve" placeholder="Your answer" value={formData.problemToSolve} onChange={(e) => handleRadioChange("problemToSolve", e.target.value)} className="text-white" />
                   </div>
 
                   <div className="space-y-4 border-t border-white/20 pt-6">
-                    <Label className="text-base">
-                      {formData.registrationType === "Team" ? "Which area is your team most interested in?" : "Which area is you most interested in?"}
+                    <Label className="text-white">
+                      {formData.registrationType === "Team" ? "Which area is your team most interested in?" : "Which area are you most interested in?"}
                     </Label>
                     <div className="flex flex-col space-y-3">
                       {areaOptions.map((area) => (
-                        <label key={area} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="checkbox" checked={formData.interestedAreas.includes(area)} onChange={(e) => handleArrayChange("interestedAreas", area, e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-purple-600 bg-background" />
-                          <span>{area}</span>
-                        </label>
+                        <div key={area} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`area-${area}`}
+                            checked={formData.interestedAreas.includes(area)}
+                            onCheckedChange={(checked) => handleCheckboxArrayChange("interestedAreas", area, checked as boolean)}
+                          />
+                          <Label htmlFor={`area-${area}`} className="text-white font-normal cursor-pointer">{area}</Label>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-2 border-t border-white/20 pt-6">
-                    <Label>How did you hear about CodeSplash 2026? <span className="text-red-500">*</span></Label>
-                    <div className="flex flex-col space-y-2 mt-2">
+                    <Label className="text-white">How did you hear about CodeSplash 2026? <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.hearAbout}
+                      onValueChange={(value) => handleRadioChange("hearAbout", value)}
+                      className="mt-2"
+                    >
                       {hearOptions.map((opt) => (
-                        <label key={opt} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" name="hearAbout" value={opt} checked={formData.hearAbout === opt} onChange={handleInputChange} className="h-4 w-4 text-purple-600 bg-background border-input" required />
-                          <span>{opt}</span>
-                        </label>
+                        <div key={opt} className="flex items-center space-x-2">
+                          <RadioGroupItem value={opt} id={`hear-${opt}`} />
+                          <Label htmlFor={`hear-${opt}`} className="text-white font-normal cursor-pointer">{opt}</Label>
+                        </div>
                       ))}
-                    </div>
+                    </RadioGroup>
                   </div>
                 </CardContent>
               </>
@@ -545,37 +592,48 @@ export default function UniversityRegistrationPage() {
                   <CardTitle className="text-2xl text-white">Declaration</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="p-6 border border-red-500/50 rounded-lg bg-red-500/10 space-y-4">
-                    <p className="text-red-500 font-bold">*</p>
-                    <label className="flex items-start space-x-3 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        name="agreeRules" 
-                        checked={formData.agreeRules} 
-                        onChange={handleInputChange} 
-                        className="mt-1 h-5 w-5 rounded border-gray-300 text-purple-600 bg-background" 
-                        required 
+                  <div className="bg-white/5 p-6 rounded-2xl text-sm text-gray-200 space-y-4">
+                    <p className="font-bold text-lg mb-4 text-white">The Promise We Make Together</p>
+                    <p>By hitting Submit, you&apos;re agreeing to play fair, be respectful, and make this hackathon awesome.</p>
+                    <div className="space-y-3 mt-4">
+                      <p><strong>1. Code of Conduct:</strong> We promise to be respectful to teammates, mentors, and other participants.</p>
+                      <p><strong>2. Originality & Work:</strong> All code, designs, and ideas submitted will be created during the hackathon by our team.</p>
+                      <p><strong>3. Media & Data Consent:</strong> We&apos;re okay with photos, videos, and project screenshots being used by the organizers for event promotion.</p>
+                      <p><strong>4. Health & Safety:</strong> We confirm that all team members are fit to participate and will follow event rules.</p>
+                      <p><strong>5. Declaration:</strong> We confirm that all information provided in this form is true to the best of our knowledge.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border border-red-500/50 rounded-2xl bg-red-500/10 space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="agreeRules"
+                        checked={formData.agreeRules}
+                        onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, agreeRules: checked as boolean }))}
+                        className="mt-1"
                       />
-                      <span className="text-base font-medium">I agree follow rules and regulations of CodeSplash 2026</span>
-                    </label>
-                    <label className="flex items-start space-x-3 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        name="agreeAccurate" 
-                        checked={formData.agreeAccurate} 
-                        onChange={handleInputChange} 
-                        className="mt-1 h-5 w-5 rounded border-gray-300 text-purple-600 bg-background" 
-                        required 
+                      <Label htmlFor="agreeRules" className="text-base font-medium text-white cursor-pointer">
+                        I agree to follow rules and regulations of CodeSplash 2026 <span className="text-red-500">*</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="agreeAccurate"
+                        checked={formData.agreeAccurate}
+                        onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, agreeAccurate: checked as boolean }))}
+                        className="mt-1"
                       />
-                      <span className="text-base font-medium">I confirm that all information provided is accurate.</span>
-                    </label>
+                      <Label htmlFor="agreeAccurate" className="text-base font-medium text-white cursor-pointer">
+                        I confirm that all information provided is accurate. <span className="text-red-500">*</span>
+                      </Label>
+                    </div>
                   </div>
                 </CardContent>
               </>
             )}
 
             {/* --- NAVIGATION FOOTER --- */}
-            <CardFooter className="flex justify-between pt-6 border-t border-white/10 mt-6">
+            <CardFooter className="flex justify-between pt-6 border-t border-white/10 mt-2">
               {step === 1 ? (
                 <Link href="/">
                   <Button type="button" variant="outline" className="text-white border-white/20 hover:bg-white/10">
