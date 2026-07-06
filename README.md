@@ -1,75 +1,159 @@
-# Code Splash Web
+# CodeSplash 2026
 
-Developer guide for the Code Splash Web workspace.
+**Sri Lanka's premier national-level university & school hackathon**
+Live: [https://codesplash.cssa.lk](https://codesplash.cssa.lk)
 
-## Workspace Setup
+---
 
-1. Get access to the repository in GitHub.
-2. Fork the repository or clone it directly, depending on your access flow.
-3. Open the cloned project in your editor.
-4. Install dependencies:
+## Portfolio Attribution
 
-```bash
-npm i
-```
+| Role | Name |
+|------|------|
+| Lead Developer | **Rithika** ([@k-rithik04](https://github.com/k-rithik04)) |
+| Developer | **Pahan** |
+| Developer | **Yasiru** |
 
-5. Start the local development server:
+Built as a full-stack portfolio project demonstrating end-to-end product engineering: scroll-driven canvas animations, a complete CMS admin panel with RBAC, public registration flows, security hardening, and production deployment.
 
-```bash
-npm run dev
-```
-
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## GitHub Workflow
-
-All developers have contributor access, but every change must be made in a dedicated branch.
-
-Create a new branch before starting any feature or bug fix. Use a clear branch name that describes the work:
-
-```bash
-git checkout -b feat/new-feature-name
-git checkout -b bugfix/bug-name
-```
-
-Use this pattern for branch names:
-
-- `feat/` for new features
-- `bugfix/` for bug fixes
-- Add a short, descriptive name after the prefix
+---
 
 ## Tech Stack
 
-- [Next.js](https://nextjs.org)
-- [TailwindCSS for styling](https://tailwindcss.com/)
-- [ShadCN](https://ui.shadcn.com)
-- [Lucide React](https://lucide.dev/)
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router, standalone output) |
+| UI | React 19, TailwindCSS v4, ShadCN (radix-sera, stone base) |
+| Animation | GSAP 3, Lenis smooth scroll, canvas frame-sequence (1265 `.webp` frames) |
+| Auth | JWT (jose) in HttpOnly cookies, bcrypt password hashing, RBAC (admin/editor/viewer) |
+| Database | Supabase (PostgreSQL + RLS, Supabase Storage for images) |
+| Security | CSP headers, CSRF validation, rate limiting, audit logging |
+| Deployment | Vercel (primary), GitHub Pages (fallback) |
+| Testing | Custom Node.js test runner (19 security + integration test suites) |
 
-## UI Rules
+---
 
-- Use TailwindCSS for all styling.
-- Use ShadCN components only for reusable UI building blocks.
-- Do not add another component library unless it is explicitly approved.
-- Use Lucide React icons when an icon is needed.
-- Don't use custom CSS or inline styles unless absolutely necessary. Tailwind should cover all styling needs.
-- Follow the existing design patterns and component usage in the codebase for consistency.
-- Don't use custom colors is unless it's a new design requirement. Stick to the existing color palette defined in ShadCN configuration.
+## Features
 
-## Installing ShadCN Components
+### Public Site
+- **Scroll-driven canvas animation** — 1265-frame preloaded WebP sequence with a Web Worker for parallel loading and a Service Worker for offline caching
+- **Section transitions** — Hero, Prizes, Timeline, Partners, Team, FAQ, CTA, Connect — all driven by a single `requestAnimationFrame` loop
+- **Registration** — Multi-step forms for both school (3-5 members) and university (individual + team) tracks
+- **Responsive design** — Glassmorphism panels, Tailwind utilities throughout
 
-If a ShadCN component is missing, install it from the terminal before using it.
+### CMS Admin (`/cms`)
+- **RBAC** — Three roles: admin (full access), editor (content + settings), viewer (dashboard + registrations only)
+- **Content management** — Editable tables for chapters, prizes, timeline, partners, team, FAQ
+- **Settings** — Hero, CTA, connect section configuration
+- **Registrations** — Spreadsheet view with CSV/Excel export
+- **User management** — Create, edit, delete CMS users (admin only)
+- **Audit log** — Login success/failure tracking (admin only)
 
-Example:
+### Security
+- JWT tokens never returned in response body (HttpOnly cookie only)
+- CSRF protection via Origin/Referer validation on all CMS API routes
+- Rate limiting on login (5 attempts/15 min per IP) and registration endpoints
+- Timing attack prevention (dummy bcrypt hash on unknown users)
+- 9 security headers (CSP, HSTS, X-Frame-Options, etc.) via `next.config.ts`
+- Server-side RBAC enforced in `proxy.ts` (Next.js 16 middleware replacement)
+- Full security audit documented in `SECURITY-AUDIT.md`
 
-```bash
-npx shadcn@latest add combobox
+---
+
+## Architecture
+
+```
+app/
+  page.tsx              # Landing page (canvas animation, sections)
+  layout.tsx            # Root layout (fonts, SEO metadata)
+  register/
+    page.tsx            # Registration entry
+    school/page.tsx     # Multi-step school form
+    university/page.tsx # Multi-step university form
+  cms/
+    layout.tsx          # CMS shell (sidebar, auth)
+    ClientLayout.tsx    # Route guards, role-based layout
+    dashboard/          # Dashboard overview
+    content/            # chapters, prizes, timeline, partners, team, faq
+    settings/           # hero, cta, connect, users
+    registrations/      # Spreadsheet view
+    audit/              # Audit log
+    api/                # login, logout, session, change-password, users
+  api/register/route.ts # Public registration endpoint
+
+proxy.ts               # Middleware: RBAC, CSRF, redirects
+lib/
+  auth-shared.ts       # JWT + bcrypt utilities
+  auth.ts              # Cookie session management
+  auth-guard.ts        # Server-side requireRole() helper
+  csrf.ts              # Origin/Referer validation
+  supabase/            # Supabase client + queries
+  useCMSData.ts        # Client hook for CMS data
+components/
+  cms/                 # EditList, EditSingleRow, Spreadsheet, ImageUpload, etc.
+  sections/            # Hero, Prizes, Timeline, Partners, Team, FAQ, CTA, Connect
+  ui/                  # ShadCN components
+tests/                 # 19 security + integration test suites
+scripts/               # Seed users, registration API tests
+supabase/schema.sql    # Database schema
 ```
 
-You can replace `combobox` with any other supported ShadCN component name.
+---
 
-## Development Notes
+## Getting Started
 
-- Keep changes small and branch-based.
-- Prefer existing ShadCN components before creating custom UI.
-- Run the app with `npm run dev` while developing.
-- Install packages with `npm i` when dependencies are added or updated.
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Set up environment
+cp .env.example .env.local
+# Fill in Supabase keys, JWT_SECRET, webhook URL
+
+# 3. Run development server
+npm run dev
+
+# 4. Open http://localhost:3000
+```
+
+### CMS Access
+
+- **URL**: [https://codesplash.cssa.lk/cms/login](https://codesplash.cssa.lk/cms/login)
+- **Default admin**: `admin` / `admin123`
+- Seed test users: `node scripts/seed-users.js`
+
+---
+
+## Commands
+
+```bash
+npm run dev          # Dev server at localhost:3000
+npm run build        # Production build
+npm run lint         # ESLint (flat config, next core-web-vitals + typescript)
+node tests/run-all.js       # Run all test suites
+node tests/run-all.js 09    # Run a specific test
+```
+
+---
+
+## Deployment
+
+### Vercel (Primary)
+- Auto-deploys from `main` branch
+- Region: `sin1` (Singapore)
+- Standalone output mode
+
+### GitHub Pages (Fallback)
+- Static export via `NEXT_PUBLIC_STATIC_EXPORT=true`
+- Build: `npm run build:ghpages`
+
+---
+
+## Security
+
+A comprehensive security audit was performed — see [`SECURITY-AUDIT.md`](./SECURITY-AUDIT.md) for the full report. 12 vulnerabilities were identified and fixed, covering authentication bypass, CSRF, rate limiting, input validation, and more.
+
+---
+
+## License
+
+Private repository. Built for CodeSplash 2026 hackathon by CSSA, University of Kelaniya.

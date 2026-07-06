@@ -16,7 +16,7 @@ async function testRBAC() {
   log("section", "TEST 07: Role-Based Access Control");
   console.log("");
 
-  // 7.1: Viewer role should not access dashboard (if restricted)
+  // 7.1: Viewer role should not access admin-only pages
   try {
     const token = await new SignJWT({
       id: "test-viewer",
@@ -31,13 +31,13 @@ async function testRBAC() {
       .setExpirationTime("1h")
       .sign(SECRET);
 
-    const res = await request("/cms/dashboard", {
+    const res = await request("/cms/audit", {
       headers: { Cookie: `cms_session=${token}` },
+      redirect: "manual",
     });
-    // Viewer gets through middleware but UI should restrict
-    const ok = res.status === 200;
-    record(ok);
-    log("warn", `Viewer can access /cms/dashboard: ${ok} (middleware doesn't check roles)`);
+    const blocked = res.status === 307 || res.status === 302;
+    record(blocked);
+    log(blocked ? "pass" : "warn", `Viewer blocked from /cms/audit: ${blocked} (status ${res.status})`);
   } catch (err) {
     record(true);
     log("info", `Viewer test: ${err.message}`);
@@ -54,19 +54,19 @@ async function testRBAC() {
     log("info", `Logout test: ${err.message}`);
   }
 
-  // 7.3: Check if middleware only checks JWT validity, not role
-  const middleware = readFileSync(join(__dirname, "..", "middleware.ts"), "utf8");
-  const checksRole = middleware.includes("role") && middleware.includes("admin");
-  record(!checksRole);
-  log(!checksRole ? "warn" : "pass", `Middleware checks user role: ${checksRole}`);
+  // 7.3: Check if proxy checks JWT validity AND role
+  const proxy = readFileSync(join(__dirname, "..", "proxy.ts"), "utf8");
+  const checksRole = proxy.includes("role") && proxy.includes("admin");
+  record(checksRole);
+  log(checksRole ? "pass" : "warn", `Proxy checks user role: ${checksRole}`);
   if (!checksRole) {
-    log("warn", "  ⚠ Middleware only validates JWT — any valid user gets through regardless of role");
+    log("warn", "  ⚠ Proxy only validates JWT — any valid user gets through regardless of role");
   }
 
-  // 7.4: Check that admin page access is controlled via middleware matcher
-  const hasAdminMatcher = middleware.includes("/admin/:path*");
+  // 7.4: Check that admin page access is controlled via proxy matcher
+  const hasAdminMatcher = proxy.includes("/admin/:path*");
   record(hasAdminMatcher);
-  log(hasAdminMatcher ? "pass" : "fail", `Middleware matcher includes /admin: ${hasAdminMatcher}`);
+  log(hasAdminMatcher ? "pass" : "fail", `Proxy matcher includes /admin: ${hasAdminMatcher}`);
 
   // 7.5: Admin page should redirect properly
   try {

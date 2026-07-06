@@ -3,7 +3,7 @@
  * Tests whether unauthenticated requests can access protected CMS routes.
  * Expected: All protected routes should redirect to /cms/login (3xx) or return 401.
  */
-import { log, record, request, summary } from "./helpers.js";
+import { log, record, request } from "./helpers.js";
 import { CMS_PROTECTED_ROUTES } from "./config.js";
 
 async function testAuthBypass() {

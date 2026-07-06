@@ -1,3 +1,13 @@
+/*
+ * Supabase Queries — CodeSplash 2026
+ * =====================================
+ * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * https://codesplash.cssa.lk
+ *
+ * Typed fetch functions for all CMS entities.
+ * Passes through full HTTP URLs unchanged.
+ */
+
 import { createClient } from "@/lib/supabase/client";
 
 export function getStorageUrl(path: string): string {

@@ -9,7 +9,7 @@ function clearSession() {
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.clear();
   } catch {}
-  window.location.replace("/admin/login");
+  window.location.replace("/cms/login");
 }
 
 export default function LogoutPage() {
@@ -21,7 +21,7 @@ export default function LogoutPage() {
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
       <script
         dangerouslySetInnerHTML={{
-          __html: `try{localStorage.removeItem("${SESSION_KEY}");sessionStorage.clear();}catch(e){}window.location.replace("/admin/login");`,
+          __html: `try{localStorage.removeItem("${SESSION_KEY}");sessionStorage.clear();}catch(e){}window.location.replace("/cms/login");`,
         }}
       />
       <div className="flex flex-col items-center gap-4">

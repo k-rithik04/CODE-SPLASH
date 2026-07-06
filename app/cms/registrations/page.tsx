@@ -1,8 +1,10 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth-guard";
 import PageHeader from "@/components/cms/PageHeader";
 import RegistrationsClient from "./RegistrationsClient";
 
 export default async function RegistrationsPage() {
+  await requireRole("editor");
   const supabase = createServerClient();
 
   const { data: schoolData } = await supabase

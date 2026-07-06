@@ -1,8 +1,10 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth-guard";
 import PageHeader from "@/components/cms/PageHeader";
 import EditListClient from "./EditListClient";
 
 export default async function FAQPage() {
+  await requireRole("editor");
   const supabase = createServerClient();
   const { data } = await supabase
     .from("faq_items")

@@ -1,7 +1,9 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth-guard";
 import PageHeader from "@/components/cms/PageHeader";
 
 export default async function AuditPage() {
+  await requireRole("admin");
   const supabase = createServerClient();
   const { data } = await supabase
     .from("audit_log")

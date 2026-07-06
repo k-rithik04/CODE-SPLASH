@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPassword, createSession } from "@/lib/auth-shared";
 import { setSessionCookie } from "@/lib/auth";
+import { validateOrigin } from "@/lib/csrf";
 
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_ATTEMPTS = 5;
@@ -19,10 +20,18 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
+function isRateLimited(ip: string): boolean {
+  const entry = loginAttempts.get(ip);
+  return !!entry && entry.count >= MAX_ATTEMPTS && Date.now() <= entry.resetAt;
+}
+
 const DUMMY_HASH = "$2b$12$2gcbillES.3X4dTnU8tkruZsMJFfacx2s5qsixa42vB0aV3S3gDFi";
 
 export async function POST(request: Request) {
   try {
+    const csrfError = validateOrigin(request);
+    if (csrfError) return csrfError;
+
     const { username, password } = await request.json();
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
 
@@ -33,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!checkRateLimit(ip)) {
+    if (isRateLimited(ip)) {
       return NextResponse.json(
         { error: "Too many login attempts. Please try again later." },
         { status: 429 }
@@ -49,11 +58,12 @@ export async function POST(request: Request) {
     }
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, username, full_name, role, password, must_change_password")
       .eq("username", username)
       .single();
 
     if (error || !profile) {
+      checkRateLimit(ip);
       await verifyPassword("dummy", DUMMY_HASH);
       return NextResponse.json(
         { error: "Invalid username or password" },
@@ -61,13 +71,16 @@ export async function POST(request: Request) {
       );
     }
 
-    let valid = false;
-    if (profile.password.startsWith("$2")) {
-      valid = await verifyPassword(password, profile.password);
-    } else {
-      valid = password === profile.password;
+    if (!profile.password.startsWith("$2")) {
+      checkRateLimit(ip);
+      return NextResponse.json(
+        { error: "Invalid username or password" },
+        { status: 401 }
+      );
     }
+    const valid = await verifyPassword(password, profile.password);
     if (!valid) {
+      checkRateLimit(ip);
       try {
         await supabase.from("audit_log").insert({
           action: "login_failed",

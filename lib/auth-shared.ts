@@ -1,10 +1,21 @@
+/*
+ * Auth Shared Utilities — CodeSplash 2026
+ * =========================================
+ * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * https://codesplash.cssa.lk
+ *
+ * JWT sign/verify (jose), bcrypt hash/verify.
+ * Used by both server-side (cookie sessions) and proxy (token verification).
+ * Security: throws on missing JWT_SECRET in production.
+ */
+
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
 const rawSecret = typeof process !== "undefined" ? process.env?.JWT_SECRET : undefined;
 
 if (!rawSecret && process.env.NODE_ENV === "production") {
-  console.error("FATAL: JWT_SECRET environment variable is not set. Refusing to start with weak fallback in production.");
+  throw new Error("FATAL: JWT_SECRET environment variable is not set. Refusing to start without it in production.");
 }
 
 const SECRET = new TextEncoder().encode(rawSecret || "ci-build-placeholder-not-for-production");

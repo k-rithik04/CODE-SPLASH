@@ -1,8 +1,22 @@
 "use client";
 
+/*
+ * Main Landing Page — CodeSplash 2026
+ * =====================================
+ * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * https://codesplash.cssa.lk
+ * Repo: https://github.com/cssa-uok/code-splash
+ *
+ * Scroll-driven canvas animation (1265 frames), particle system,
+ * and section transitions powered by GSAP + Lenis smooth scroll.
+ * Sections: Hero → Prizes → Timeline → Partners → Team → FAQ → CTA → Connect
+ */
+
 import { useEffect, useRef, useState } from "react";
+import type Lenis from "lenis";
 import { mapRange } from "@/lib/animation";
 import { useCMSData } from "@/lib/useCMSData";
+import { useLenis } from "@/components/SmoothScroll";
 import {
   Loader,
   Background,
@@ -33,17 +47,19 @@ const SECTION_TIMING = {
 
 export default function Home() {
   const cms = useCMSData();
+  const lenis = useLenis();
   const [loadProgress, setLoadProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Sailing through the river..");
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [isLoaderRemoved, setIsLoaderRemoved] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const frame1DrawnRef = useRef(false);
 
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const partCanvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>(0);
-  const currentScroll = useRef(0);
-  const targetScroll = useRef(0);
+  const lenisRef = useRef<Lenis | null>(null);
+  const engineInitRef = useRef(false);
   const lastDrawnFrame = useRef(-1);
   const lastActiveIndex = useRef(-1);
   const bitmapsRef = useRef<Map<number, ImageBitmap>>(new Map());
@@ -116,12 +132,42 @@ export default function Home() {
       if (type === "progress") {
         const pct = (e.data.loaded / e.data.total) * 100;
         setLoadProgress(Math.min(pct, 100));
+      } else if (type === "firstFrameReady") {
+        // Frame 1 bitmap received — draw it to canvas immediately
+        const bgCanvas = bgCanvasRef.current;
+        if (bgCanvas && e.data.bitmap) {
+          const ctx = bgCanvas.getContext("2d", { alpha: false });
+          if (ctx) {
+            bgCanvas.width = 1920;
+            bgCanvas.height = 1080;
+            ctx.drawImage(e.data.bitmap, 0, 0, 1920, 1080);
+            frame1DrawnRef.current = true;
+          }
+        }
       } else if (type === "firstBatchComplete") {
         setLoadProgress(100);
-        hideTimer = setTimeout(() => {
-          setIsLoaderVisible(false);
-          removeTimer = setTimeout(() => setIsLoaderRemoved(true), 600);
-        }, 2000);
+        // Only dismiss loader after frame 1 is confirmed drawn
+        const dismissLoader = () => {
+          hideTimer = setTimeout(() => {
+            setIsLoaderVisible(false);
+            removeTimer = setTimeout(() => setIsLoaderRemoved(true), 600);
+          }, 2000);
+        };
+        if (frame1DrawnRef.current) {
+          dismissLoader();
+        } else {
+          // Wait up to 3s for frame 1 to be drawn, then dismiss anyway
+          const checkInterval = setInterval(() => {
+            if (frame1DrawnRef.current) {
+              clearInterval(checkInterval);
+              dismissLoader();
+            }
+          }, 50);
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            dismissLoader();
+          }, 3000);
+        }
       } else if (type === "bitmaps") {
         for (const item of e.data.items) {
           bitmapsRef.current.set(item.frame, item.bitmap);
@@ -141,9 +187,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    window.scrollTo(0, 0);
-    targetScroll.current = 0;
-    currentScroll.current = 0;
+    lenisRef.current = lenis;
 
     const bgCanvas = bgCanvasRef.current;
     const partCanvas = partCanvasRef.current;
@@ -153,8 +197,21 @@ export default function Home() {
     const pCtx = partCanvas.getContext("2d");
     if (!bgCtx || !pCtx) return;
 
-    bgCanvas.width = 1920;
-    bgCanvas.height = 1080;
+    if (!engineInitRef.current) {
+      engineInitRef.current = true;
+      window.scrollTo(0, 0);
+      if (lenis) lenis.scrollTo(0, { immediate: true });
+
+      bgCanvas.width = 1920;
+      bgCanvas.height = 1080;
+
+      // Draw frame 1 immediately if already available (prevents black screen)
+      const existingFrame1 = bitmapsRef.current.get(1);
+      if (existingFrame1) {
+        bgCtx.drawImage(existingFrame1, 0, 0, 1920, 1080);
+        lastDrawnFrame.current = 0;
+      }
+    }
 
     let particles: Array<{
       x: number; y: number; baseX: number; baseY: number;
@@ -194,18 +251,10 @@ export default function Home() {
     const handleResize = () => { updateMetrics(); initParticles(); };
     const handleMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
     const handleMouseLeave = () => { mouse.x = null; mouse.y = null; };
-    const handleScroll = () => { targetScroll.current = window.scrollY; };
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        window.scrollBy({ top: e.deltaX * 0.8, behavior: 'auto' });
-      }
-    };
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("wheel", handleWheel, { passive: true });
 
     const updateParticles = () => {
       pCtx.clearRect(0, 0, partCanvas.width, partCanvas.height);
@@ -262,8 +311,8 @@ export default function Home() {
       const isDesktop = innerWidth >= 768;
       const t = SECTION_TIMING;
 
-      currentScroll.current += (targetScroll.current - currentScroll.current) * 0.12;
-      const sp = Math.min(Math.max(currentScroll.current / maxScroll, 0), 1);
+      const scroll = lenisRef.current ? lenisRef.current.scroll : window.scrollY;
+      const sp = Math.min(Math.max(scroll / maxScroll, 0), 1);
 
       if (scrollArrowRef.current) {
         scrollArrowRef.current.style.opacity = sp < 0.02 ? "1" : "0";
@@ -281,6 +330,9 @@ export default function Home() {
           bgCtx.drawImage(bitmap, 0, 0, bgCanvas.width, bgCanvas.height);
           lastDrawnFrame.current = frameIndex;
         }
+      } else if (lastDrawnFrame.current >= 0) {
+        // Fallback: if current frame isn't loaded, keep showing the last drawn frame
+        // This prevents black frames when scrolling into unloaded regions
       }
       updateParticles();
 
@@ -551,21 +603,27 @@ export default function Home() {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("wheel", handleWheel);
       clearTimeout(metricsTimer);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, []);
+  }, [lenis]);
 
   const handleDialClick = (targetPercentage: number) => {
     const maxScroll = layoutMetrics.current.maxScroll;
-    window.scrollTo({ top: targetPercentage * maxScroll, behavior: "smooth" });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(targetPercentage * maxScroll);
+    } else {
+      window.scrollTo({ top: targetPercentage * maxScroll, behavior: "smooth" });
+    }
   };
 
   const jumpToCurrentWeek = () => {
     const maxScroll = layoutMetrics.current.maxScroll;
-    window.scrollTo({ top: 0.37 * maxScroll, behavior: "smooth" });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0.37 * maxScroll);
+    } else {
+      window.scrollTo({ top: 0.37 * maxScroll, behavior: "smooth" });
+    }
   };
 
   const handlePrizeFlip = (e: React.MouseEvent<HTMLDivElement>) => {

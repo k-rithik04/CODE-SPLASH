@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth-guard";
 import Link from "next/link";
 import LogoutButton from "@/components/cms/LogoutButton";
 
@@ -15,6 +16,7 @@ const TABLES = [
 ];
 
 export default async function DashboardPage() {
+  await requireRole("viewer");
   const supabase = createServerClient();
 
   const counts: Record<string, number> = {};

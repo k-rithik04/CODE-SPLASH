@@ -23,8 +23,8 @@ async function testSessionManagement() {
     });
     const data = await res.json().catch(() => ({}));
 
-    if (res.status === 200 && data.token) {
-      sessionToken = data.token;
+    if (res.status === 200 && data.success) {
+      sessionToken = res.headers.get("set-cookie")?.match(/cms_session=([^;]+)/)?.[1] || null;
       record(true);
       log("pass", `Login with valid credentials: got token (${sessionToken.length} chars)`);
 

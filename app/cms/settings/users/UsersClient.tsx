@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -44,19 +44,32 @@ export default function UsersClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false;
+    async function loadUsers() {
+      try {
+        const res = await fetch("/cms/api/users");
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          setUsers(data.users);
+        }
+      } catch {} finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadUsers();
+    return () => { cancelled = true; };
+  }, []);
+
+  const fetchUsers = async () => {
     try {
       const res = await fetch("/cms/api/users");
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users);
       }
-    } catch {} finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+    } catch {}
+  };
 
   const openCreate = () => {
     setEditingUser(null);

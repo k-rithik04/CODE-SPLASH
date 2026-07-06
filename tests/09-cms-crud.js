@@ -6,11 +6,8 @@
  * Tests: login, read/write to each content table, CMS page rendering, public site rendering.
  */
 
-import { BASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY, JWT_SECRET_PLACEHOLDER } from "./config.js";
-import { log, record, supabaseQuery } from "./helpers.js";
-import { SignJWT } from "jose";
-
-const SECRET = new TextEncoder().encode(JWT_SECRET_PLACEHOLDER);
+import { BASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+import { log, record } from "./helpers.js";
 
 // Table definitions: name, test record fields, and the public page that should render the data
 const TABLES = [
@@ -84,7 +81,7 @@ const SETTINGS_TABLES = [
 async function login() {
   const res = await fetch(`${BASE_URL}/cms/api/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Origin": BASE_URL, "Referer": BASE_URL + "/" },
     body: JSON.stringify({ username: "yasiru", password: "1234" }),
   });
   if (!res.ok) throw new Error(`Login failed: ${res.status}`);
@@ -320,7 +317,7 @@ export default async function testCMSCrud() {
   try {
     const loginRes = await fetch(`${BASE_URL}/cms/api/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Origin": BASE_URL, "Referer": BASE_URL + "/" },
       body: JSON.stringify({ username: "yasiru", password: "1234" }),
     });
     const loginData = await loginRes.json();

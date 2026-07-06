@@ -101,7 +101,6 @@
   body {
     @apply bg-bg text-white font-main overflow-x-hidden;
     -webkit-font-smoothing: antialiased;
-    scroll-behavior: smooth;
   }
 }
 

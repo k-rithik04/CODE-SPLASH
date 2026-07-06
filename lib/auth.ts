@@ -1,3 +1,13 @@
+/*
+ * Auth — CodeSplash 2026
+ * ========================
+ * Portfolio project by Rithika (lead), Pahan, and Yasiru
+ * https://codesplash.cssa.lk
+ *
+ * Server-side cookie session management.
+ * HttpOnly, SameSite=strict, Secure in production.
+ */
+
 import { cookies } from "next/headers";
 
 // Re-export everything that works in both environments

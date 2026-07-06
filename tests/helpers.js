@@ -1,7 +1,7 @@
 import { SignJWT } from "jose";
 import { BASE_URL, JWT_SECRET_PLACEHOLDER } from "./config.js";
 
-const SECRET = new TextEncoder().encode(JWT_SECRET_PLACEHOLDER);
+const SECRET = new TextEncoder().encode(JWT_SECRET_PLACEHOLDER || "test-placeholder-for-tests-only");
 
 let passed = 0;
 let failed = 0;
@@ -57,6 +57,8 @@ export async function request(path, options = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      "Origin": BASE_URL,
+      "Referer": BASE_URL + "/",
       ...options.headers,
     },
   });

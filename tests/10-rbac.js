@@ -9,7 +9,7 @@
  *  - Forged JWT with wrong role is rejected
  */
 
-import { createForgedJWT, request, log, record, summary, SECRET } from "./helpers.js";
+import { createForgedJWT, request, log, record } from "./helpers.js";
 import { SignJWT } from "jose";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || "ci-build-placeholder-not-for-production");
@@ -21,12 +21,12 @@ async function login(username, password) {
   });
   const data = await res.json();
   const cookie = res.headers.get("set-cookie");
-  const token = cookie?.match(/cms-session=([^;]+)/)?.[1];
+  const token = cookie?.match(/cms_session=([^;]+)/)?.[1];
   return { res, data, token };
 }
 
 function authCookie(token) {
-  return `cms-session=${token}`;
+  return `cms_session=${token}`;
 }
 
 // ─── Login Tests ───
@@ -146,13 +146,13 @@ async function testForgedJWTs() {
   }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setIssuer("codesplash-cms").setExpirationTime("1h")
     .sign(new TextEncoder().encode("wrong-secret-key"));
 
-  const forged1 = await request("/cms/api/session", { headers: { Cookie: `cms-session=${wrongSecret}` } });
+  const forged1 = await request("/cms/api/session", { headers: { Cookie: `cms_session=${wrongSecret}` } });
   log(forged1.status === 401 ? "pass" : "fail", `Wrong secret → 401: ${forged1.status}`);
   record(forged1.status === 401);
 
   // Viewer trying to access admin API
   const viewerJWT = await createForgedJWT({ role: "viewer", username: "viewer_attacker" });
-  const forged2 = await request("/cms/api/users", { headers: { Cookie: `cms-session=${viewerJWT}` } });
+  const forged2 = await request("/cms/api/users", { headers: { Cookie: `cms_session=${viewerJWT}` } });
   log(forged2.status === 403 ? "pass" : "fail", `Forged viewer JWT → users API: ${forged2.status} (expected 403)`);
   record(forged2.status === 403);
 
@@ -163,7 +163,7 @@ async function testForgedJWTs() {
   }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setIssuer("codesplash-cms").setExpirationTime("1h")
     .sign(SECRET_KEY);
 
-  const forged3 = await request("/cms/api/session", { headers: { Cookie: `cms-session=${tampered}` } });
+  const forged3 = await request("/cms/api/session", { headers: { Cookie: `cms_session=${tampered}` } });
   const sessionData = forged3.status === 200 ? await forged3.json() : null;
   const isValidUser = sessionData?.user?.username === "admin";
   log(!isValidUser ? "pass" : "fail", `Tampered JWT user not recognized as admin: ${sessionData?.user?.username ?? "rejected"}`);

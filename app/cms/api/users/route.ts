@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionFromCookies } from "@/lib/auth";
 import { hashPassword } from "@/lib/auth-shared";
+import { validateOrigin } from "@/lib/csrf";
 
 export async function GET() {
   const session = await getSessionFromCookies();
@@ -22,6 +23,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   const session = await getSessionFromCookies();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -33,8 +37,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Username, password, and role are required" }, { status: 400 });
   }
 
-  if (password.length < 4) {
-    return NextResponse.json({ error: "Password must be at least 4 characters" }, { status: 400 });
+  if (password.length < 8) {
+    return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+  }
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return NextResponse.json({ error: "Password must contain at least one letter and one number" }, { status: 400 });
   }
 
   const supabase = await createAdminClient();

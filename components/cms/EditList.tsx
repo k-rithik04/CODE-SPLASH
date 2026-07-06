@@ -17,7 +17,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import ImageUpload from "@/components/cms/ImageUpload";
-import Spreadsheet from "@/components/cms/Spreadsheet";
 
 interface Field {
   key: string;
@@ -127,10 +126,6 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
 
   const inputClass = "bg-white/5 border-white/10 text-white placeholder:text-white/20 hover:border-white/20 focus:border-orange/50 focus:ring-1 focus:ring-orange/50 transition-all rounded-lg";
 
-  const handleImport = (imported: Record<string, unknown>[]) => {
-    setList(imported);
-  };
-
   return (
     <div ref={containerRef} className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-x-auto">
       <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
@@ -143,7 +138,6 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
         <div className="flex items-center gap-3">
           {!readOnly && (
             <>
-              <Spreadsheet title={title} fields={fields} items={list} onImport={handleImport} />
               <Button variant="outline" size="sm" onClick={handleAdd} className="border-white/20 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all">
                 + Add Item
               </Button>

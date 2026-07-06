@@ -1,8 +1,42 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateOrigin } from "@/lib/csrf";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^\+?[\d\s\-()]{7,20}$/;
+const MAX_TEXT = 255;
+
+function sanitize(value: string | null): string | null {
+  if (!value) return null;
+  return value.trim().slice(0, MAX_TEXT);
+}
+
+function validateEmail(email: string | null): boolean {
+  if (!email) return true;
+  return EMAIL_RE.test(email);
+}
+
+function validatePhone(phone: string | null): boolean {
+  if (!phone) return true;
+  return PHONE_RE.test(phone);
+}
 
 export async function POST(request: Request) {
   try {
+    const csrfError = validateOrigin(request);
+    if (csrfError) return csrfError;
+
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const rateKey = `register:${ip}`;
+    const { allowed, retryAfterMs } = checkRateLimit(rateKey, 5, 15 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: `Too many registrations. Try again in ${Math.ceil(retryAfterMs / 60000)} minutes.` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.text();
     const params = new URLSearchParams(body);
 
@@ -12,23 +46,40 @@ export async function POST(request: Request) {
     const hasSchoolFields = params.has("school") || params.has("teacherName") || params.has("district");
 
     if (hasSchoolFields) {
-      // School registration
+      const teacherEmail = params.get("teacherEmail");
+      const leaderEmail = params.get("leaderEmail");
+      const leaderPhone = params.get("leaderPhone");
+      const teacherPhone = params.get("teacherPhone");
+
+      if (teacherEmail && !validateEmail(teacherEmail)) {
+        return NextResponse.json({ success: false, error: "Invalid teacher email format" }, { status: 400 });
+      }
+      if (leaderEmail && !validateEmail(leaderEmail)) {
+        return NextResponse.json({ success: false, error: "Invalid leader email format" }, { status: 400 });
+      }
+      if (leaderPhone && !validatePhone(leaderPhone)) {
+        return NextResponse.json({ success: false, error: "Invalid leader phone format" }, { status: 400 });
+      }
+      if (teacherPhone && !validatePhone(teacherPhone)) {
+        return NextResponse.json({ success: false, error: "Invalid teacher phone format" }, { status: 400 });
+      }
+
       const noOfMembers = parseInt(params.get("noOfMembers") || "2");
 
       const record = {
         student_type: parseInt(params.get("studentType") || "0"),
-        team_name: params.get("teamName") || "",
+        team_name: sanitize(params.get("teamName")) || "",
         no_of_team_members: noOfMembers,
-        school: params.get("school") || "",
-        school_address: params.get("schoolAddress") || "",
-        district: params.get("district") || "",
-        teacher_name: params.get("teacherName") || "",
-        teacher_email: params.get("teacherEmail") || "",
-        teacher_phone: params.get("teacherPhone") || "",
-        leader_name: params.get("leaderName") || "",
-        leader_grade: params.get("leaderGrade") || "",
-        leader_email: params.get("leaderEmail") || "",
-        leader_phone: params.get("leaderPhone") || "",
+        school: sanitize(params.get("school")) || "",
+        school_address: sanitize(params.get("schoolAddress")) || "",
+        district: sanitize(params.get("district")) || "",
+        teacher_name: sanitize(params.get("teacherName")) || "",
+        teacher_email: sanitize(params.get("teacherEmail")) || "",
+        teacher_phone: sanitize(params.get("teacherPhone")) || "",
+        leader_name: sanitize(params.get("leaderName")) || "",
+        leader_grade: sanitize(params.get("leaderGrade")) || "",
+        leader_email: sanitize(params.get("leaderEmail")) || "",
+        leader_phone: sanitize(params.get("leaderPhone")) || "",
         member2_name: params.get("member2Name") || null,
         member2_grade: params.get("member2Grade") || null,
         member2_phone: params.get("member2Phone") || null,
@@ -55,18 +106,32 @@ export async function POST(request: Request) {
     }
 
     // University registration
+    const uniEmail = params.get("email");
+    const leaderEmail = params.get("leaderEmail");
+    const leaderPhone = params.get("leaderPhone");
+
+    if (uniEmail && !validateEmail(uniEmail)) {
+      return NextResponse.json({ success: false, error: "Invalid email format" }, { status: 400 });
+    }
+    if (leaderEmail && !validateEmail(leaderEmail)) {
+      return NextResponse.json({ success: false, error: "Invalid leader email format" }, { status: 400 });
+    }
+    if (leaderPhone && !validatePhone(leaderPhone)) {
+      return NextResponse.json({ success: false, error: "Invalid leader phone format" }, { status: 400 });
+    }
+
     const teamSize = parseInt(params.get("teamSize") || "1");
 
     const record = {
-      email: params.get("email") || null,
-      team_name: params.get("teamName") || null,
-      university: params.get("university") || null,
+      email: sanitize(params.get("email")) || null,
+      team_name: sanitize(params.get("teamName")) || null,
+      university: sanitize(params.get("university")) || null,
       team_size: teamSize,
-      leader_name: params.get("leaderName") || null,
-      leader_gender: params.get("leaderGender") || null,
-      leader_email: params.get("leaderEmail") || null,
-      leader_phone: params.get("leaderPhone") || null,
-      leader_year: params.get("leaderYear") || null,
+      leader_name: sanitize(params.get("leaderName")) || null,
+      leader_gender: sanitize(params.get("leaderGender")) || null,
+      leader_email: sanitize(params.get("leaderEmail")) || null,
+      leader_phone: sanitize(params.get("leaderPhone")) || null,
+      leader_year: sanitize(params.get("leaderYear")) || null,
       member2_name: params.get("member2Name") || null,
       member2_gender: params.get("member2Gender") || null,
       member2_email: params.get("member2Email") || null,

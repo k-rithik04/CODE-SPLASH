@@ -1,7 +1,14 @@
+import { config } from "dotenv";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+config({ path: join(__dirname, "..", ".env.local") });
+
 export const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
-export const SUPABASE_URL = "https://kcfwibhzmfwipipwbzrw.supabase.co";
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjZndpYmh6bWZ3aXBpcHdienJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTA2OTAsImV4cCI6MjA5ODgyNjY5MH0.l2sjzMqzaFIjn-dM86EoYwbpQA29WEzaG_riyyHUuBs";
-export const JWT_SECRET_PLACEHOLDER = "ci-build-placeholder-not-for-production";
+export const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+export const JWT_SECRET_PLACEHOLDER = process.env.JWT_SECRET || "";
 export const CMS_PROTECTED_ROUTES = [
   "/cms/dashboard",
   "/cms/content/chapters",

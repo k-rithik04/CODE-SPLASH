@@ -2,12 +2,27 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPassword, hashPassword, createSession } from "@/lib/auth-shared";
 import { setSessionCookie, getSessionFromCookies } from "@/lib/auth";
+import { validateOrigin } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const csrfError = validateOrigin(request);
+    if (csrfError) return csrfError;
+
     const session = await getSessionFromCookies();
     if (!session) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const rateKey = `change-password:${session.id}:${ip}`;
+    const { allowed, retryAfterMs } = checkRateLimit(rateKey, 5, 15 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: `Too many attempts. Try again in ${Math.ceil(retryAfterMs / 60000)} minutes.` },
+        { status: 429 }
+      );
     }
 
     const { currentPassword, newPassword } = await request.json();
@@ -40,12 +55,10 @@ export async function POST(request: Request) {
     }
 
     const profileData = profile as { id: string; password: string };
-    let valid = false;
-    if (profileData.password.startsWith("$2")) {
-      valid = await verifyPassword(currentPassword, profileData.password);
-    } else {
-      valid = currentPassword === profileData.password;
+    if (!profileData.password.startsWith("$2")) {
+      return NextResponse.json({ error: "Current password is incorrect" }, { status: 401 });
     }
+    const valid = await verifyPassword(currentPassword, profileData.password);
 
     if (!valid) {
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 401 });
