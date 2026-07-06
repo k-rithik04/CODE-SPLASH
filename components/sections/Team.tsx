@@ -26,6 +26,7 @@ const Team = React.forwardRef<HTMLDivElement, TeamProps>(
                   src={getStorageUrl(member.image_url)}
                   alt={member.name}
                   fill
+                  unoptimized
                   className="object-cover object-center"
                   sizes="(max-width: 768px) 320px, 320px"
                 />

@@ -220,7 +220,7 @@ export default function EditList({ title, tableName, fields, items, onUpdate, re
                         <ImageUpload
                           currentUrl={(item[field.key] as string) || ""}
                           onUpload={(url) => handleChange(index, field.key, url)}
-                          folder={field.folder || "cms-images"}
+                          folder={field.folder || ""}
                           aspectRatios={field.aspectRatios}
                           className="min-w-[180px]"
                         />

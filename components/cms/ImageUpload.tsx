@@ -83,7 +83,7 @@ interface ImageUploadProps {
 export default function ImageUpload({
   currentUrl,
   onUpload,
-  folder = "cms-images",
+  folder = "",
   className = "",
   aspectRatios,
 }: ImageUploadProps) {
