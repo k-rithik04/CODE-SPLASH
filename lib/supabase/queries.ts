@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 export function getStorageUrl(path: string): string {
   if (!path) return "";
   if (path.startsWith("http")) return path;
+  if (path.startsWith("/")) return path;
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const cleanPath = path.replace(/^\/+/, "");
   return `${base}/storage/v1/object/public/cms-images/${cleanPath}`;
@@ -98,64 +99,136 @@ export type ConnectContent = {
 };
 
 export async function fetchHeroContent(): Promise<HeroContent | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("hero_content").select("*").limit(1).maybeSingle();
-  if (error) console.error("[CMS] hero_content:", error.message, error.code);
-  return data;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("hero_content").select("*").limit(1).maybeSingle();
+    if (error) {
+      console.error("[CMS] hero_content:", error.message, error.code);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.error("[CMS] hero_content: network error", e);
+    return null;
+  }
 }
 
 export async function fetchChapters(): Promise<Chapter[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("chapters").select("*").order("sort_order");
-  if (error) console.error("[CMS] chapters:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("chapters").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] chapters:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] chapters: network error", e);
+    return [];
+  }
 }
 
 export async function fetchPrizes(): Promise<Prize[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("prizes").select("*").order("sort_order");
-  if (error) console.error("[CMS] prizes:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("prizes").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] prizes:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] prizes: network error", e);
+    return [];
+  }
 }
 
 export async function fetchTimelineEntries(): Promise<TimelineEntry[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("timeline_entries").select("*").order("sort_order");
-  if (error) console.error("[CMS] timeline:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("timeline_entries").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] timeline:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] timeline: network error", e);
+    return [];
+  }
 }
 
 export async function fetchPartners(): Promise<PartnerRow[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("partners").select("*").order("sort_order");
-  if (error) console.error("[CMS] partners:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("partners").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] partners:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] partners: network error", e);
+    return [];
+  }
 }
 
 export async function fetchTeamMembers(): Promise<TeamMember[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("team_members").select("*").order("sort_order");
-  if (error) console.error("[CMS] team_members:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("team_members").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] team_members:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] team_members: network error", e);
+    return [];
+  }
 }
 
 export async function fetchFaqItems(): Promise<FaqItem[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("faq_items").select("*").order("sort_order");
-  if (error) console.error("[CMS] faq_items:", error.message, error.code);
-  return data ?? [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("faq_items").select("*").order("sort_order");
+    if (error) {
+      console.error("[CMS] faq_items:", error.message, error.code);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error("[CMS] faq_items: network error", e);
+    return [];
+  }
 }
 
 export async function fetchCtaContent(): Promise<CtaContent | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("cta_content").select("*").limit(1).maybeSingle();
-  if (error) console.error("[CMS] cta_content:", error.message, error.code);
-  return data;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("cta_content").select("*").limit(1).maybeSingle();
+    if (error) {
+      console.error("[CMS] cta_content:", error.message, error.code);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.error("[CMS] cta_content: network error", e);
+    return null;
+  }
 }
 
 export async function fetchConnectContent(): Promise<ConnectContent | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("connect_content").select("*").limit(1).maybeSingle();
-  if (error) console.error("[CMS] connect_content:", error.message, error.code);
-  return data;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("connect_content").select("*").limit(1).maybeSingle();
+    if (error) {
+      console.error("[CMS] connect_content:", error.message, error.code);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.error("[CMS] connect_content: network error", e);
+    return null;
+  }
 }

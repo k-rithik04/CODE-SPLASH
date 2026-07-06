@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function RegisterPage() {
   const [status, setStatus] = useState<"loading" | "open" | "closed">("loading");
   const [countdown, setCountdown] = useState(15);
+  const [buttonText, setButtonText] = useState("Register");
 
   useEffect(() => {
     const supabase = createClient();
@@ -13,11 +14,12 @@ export default function RegisterPage() {
       try {
         const { data } = await supabase
           .from("cta_content")
-          .select("is_active")
+          .select("is_active, button_text")
           .eq("id", 1)
           .maybeSingle();
-        const row = data as { is_active: boolean } | null;
+        const row = data as { is_active: boolean; button_text: string } | null;
         setStatus(row?.is_active ? "open" : "closed");
+        if (row?.button_text) setButtonText(row.button_text);
       } catch {
         setStatus("closed");
       }
@@ -61,7 +63,7 @@ export default function RegisterPage() {
               Registration is Open!
             </h1>
             <p className="text-lg text-gray-300">
-              Head back to the site and hit the <span className="text-[#ff6b00] font-bold">Register</span> button to choose your track.
+              Head back to the site and hit the <span className="text-[#ff6b00] font-bold">{buttonText}</span> button to choose your track.
             </p>
             <p className="text-sm text-gray-400">
               Redirecting to home page in <span className="text-[#ff6b00] font-bold">{countdown}s</span>...

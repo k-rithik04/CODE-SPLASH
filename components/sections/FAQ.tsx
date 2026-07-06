@@ -27,6 +27,7 @@ const FAQ = React.forwardRef<HTMLDivElement, FAQProps>(
             {data.map((faq, i) => (
               <details
                 key={i}
+                name="faq-accordion"
                 ref={(el) => { itemsRef.current[i] = el; }}
                 className="w-full bg-glass-bg backdrop-blur-[40px] border border-glass-border shadow-lg rounded-xl p-2.5 sm:p-3 md:p-5 cursor-pointer group hover:border-orange/50 transition-all duration-500"
               >

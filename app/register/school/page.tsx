@@ -23,11 +23,12 @@ const districts = [
 export default function SchoolRegistrationPage() {
   const {
     step, isSubmitting, isSubmitted, visibleMemberCount, errorMsg, formData,
-    nextStep: storeNextStep, prevStep, setIsSubmitting, setIsSubmitted,
-    setVisibleMemberCount, setErrorMsg, updateField, updateMember,
+    nextStep: storeNextStep, prevStep: storePrevStep, setIsSubmitting, setIsSubmitted,
+    setVisibleMemberCount, setErrorMsg, updateField, updateMember, setStep,
   } = useSchoolFormStore();
 
-  const totalSteps = 4;
+  const hasAdditionalMembers = parseInt(formData.noOfMembers) > 1;
+  const totalSteps = hasAdditionalMembers ? 4 : 3;
 
   const handleRadioChange = (name: string, value: string) => {
     updateField(name as keyof typeof formData, value);
@@ -44,7 +45,9 @@ export default function SchoolRegistrationPage() {
   const validateStep = (): string | null => {
     if (step === 1) {
       if (!validateLength(formData.teamName, 2, 50)) return "Team Name is required (2-50 characters)";
-      if (!validateRequired(formData.noOfMembers)) return "Please select the number of team members";
+      if (!validateRequired(formData.noOfMembers)) return "Please enter the number of team members";
+      const memberCount = parseInt(formData.noOfMembers);
+      if (!memberCount || memberCount < 1 || memberCount > 5) return "Number of team members must be between 1 and 5";
       if (!validateRequired(formData.studentType)) return "Please select a registration type";
       if (formData.studentType === "Government") {
         if (!validateRequired(formData.school)) return "School is required";
@@ -81,8 +84,23 @@ export default function SchoolRegistrationPage() {
       return;
     }
     setErrorMsg(null);
-    if (step === 2) setVisibleMemberCount(parseInt(formData.noOfMembers) - 1);
+    if (step === 2) {
+      const count = parseInt(formData.noOfMembers);
+      setVisibleMemberCount(count - 1);
+      if (count <= 1) {
+        setStep(4);
+        return;
+      }
+    }
     storeNextStep();
+  };
+
+  const prevStep = () => {
+    if (step === 4 && !hasAdditionalMembers) {
+      setStep(2);
+      return;
+    }
+    storePrevStep();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -215,7 +233,7 @@ export default function SchoolRegistrationPage() {
                 <CardHeader>
                   <CardTitle className="text-2xl text-white">SECTION 1 | Team Information</CardTitle>
                   <CardDescription className="text-gray-300">
-                    Every team member must be from the same school. A team must have a minimum of 3 members and max 5.
+                    Every team member must be from the same school. A team can have 1 to 5 members.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -224,38 +242,44 @@ export default function SchoolRegistrationPage() {
                     <Input name="teamName" value={formData.teamName} onChange={(e) => updateField("teamName", e.target.value)} required className="text-white" />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-white">No of Team Members <span className="text-red-500">*</span></Label>
-                      <RadioGroup
-                        value={formData.noOfMembers}
-                        onValueChange={(value) => handleRadioChange("noOfMembers", value)}
-                        className="mt-2"
-                      >
-                        {["3", "4", "5"].map((num) => (
-                          <div key={num} className="flex items-center space-x-2">
-                            <RadioGroupItem value={num} id={`members-${num}`} />
-                            <Label htmlFor={`members-${num}`} className="text-white font-normal cursor-pointer">{num}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="text-white">No of Team Members <span className="text-red-500">*</span></Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={formData.noOfMembers}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "" || /^\d*$/.test(v)) updateField("noOfMembers", v);
+                      }}
+                      onBlur={(e) => {
+                        const n = parseInt(e.target.value);
+                        if (!n || n < 1) updateField("noOfMembers", "1");
+                        else if (n > 5) updateField("noOfMembers", "5");
+                        else updateField("noOfMembers", String(n));
+                      }}
+                      placeholder="1 - 5"
+                      required
+                      className="text-white"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-white">Registration Type <span className="text-red-500">*</span></Label>
-                      <RadioGroup
-                        value={formData.studentType}
-                        onValueChange={(value) => handleRadioChange("studentType", value)}
-                        className="mt-2"
-                      >
-                        {["Government", "Private"].map((type) => (
-                          <div key={type} className="flex items-center space-x-2">
-                            <RadioGroupItem value={type} id={`type-${type}`} />
-                            <Label htmlFor={`type-${type}`} className="text-white font-normal cursor-pointer">{type}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="text-white">Registration Type <span className="text-red-500">*</span></Label>
+                    <RadioGroup
+                      value={formData.studentType}
+                      onValueChange={(value) => handleRadioChange("studentType", value)}
+                      className="flex flex-row gap-6 mt-2"
+                    >
+                      {["Government", "Private"].map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <RadioGroupItem value={type} id={`type-${type}`} className="border-white/50 data-checked:border-white" />
+                          <Label htmlFor={`type-${type}`} className="text-white font-normal cursor-pointer">{type}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
                   </div>
 
                   {formData.studentType === "Government" && (
@@ -375,10 +399,11 @@ export default function SchoolRegistrationPage() {
                     <p>By hitting Submit, you&apos;re agreeing to play fair, be respectful, and make this hackathon awesome.</p>
                     <div className="space-y-3 mt-4">
                       <p><strong>1. Code of Conduct:</strong> We promise to be respectful to teammates, mentors, and other participants.</p>
-                      <p><strong>2. Originality & Work:</strong> All code, designs, and ideas submitted will be created during the hackathon by our team.</p>
+                      <p><strong>2. Originality & Work:</strong> All code, designs, and ideas submitted must be created during the hackathon by our team.</p>
                       <p><strong>3. Media &amp; Data Consent:</strong> We&apos;re okay with photos, videos, and project screenshots being used by the organizers for event promotion.</p>
                       <p><strong>4. Health & Safety:</strong> We confirm that all team members are fit to participate and will follow event rules.</p>
                       <p><strong>5. Declaration:</strong> We confirm that all information provided in this form is true to the best of our knowledge.</p>
+                      <p><strong>6. Judging & Decisions:</strong> We acknowledge that the decisions made by the judging panel are final and binding in all matters relating to the competition.</p>
                     </div>
                   </div>
 
@@ -391,7 +416,7 @@ export default function SchoolRegistrationPage() {
                         className="mt-1"
                       />
                       <Label htmlFor="declaration" className="text-base font-medium text-white cursor-pointer">
-                        I have read and agree to the Code of Conduct, Originality and Consent terms above. <span className="text-red-500">*</span>
+                        I have read and agree to the Code of Conduct, Originality, and Consent terms above. <span className="text-red-500">*</span>
                       </Label>
                     </div>
                   </div>
