@@ -701,11 +701,10 @@ export default function Home() {
           ref={heroLayerRef}
           contentRef={heroContentRef}
           scrollArrowRef={scrollArrowRef}
-          onRegister={() => handleDialClick(0.95)}
+          onRegister={() => (cms.cta?.is_active ?? true) ? handleDialClick(0.95) : undefined}
           onOngoing={jumpToCurrentWeek}
           data={cms.hero}
-          registrationOpen={cms.cta?.is_active ?? true}
-          ctaText={cms.cta?.button_text ?? "Register Now"}
+          registrationOpen={cms.cta?.is_active ?? false}
         />
 
         <Chapters

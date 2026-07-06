@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useEffect, useSyncExternalStore, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 const LenisContext = createContext<Lenis | null>(null);
@@ -28,7 +29,19 @@ export function useLenis() {
 }
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isCMS = pathname.startsWith("/cms");
+
   useEffect(() => {
+    if (isCMS) {
+      lenisInstance = null;
+      listeners.forEach((l) => l());
+      return () => {
+        lenisInstance = null;
+        listeners.forEach((l) => l());
+      };
+    }
+
     const instance = new Lenis({
       duration: 1.0,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -50,7 +63,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       lenisInstance = null;
       listeners.forEach((l) => l());
     };
-  }, []);
+  }, [isCMS]);
 
   return (
     <LenisContext.Provider value={lenisInstance}>

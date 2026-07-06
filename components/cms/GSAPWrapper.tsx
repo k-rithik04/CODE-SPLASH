@@ -16,7 +16,7 @@ export default function GSAPWrapper({ children }: { children: React.ReactNode })
   }, { scope: container });
 
   return (
-    <div ref={container} className="h-full w-full">
+    <div ref={container} className="w-full">
       {children}
     </div>
   );
