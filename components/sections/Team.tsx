@@ -62,13 +62,13 @@ function TeamCard({ member }: { member: TeamMember }) {
           <Image
             src={src}
             alt={member.name}
-            width={200}
-            height={200}
+            fill
+            sizes="(max-width: 768px) 280px, 320px"
             loading="lazy"
             unoptimized
             onLoad={() => setLoaded(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 object-cover object-center transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
