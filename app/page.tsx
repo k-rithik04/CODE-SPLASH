@@ -705,6 +705,7 @@ export default function Home() {
           onOngoing={jumpToCurrentWeek}
           data={cms.hero}
           registrationOpen={cms.cta?.is_active ?? true}
+          ctaText={cms.cta?.button_text || "Register Now"}
         />
 
         <Chapters
