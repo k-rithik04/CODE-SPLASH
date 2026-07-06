@@ -12,7 +12,7 @@ export default function Background({ canvasWrapperRef, bgCanvasRef, partCanvasRe
   return (
     <div
       ref={canvasWrapperRef}
-      style={{ opacity: 0.8 }}
+      style={{ opacity: 1 }}
       className="fixed inset-0 w-screen h-screen pointer-events-none overflow-visible z-[-1] will-change-transform"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-bg via-[#110600] to-bg z-0"></div>

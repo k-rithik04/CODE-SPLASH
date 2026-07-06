@@ -93,7 +93,6 @@ export default function ImageUpload({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [selectedRatio, setSelectedRatio] = useState<string>("original");
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -130,8 +129,8 @@ export default function ImageUpload({
         }
       }
 
-      const maxW = 460;
-      const maxH = 340;
+      const maxW = 3840;
+      const maxH = 3840;
       let displayW = sw;
       let displayH = sh;
 
@@ -144,7 +143,6 @@ export default function ImageUpload({
 
       canvas.width = displayW;
       canvas.height = displayH;
-      setCanvasSize({ width: displayW, height: displayH });
 
       ctx.clearRect(0, 0, displayW, displayH);
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, displayW, displayH);
@@ -186,7 +184,7 @@ export default function ImageUpload({
     setUploading(true);
 
     const blob = await new Promise<Blob>((resolve) => {
-      canvas.toBlob((b) => resolve(b!), "image/webp", 0.9);
+      canvas.toBlob((b) => resolve(b!), "image/webp", 1.0);
     });
 
     const fileExt = "webp";
@@ -293,11 +291,7 @@ export default function ImageUpload({
             >
               <canvas
                 ref={canvasRef}
-                className="max-w-full"
-                style={{
-                  width: canvasSize.width || "auto",
-                  height: canvasSize.height || "auto",
-                }}
+                className="max-w-full max-h-full object-contain"
               />
             </div>
 

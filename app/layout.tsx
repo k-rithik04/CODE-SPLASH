@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     template: "%s | CodeSplash 2026",
   },
   description:
-    "CodeSplash 2026 is Sri Lanka's premier national-level hackathon bridging university and school talent. A convergence of logic, creativity, and innovation — organised by CSSA, University of Kelaniya.",
+    "CodeSplash 2026 is Sri Lanka's premier national-level hackathon bridging university and school talent. A convergence of logic, creativity, and innovation — organized by CSSA, University of Kelaniya.",
   keywords: [
     "hackathon",
     "CodeSplash",
@@ -62,8 +62,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
     ],
     apple: [
       { url: "/CodeSplash.png", sizes: "180x180", type: "image/png" },
@@ -172,7 +170,7 @@ const JSON_LD = {
           name: "What is CodeSplash?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "CodeSplash is the flagship inter-university hackathon conducted by the Computer Science Students' Association (CSSA) of the University of Kelaniya. At CodeSplash, you get to push your limits in idea generation, build under pressure and create a solution that will work no matter what field it is in.",
+            text: "CodeSplash is the flagship inter-university hackathon conducted by the Computer Science Students' Association (CSSA) of the University of Kelaniya. At CodeSplash, you get to push your limits in idea generation, build under pressure and create a solution that will work regardless of the field.",
           },
         },
         {
