@@ -30,6 +30,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Hero Section", href: "/cms/settings/hero", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" },
       { label: "CTA Section", href: "/cms/settings/cta", icon: "M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" },
       { label: "Footer / Connect", href: "/cms/settings/connect", icon: "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" },
+      { label: "User Management", href: "/cms/settings/users", icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" },
     ],
   },
   {
