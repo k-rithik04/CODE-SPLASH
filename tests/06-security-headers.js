@@ -94,18 +94,18 @@ async function testSecurityHeaders() {
 
   // 6.5: Check CSRF protection
   const loginFile = readFileSync(join(__dirname, "..", "app", "cms", "api", "login", "route.ts"), "utf8");
-  const hasCSRF = loginFile.includes("csrf") || loginFile.includes("CSRF") || loginFile.includes("Origin");
-  record(!hasCSRF); // We WANT to find this is missing
-  log(!hasCSRF ? "warn" : "pass", `CSRF protection in login route: ${hasCSRF}`);
+  const hasCSRF = loginFile.includes("validateOrigin");
+  record(hasCSRF);
+  log(hasCSRF ? "pass" : "warn", `CSRF protection in login route: ${hasCSRF}`);
   if (!hasCSRF) {
     log("warn", "  ⚠ No CSRF token validation — relies only on SameSite cookie policy");
   }
 
   // 6.6: Check logout POST for CSRF
   const logoutFile = readFileSync(join(__dirname, "..", "app", "cms", "api", "logout", "route.ts"), "utf8");
-  const logoutHasCSRF = logoutFile.includes("csrf") || logoutFile.includes("Origin");
-  record(!logoutHasCSRF);
-  log(!logoutHasCSRF ? "warn" : "pass", `CSRF protection in logout route: ${logoutHasCSRF}`);
+  const logoutHasCSRF = logoutFile.includes("validateOrigin");
+  record(logoutHasCSRF);
+  log(logoutHasCSRF ? "pass" : "warn", `CSRF protection in logout route: ${logoutHasCSRF}`);
 
   console.log("");
 }

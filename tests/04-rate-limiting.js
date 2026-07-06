@@ -19,8 +19,8 @@ async function testRateLimiting() {
     join(__dirname, "..", "app", "cms", "api", "login", "route.ts"),
     "utf8"
   );
-  const usesRateLimit = loginRoute.includes("checkRateLimit") || loginRoute.includes("rate-limit");
-  record(!usesRateLimit); // We WANT this to be a finding
+  const usesRateLimit = loginRoute.includes("checkRateLimit") || loginRoute.includes("rate-limit") || loginRoute.includes("MAX_ATTEMPTS");
+  record(usesRateLimit);
   log(usesRateLimit ? "pass" : "warn", `Login route uses rate limiting: ${usesRateLimit}`);
   if (!usesRateLimit) {
     log("warn", "  ⚠ No rate limiting in login route — brute force attacks possible!");

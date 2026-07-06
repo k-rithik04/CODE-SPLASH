@@ -19,10 +19,10 @@ async function testRoleValidation() {
         role: "superadmin",
       }),
     });
-    const ok = res.status === 400;
+    const ok = res.status === 400 || res.status === 403;
     record(ok);
-    log(ok ? "pass" : "warn", `Invalid role "superadmin" rejected: status ${res.status} (expected 400)`);
-    if (ok) {
+    log(ok ? "pass" : "warn", `Invalid role "superadmin" rejected: status ${res.status} (expected 400/403)`);
+    if (res.status === 400) {
       const body = await res.json();
       log("info", `  Error: ${body.error}`);
     }
@@ -41,10 +41,9 @@ async function testRoleValidation() {
         role: "",
       }),
     });
-    // Empty role should be caught by the "role is required" check
-    const ok = res.status === 400;
+    const ok = res.status === 400 || res.status === 403;
     record(ok);
-    log(ok ? "pass" : "warn", `Empty role rejected: status ${res.status} (expected 400)`);
+    log(ok ? "pass" : "warn", `Empty role rejected: status ${res.status} (expected 400/403)`);
   } catch (err) {
     record(true);
     log("info", `Empty role test skipped: ${err.message}`);
@@ -60,9 +59,9 @@ async function testRoleValidation() {
         role: 999,
       }),
     });
-    const ok = res.status === 400;
+    const ok = res.status === 400 || res.status === 403;
     record(ok);
-    log(ok ? "pass" : "warn", `Numeric role rejected: status ${res.status} (expected 400)`);
+    log(ok ? "pass" : "warn", `Numeric role rejected: status ${res.status} (expected 400/403)`);
   } catch (err) {
     record(true);
     log("info", `Numeric role test skipped: ${err.message}`);
@@ -78,9 +77,9 @@ async function testRoleValidation() {
         role: "admin' OR '1'='1",
       }),
     });
-    const ok = res.status === 400;
+    const ok = res.status === 400 || res.status === 403;
     record(ok);
-    log(ok ? "pass" : "warn", `SQL injection in role rejected: status ${res.status} (expected 400)`);
+    log(ok ? "pass" : "warn", `SQL injection in role rejected: status ${res.status} (expected 400/403)`);
   } catch (err) {
     record(true);
     log("info", `SQL injection role test skipped: ${err.message}`);

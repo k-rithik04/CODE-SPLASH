@@ -18,6 +18,7 @@ import testSecurityHeaders from "./06-security-headers.js";
 import testRBAC from "./07-rbac.js";
 import testSessionManagement from "./08-session-management.js";
 import testCMSCrud from "./09-cms-crud.js";
+import testRBACComprehensive from "./10-rbac.js";
 import testJWTSecretEnforcement from "./11-jwt-secret-enforcement.js";
 import testCSRFProtection from "./12-csrf-protection.js";
 import testPasswordStrength from "./13-password-strength.js";
@@ -27,8 +28,33 @@ import testRoleEnforcement from "./16-role-enforcement.js";
 import testPlaintextPassword from "./17-plaintext-password.js";
 import testCSPAndHeaders from "./18-csp-and-headers.js";
 import testRoleValidation from "./19-role-validation.js";
+import testSuspiciousPaths from "./20-suspicious-paths.js";
+import testRequestSizeLimit from "./21-request-size-limit.js";
+import testUserSelfProtection from "./22-user-self-protection.js";
+import testChangePasswordFlow from "./23-change-password-flow.js";
+import testRegistrationFlow from "./24-registration-flow.js";
+import testLoginSecurity from "./25-login-security.js";
+import testApiMethodRestriction from "./26-api-method-restriction.js";
+import testXSSPrevention from "./27-xss-prevention.js";
+import testAuditLogging from "./28-audit-logging.js";
+import testProxyRateLimiting from "./29-proxy-rate-limiting.js";
+import testCookieSecurity from "./30-cookie-security.js";
+import testErrorMessageConsistency from "./31-error-message-consistency.js";
+import testContentTypeValidation from "./32-content-type-validation.js";
+import testInputSanitization from "./33-input-sanitization.js";
+import testHttpOnlyCookie from "./34-httponly-cookie-verification.js";
 
 const TESTS = {
+  "01": { name: "Authentication Bypass", fn: testAuthBypass },
+  "02": { name: "SQL Injection", fn: testSQLInjection },
+  "03": { name: "JWT Token Tampering", fn: tamperJWT },
+  "04": { name: "Rate Limiting on Login", fn: testRateLimiting },
+  "05": { name: "Credential Exposure", fn: testCredentialExposure },
+  "06": { name: "Security Headers", fn: testSecurityHeaders },
+  "07": { name: "RBAC", fn: testRBAC },
+  "08": { name: "Session Management", fn: testSessionManagement },
+  "09": { name: "CMS CRUD Propagation", fn: testCMSCrud },
+  "10": { name: "RBAC Comprehensive", fn: testRBACComprehensive },
   "11": { name: "JWT Secret Enforcement", fn: testJWTSecretEnforcement },
   "12": { name: "CSRF Protection", fn: testCSRFProtection },
   "13": { name: "Password Strength", fn: testPasswordStrength },
@@ -38,15 +64,21 @@ const TESTS = {
   "17": { name: "Plaintext Password Prevention", fn: testPlaintextPassword },
   "18": { name: "CSP and Headers Updates", fn: testCSPAndHeaders },
   "19": { name: "Role Validation", fn: testRoleValidation },
-  "08": { name: "Session Management", fn: testSessionManagement },
-  "09": { name: "CMS CRUD Propagation", fn: testCMSCrud },
-  "01": { name: "Authentication Bypass", fn: testAuthBypass },
-  "02": { name: "SQL Injection", fn: testSQLInjection },
-  "03": { name: "JWT Token Tampering", fn: tamperJWT },
-  "04": { name: "Rate Limiting on Login", fn: testRateLimiting },
-  "05": { name: "Credential Exposure", fn: testCredentialExposure },
-  "06": { name: "Security Headers", fn: testSecurityHeaders },
-  "07": { name: "RBAC", fn: testRBAC },
+  "20": { name: "Suspicious Path Blocking", fn: testSuspiciousPaths },
+  "21": { name: "Request Size Limit", fn: testRequestSizeLimit },
+  "22": { name: "User Self-Protection", fn: testUserSelfProtection },
+  "23": { name: "Change Password Flow", fn: testChangePasswordFlow },
+  "24": { name: "Registration Flow", fn: testRegistrationFlow },
+  "25": { name: "Login Security", fn: testLoginSecurity },
+  "26": { name: "API Method Restriction", fn: testApiMethodRestriction },
+  "27": { name: "XSS Prevention", fn: testXSSPrevention },
+  "28": { name: "Audit Logging", fn: testAuditLogging },
+  "29": { name: "Proxy Rate Limiting", fn: testProxyRateLimiting },
+  "30": { name: "Cookie Security", fn: testCookieSecurity },
+  "31": { name: "Error Message Consistency", fn: testErrorMessageConsistency },
+  "32": { name: "Content Type Validation", fn: testContentTypeValidation },
+  "33": { name: "Input Sanitization", fn: testInputSanitization },
+  "34": { name: "HttpOnly Cookie Verification", fn: testHttpOnlyCookie },
 };
 
 async function main() {
