@@ -33,6 +33,7 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
                 height={120}
                 unoptimized
                 className="w-[90%] md:w-[85%] h-auto object-contain mb-4 filter drop-shadow-[0_4px_20px_rgba(255,107,0,0.15)]"
+                style={{ height: "auto" }}
               />
 
               <p className="w-full text-[0.75rem] md:text-[0.9rem] font-normal text-white/70 leading-relaxed tracking-[0.3px] text-left max-w-[480px]">

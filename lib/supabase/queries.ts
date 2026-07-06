@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/client";
 
 export function getStorageUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  return `${base}/storage/v1/object/public/cms-images/${path}`;
+  const cleanPath = path.replace(/^\/+/, "");
+  return `${base}/storage/v1/object/public/cms-images/${cleanPath}`;
 }
 
 export type HeroContent = {

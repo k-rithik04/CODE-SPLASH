@@ -11,5 +11,6 @@ export const STORAGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage
 
 export function imageUrl(path: string): string {
   if (path.startsWith("http")) return path
-  return `${STORAGE_BASE_URL}${path}`
+  const cleanPath = path.replace(/^\/+/, "")
+  return `${STORAGE_BASE_URL}/${cleanPath}`
 }
