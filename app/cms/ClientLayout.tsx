@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { RoleProvider, useRole } from "./RoleProvider";
-import { SidebarProvider } from "@/components/cms/SidebarContext";
+import { SidebarProvider, useSidebar } from "@/components/cms/SidebarContext";
 import Sidebar from "./Sidebar";
 import GSAPWrapper from "@/components/cms/GSAPWrapper";
+import { cn } from "@/lib/utils";
 
 type Role = "admin" | "editor" | "viewer";
 const ROLE_HIERARCHY: Record<Role, number> = { viewer: 0, editor: 1, admin: 2 };
@@ -68,6 +69,15 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function MainContent({ children }: { children: React.ReactNode }) {
+  const { open } = useSidebar();
+  return (
+    <main className={cn("min-h-screen p-6 md:p-8 transition-all duration-300", open ? "ml-[260px]" : "ml-[72px]")}>
+      <GSAPWrapper>{children}</GSAPWrapper>
+    </main>
+  );
+}
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthRoute = pathname === "/cms/login" || pathname === "/cms/change-password" || pathname.startsWith("/cms/login/") || pathname.startsWith("/cms/change-password/");
@@ -88,9 +98,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <RouteGuard>
           <div className="min-h-screen bg-black text-white">
             <Sidebar />
-            <main className="ml-[72px] min-h-screen p-6 md:p-8">
-              <GSAPWrapper>{children}</GSAPWrapper>
-            </main>
+            <MainContent>{children}</MainContent>
           </div>
         </RouteGuard>
       </SidebarProvider>
