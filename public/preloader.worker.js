@@ -1,11 +1,11 @@
 self.onmessage = async function (e) {
-  const { firstCount, totalFrames, mobileSkip = 1, isMobile = false } = e.data;
+  const { firstCount, totalFrames, mobileSkip = 1 } = e.data;
 
   const pad = (n) => n >= 1000 ? String(n).padStart(4, "0") : String(n).padStart(3, "0");
 
   const WORKER_URL = self.location.pathname;
   const BASE_PATH = WORKER_URL.substring(0, WORKER_URL.lastIndexOf("/"));
-  const folder = isMobile ? "frames_mobile" : "frames";
+  const folder = "frames";
 
   const PHASE1_CONCURRENCY = mobileSkip > 1 ? 4 : 16;
   const PHASE2_CONCURRENCY = mobileSkip > 1 ? 3 : 12;

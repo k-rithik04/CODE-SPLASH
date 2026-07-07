@@ -37,17 +37,17 @@ import {
   Connect,
 } from "@/components/sections";
 
-const FRAME_COUNT = 1265;
+const FRAME_COUNT = 1514;
 
 const SECTION_TIMING = {
   hero: { fadeStart: 0.04, end: 0.08 },
-  chapters: { start: 0.07, inEnd: 0.09, outStart: 0.16, outEnd: 0.17, end: 0.18 },
-  prizes: { start: 0.17, inEnd: 0.20, outStart: 0.25, outEnd: 0.26, end: 0.27 },
-  timeline: { start: 0.28, inEnd: 0.29, holdStart: 0.32, scrollEnd: 0.46, outStart: 0.48, outEnd: 0.50, end: 0.50 },
-  partners: { start: 0.51, inEnd: 0.52, holdStart: 0.53, scrollEnd: 0.59, outStart: 0.595, outEnd: 0.6, end: 0.6 },
-  team: { start: 0.615, inEnd: 0.62, outStart: 0.75, outEnd: 0.79, end: 0.79 },
-  faq: { start: 0.78, inEnd: 0.80, pointerStart: 0.81, pointerEnd: 0.87, outStart: 0.86, outEnd: 0.89, end: 0.89 },
-  cta: { start: 0.92, inEnd: 0.95, end: 1.0 },
+  chapters: { start: 0.075, inEnd: 0.09, outStart: 0.135, outEnd: 0.145, end: 0.155 },
+  prizes: { start: 0.15, inEnd: 0.17, outStart: 0.20, outEnd: 0.21, end: 0.22 },
+  timeline: { start: 0.215, inEnd: 0.23, holdStart: 0.24, scrollEnd: 0.38, outStart: 0.39, outEnd: 0.41, end: 0.42 },
+  partners: { start: 0.42, inEnd: 0.44, holdStart: 0.445, scrollEnd: 0.63, outStart: 0.635, outEnd: 0.65, end: 0.645 },
+  team: { start: 0.635, inEnd: 0.65, outStart: 0.78, outEnd: 0.805, end: 0.81 },
+  faq: { start: 0.805, inEnd: 0.825, pointerStart: 0.84, pointerEnd: 0.88, outStart: 0.895, outEnd: 0.915, end: 0.92 },
+  cta: { start: 0.915, inEnd: 0.94, end: 1.0 },
 };
 
 export default function Home() {
@@ -59,6 +59,11 @@ export default function Home() {
   const [isLoaderRemoved, setIsLoaderRemoved] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const frame1DrawnRef = useRef(false);
+  const cmsIsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    cmsIsLoadedRef.current = cms.isLoaded;
+  }, [cms.isLoaded]);
 
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const partCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -69,7 +74,7 @@ export default function Home() {
   const lastActiveIndex = useRef(-1);
   const imagesRef = useRef<Map<number, ImageBitmap>>(new Map());
   const pendingLoadsRef = useRef<Set<number>>(new Set());
-  const layoutMetrics = useRef({ width: 0, height: 0, maxScroll: 1 });
+  const layoutMetrics = useRef({ width: 0, height: 0, maxScroll: 1, partnersMaxScrollY: -68, timelineMaxScrollY: -71 });
 
   function bitmapLruInsert(frame: number, bitmap: ImageBitmap, isMobile: boolean) {
     const MAX_BITMAPS = isMobile ? 60 : 300;
@@ -178,27 +183,28 @@ export default function Home() {
         }
       } else if (type === "firstBatchComplete") {
         setLoadProgress(100);
-        // Only dismiss loader after frame 1 is confirmed drawn
+        // Only dismiss loader after frame 1 is confirmed drawn AND CMS data is loaded
         const dismissLoader = () => {
           hideTimer = setTimeout(() => {
             setIsLoaderVisible(false);
             removeTimer = setTimeout(() => setIsLoaderRemoved(true), 600);
           }, 2000);
         };
-        if (frame1DrawnRef.current) {
+        if (frame1DrawnRef.current && cmsIsLoadedRef.current) {
           dismissLoader();
         } else {
-          // Wait up to 3s for frame 1 to be drawn, then dismiss anyway
+          // Wait up to 5s for frame 1 and CMS data, then dismiss anyway to avoid infinite hang
+          let attempts = 0;
           const checkInterval = setInterval(() => {
-            if (frame1DrawnRef.current) {
+            attempts++;
+            if (frame1DrawnRef.current && cmsIsLoadedRef.current) {
+              clearInterval(checkInterval);
+              dismissLoader();
+            } else if (attempts > 100) { // 5 seconds (100 * 50ms)
               clearInterval(checkInterval);
               dismissLoader();
             }
           }, 50);
-          setTimeout(() => {
-            clearInterval(checkInterval);
-            dismissLoader();
-          }, 3000);
         }
       } else if (type === "error") {
         // Worker crashed — dismiss loader anyway so site isn't stuck
@@ -267,6 +273,24 @@ export default function Home() {
       layoutMetrics.current.height = window.innerHeight;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       layoutMetrics.current.maxScroll = maxScroll <= 0 ? 1 : maxScroll;
+
+      if (partnersContentRef.current) {
+        const h = partnersContentRef.current.offsetHeight;
+        if (h > 0) {
+          const containerH = window.innerHeight * 0.75;
+          const maxPx = Math.max(0, h - containerH);
+          layoutMetrics.current.partnersMaxScrollY = Math.min(-68, -(maxPx / h) * 100);
+        }
+      }
+
+      if (timelineTrackRef.current) {
+        const h = timelineTrackRef.current.offsetHeight;
+        if (h > 0) {
+          const containerH = window.innerHeight * 0.75;
+          const maxPx = Math.max(0, h - containerH);
+          layoutMetrics.current.timelineMaxScrollY = Math.min(-71, -(maxPx / h) * 100);
+        }
+      }
     };
 
     const initParticles = () => {
@@ -288,6 +312,7 @@ export default function Home() {
       }
     };
 
+    updateMetrics();
     if (!isMobile) initParticles();
     const metricsTimer = setTimeout(updateMetrics, 500);
 
@@ -384,7 +409,7 @@ export default function Home() {
 
       const frameIndex = Math.floor(sp * (FRAME_COUNT - 1));
       const targetFrame = frameIndex + 1;
-      
+
       const bitmap = imagesRef.current.get(targetFrame);
 
       if (bitmap) {
@@ -424,12 +449,12 @@ export default function Home() {
 
       let activeIndex = 0;
       if (sp < 0.08) activeIndex = 0;
-      else if (sp < 0.18) activeIndex = 1;
-      else if (sp < 0.27) activeIndex = 2;
-      else if (sp < 0.50) activeIndex = 3;
-      else if (sp < 0.615) activeIndex = 4;
-      else if (sp < 0.79) activeIndex = 5;
-      else if (sp < 0.89) activeIndex = 6;
+      else if (sp < 0.155) activeIndex = 1;
+      else if (sp < 0.22) activeIndex = 2;
+      else if (sp < 0.42) activeIndex = 3;
+      else if (sp < 0.645) activeIndex = 4;
+      else if (sp < 0.81) activeIndex = 5;
+      else if (sp < 0.92) activeIndex = 6;
       else if (sp < 1.0) activeIndex = 7;
       else activeIndex = 8;
 
@@ -539,15 +564,16 @@ export default function Home() {
           else if (sp > t.timeline.outStart) op = mapRange(sp, t.timeline.outStart, t.timeline.outEnd, 1, 0);
           timelineLayerRef.current.style.opacity = op.toString();
           timelineLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
+          const tMax = layoutMetrics.current.timelineMaxScrollY;
           let scrollY = 0;
           if (sp < t.timeline.holdStart) {
             scrollY = mapRange(sp, t.timeline.start, t.timeline.holdStart, 15, 0);
           } else if (sp < t.timeline.scrollEnd) {
-            scrollY = mapRange(sp, t.timeline.holdStart, t.timeline.scrollEnd, 0, -71);
+            scrollY = mapRange(sp, t.timeline.holdStart, t.timeline.scrollEnd, 0, tMax);
           } else if (sp < t.timeline.outStart) {
-            scrollY = -71;
+            scrollY = tMax;
           } else {
-            scrollY = mapRange(sp, t.timeline.outStart, t.timeline.end, -71, -80);
+            scrollY = mapRange(sp, t.timeline.outStart, t.timeline.end, tMax, tMax - 9);
           }
           timelineTrackRef.current.style.transform = `translate3d(0, ${scrollY}%, 0)`;
         } else {
@@ -565,15 +591,16 @@ export default function Home() {
           partnersLayerRef.current.style.opacity = op.toString();
           partnersLayerRef.current.style.pointerEvents = op > 0.05 ? "auto" : "none";
           partnersLayerRef.current.style.zIndex = op > 0.05 ? "50" : "10";
+          const pMax = layoutMetrics.current.partnersMaxScrollY;
           let scrollY = 0;
           if (sp < t.partners.holdStart) {
             scrollY = mapRange(sp, t.partners.start, t.partners.holdStart, 15, 0);
           } else if (sp < t.partners.scrollEnd) {
-            scrollY = mapRange(sp, t.partners.holdStart, t.partners.scrollEnd, 0, -68);
+            scrollY = mapRange(sp, t.partners.holdStart, t.partners.scrollEnd, 0, pMax);
           } else if (sp < t.partners.outStart) {
-            scrollY = -68;
+            scrollY = pMax;
           } else {
-            scrollY = mapRange(sp, t.partners.outStart, t.partners.end, -68, -80);
+            scrollY = mapRange(sp, t.partners.outStart, t.partners.end, pMax, pMax - 12);
           }
           partnersContentRef.current.style.transform = `translate3d(0, ${scrollY}%, 0)`;
         } else {

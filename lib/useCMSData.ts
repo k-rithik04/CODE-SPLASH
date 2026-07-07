@@ -32,6 +32,7 @@ export interface CMSData {
   faq: FaqItem[];
   cta: CtaContent | null;
   connect: ConnectContent | null;
+  isLoaded: boolean;
 }
 
 export function useCMSData(): CMSData {
@@ -45,6 +46,7 @@ export function useCMSData(): CMSData {
     faq: [],
     cta: null,
     connect: null,
+    isLoaded: false,
   });
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function useCMSData(): CMSData {
       fetchCtaContent(),
       fetchConnectContent(),
     ]).then(([hero, chapters, prizes, timeline, partners, team, faq, cta, connect]) => {
-      setData({ hero, chapters, prizes, timeline, partners, team, faq, cta, connect });
+      setData({ hero, chapters, prizes, timeline, partners, team, faq, cta, connect, isLoaded: true });
     });
   }, []);
 

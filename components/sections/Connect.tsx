@@ -10,7 +10,7 @@ interface SocialLink {
   ariaLabel: string;
   imgSrc: string;
   alt: string;
-  hasTooltip?: boolean;
+  tooltipText: string;
 }
 
 interface ConnectProps {
@@ -24,11 +24,11 @@ const INSTAGRAM_SVG = "data:image/svg+xml;utf8,<svg fill='%23ff6b00' viewBox='0 
 
 const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerRef) => {
   const socialLinks: SocialLink[] = data ? [
-    { href: data.linkedin_url, ariaLabel: "LinkedIn", imgSrc: LINKEDIN_SVG, alt: "LinkedIn" },
-    { href: data.facebook_url, ariaLabel: "Facebook", imgSrc: FACEBOOK_SVG, alt: "Facebook" },
-    { href: data.youtube_url, ariaLabel: "YouTube", imgSrc: YOUTUBE_SVG, alt: "YouTube" },
-    { href: data.instagram_cssa_url, ariaLabel: "Instagram CSSA", imgSrc: INSTAGRAM_SVG, alt: "Instagram CSSA" },
-    { href: data.instagram_codesplash_url, ariaLabel: "Instagram CodeSplash", imgSrc: INSTAGRAM_SVG, alt: "Instagram CodeSplash", hasTooltip: true },
+    { href: data.linkedin_url, ariaLabel: "LinkedIn", imgSrc: LINKEDIN_SVG, alt: "LinkedIn", tooltipText: "CSSA LinkedIn" },
+    { href: data.facebook_url, ariaLabel: "Facebook", imgSrc: FACEBOOK_SVG, alt: "Facebook", tooltipText: "CSSA Facebook" },
+    { href: data.youtube_url, ariaLabel: "YouTube", imgSrc: YOUTUBE_SVG, alt: "YouTube", tooltipText: "CSSA YouTube" },
+    { href: data.instagram_cssa_url, ariaLabel: "Instagram CSSA", imgSrc: INSTAGRAM_SVG, alt: "Instagram CSSA", tooltipText: "CSSA Instagram" },
+    { href: data.instagram_codesplash_url, ariaLabel: "Instagram CodeSplash", imgSrc: INSTAGRAM_SVG, alt: "Instagram CodeSplash", tooltipText: "CodeSplash Instagram" },
   ] : [];
 
   return (
@@ -69,7 +69,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
               target="_blank"
               rel="noopener noreferrer"
               aria-label={link.ariaLabel}
-              className={`connect-btn !px-3 md:!px-4 touch-manipulation${link.hasTooltip ? " group relative" : ""}`}
+              className="connect-btn !px-3 md:!px-4 touch-manipulation group relative"
             >
               <Image
                 src={link.imgSrc}
@@ -79,11 +79,9 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
                 unoptimized
                 className="w-4 md:w-5 h-4 md:h-5 object-contain"
               />
-              {link.hasTooltip && (
-                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[0.5rem] bg-orange text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  CodeSplash
-                </span>
-              )}
+              <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[0.5rem] bg-orange text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                {link.tooltipText}
+              </span>
             </a>
           ))}
         </div>

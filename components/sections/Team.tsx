@@ -1,10 +1,8 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 import React, { useState } from "react";
 import type { TeamMember } from "@/lib/supabase/queries";
 import { getStorageUrl } from "@/lib/supabase/queries";
-
 
 interface TeamProps {
   trackRef: React.RefObject<HTMLDivElement | null>;
@@ -36,7 +34,7 @@ function TeamCard({ member }: { member: TeamMember }) {
 
   return (
     <div className="w-[280px] md:w-[300px] h-[380px] md:h-[400px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border transition-transform hover:-translate-y-2 group">
-      <div className="h-[60%] w-full border-b border-white/10 relative overflow-hidden bg-white">
+      <div className="h-[60%] w-full relative overflow-hidden">
         {!loaded && !error && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-10 h-10 border-3 border-black/10 border-t-orange rounded-full animate-spin" />
@@ -55,7 +53,7 @@ function TeamCard({ member }: { member: TeamMember }) {
             loading="lazy"
             onLoad={() => setLoaded(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-contain object-bottom p-0 scale-110 origin-bottom ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
           />
         )}
         <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 rounded-full text-white/90 transition-all duration-300 hover:scale-110 hover:text-orange z-50 drop-shadow-md cursor-pointer">

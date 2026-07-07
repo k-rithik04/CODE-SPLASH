@@ -46,8 +46,9 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
 
               <div className="flex flex-col sm:flex-row gap-[10px] sm:gap-4 mt-6 z-50">
                 {registrationOpen && (
-                  <Button
+                  <button
                     onClick={onRegister}
+                    style={{ background: "transparent" }}
                     className="jump-btn group rounded-full !border !border-[#ff6b00] !bg-gradient-to-r !from-[#ff6b00]/25 !to-transparent !via-[#ff6b00]/22 !to-[#ff6b00]/8 backdrop-blur-md !shadow-[0_0_20px_rgba(255,107,0,0.2)] hover:!from-[#ff6b00]/40 hover:!via-[#ff6b00]/35 hover:!to-[#ff6b00]/12 hover:!text-white hover:!shadow-[0_0_28px_rgba(255,107,0,0.3)] transition-all duration-300"
                   >
                     <span>{ctaText}</span>
@@ -64,12 +65,13 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
                         d="M9 5l7 7-7 7"
                       />
                     </svg>
-                  </Button>
+                  </button>
                 )}
 
-                <Button
+                <button
                   onClick={onOngoing}
-                  className={`jump-btn group rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-[#ff8a33] hover:bg-white/10 transition-all duration-300 !mt-0 ${registrationOpen ? "sm:!mt-6" : ""} z-50`}>
+                  style={{ background: "rgba(255, 255, 255, 0.05)" }}
+                  className={`jump-btn group rounded-full border border-white/10 backdrop-blur-md text-[#ff8a33] hover:bg-white/10 transition-all duration-300 !mt-0 ${registrationOpen ? "sm:!mt-6" : ""} z-50`}>
                   <span>Ongoing Challenge</span>
                   <svg
                     className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
@@ -84,7 +86,7 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
                       d="M13 5l7 7-7 7M5 5l7 7-7 7"
                     />
                   </svg>
-                </Button>
+                </button>
               </div>
             </div>
           </section>

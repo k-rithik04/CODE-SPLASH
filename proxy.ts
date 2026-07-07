@@ -125,7 +125,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Skip rate limiting for static assets (HMR chunks, CSS, JS)
-  if (!pathname.startsWith("/_next/") && !pathname.startsWith("/assets/frames/") && !pathname.startsWith("/assets/frames_mobile/")) {
+  if (!pathname.startsWith("/_next/") && !pathname.startsWith("/assets/frames/")) {
     // Global rate limiting (all routes)
     const clientKey = getRateLimitKey(request);
     if (!checkGlobalRateLimit(clientKey)) {

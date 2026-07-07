@@ -10,12 +10,12 @@ interface NavigationProps {
 
 const NAV_ITEMS = [
   { label: "Gateway", target: 0.0 },
-  { label: "Chapters", target: 0.09 },
-  { label: "Treasury", target: 0.20 },
-  { label: "Journey", target: 0.29 },
-  { label: "Partners", target: 0.53 },
-  { label: "Creators", target: 0.62 },
-  { label: "FAQ", target: 0.80 },
+  { label: "Chapters", target: 0.11 },
+  { label: "Treasury", target: 0.18 },
+  { label: "Journey", target: 0.24 },
+  { label: "Partners", target: 0.445 },
+  { label: "Creators", target: 0.65 },
+  { label: "FAQ", target: 0.85 },
   { label: "Register", target: 0.95 },
 ];
 
