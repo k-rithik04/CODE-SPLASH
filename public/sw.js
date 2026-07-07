@@ -1,5 +1,5 @@
-const CACHE_NAME = "code-splash-frames-v1";
-const FRAME_PATTERN = /\/assets\/frames\/frame_\d{1,4}\.webp$/;
+const CACHE_NAME = "code-splash-frames-v2";
+const FRAME_PATTERN = /\/assets\/frames(?:_mobile)?\/frame_\d{1,4}\.webp$/;
 
 self.addEventListener("install", () => {
   self.skipWaiting();

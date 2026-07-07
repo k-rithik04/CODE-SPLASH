@@ -36,9 +36,7 @@ const ROLE_HIERARCHY: Record<string, number> = { viewer: 0, editor: 1, admin: 2 
 const ADMIN_ROUTES = ["/cms/audit", "/cms/settings/users"];
 const EDITOR_ROUTES = [
   "/cms/content",
-  "/cms/settings/hero",
-  "/cms/settings/cta",
-  "/cms/settings/connect",
+  "/cms/settings",
 ];
 
 // Rate limiting store (in-memory, per-instance)
@@ -127,7 +125,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Skip rate limiting for static assets (HMR chunks, CSS, JS)
-  if (!pathname.startsWith("/_next/")) {
+  if (!pathname.startsWith("/_next/") && !pathname.startsWith("/assets/frames/") && !pathname.startsWith("/assets/frames_mobile/")) {
     // Global rate limiting (all routes)
     const clientKey = getRateLimitKey(request);
     if (!checkGlobalRateLimit(clientKey)) {

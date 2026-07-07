@@ -273,7 +273,7 @@ export default function RootLayout({
       </head>
       <body className={cn(
         "min-h-full flex flex-col",
-        "bg-bg text-white font-main overflow-x-hidden"
+        "bg-bg text-white font-main"
       )}>
         <div
           suppressHydrationWarning

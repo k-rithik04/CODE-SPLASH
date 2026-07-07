@@ -20,6 +20,8 @@ import type Lenis from "lenis";
 import { mapRange } from "@/lib/animation";
 import { useCMSData } from "@/lib/useCMSData";
 import { useLenis } from "@/components/SmoothScroll";
+import { isMobileDevice } from "@/lib/device-detection";
+import { getFrameUrl } from "@/lib/frame-resolver";
 import {
   Loader,
   Background,
@@ -65,8 +67,26 @@ export default function Home() {
   const engineInitRef = useRef(false);
   const lastDrawnFrame = useRef(-1);
   const lastActiveIndex = useRef(-1);
-  const bitmapsRef = useRef<Map<number, ImageBitmap>>(new Map());
+  const imagesRef = useRef<Map<number, ImageBitmap>>(new Map());
+  const pendingLoadsRef = useRef<Set<number>>(new Set());
   const layoutMetrics = useRef({ width: 0, height: 0, maxScroll: 1 });
+
+  function bitmapLruInsert(frame: number, bitmap: ImageBitmap, isMobile: boolean) {
+    const MAX_BITMAPS = isMobile ? 60 : 300;
+    if (imagesRef.current.size >= MAX_BITMAPS) {
+      let farthestKey = -1, farthestDist = -1;
+      for (const [key] of imagesRef.current) {
+        const dist = Math.abs(key - (lastDrawnFrame.current >= 0 ? lastDrawnFrame.current : 0));
+        if (dist > farthestDist) { farthestDist = dist; farthestKey = key; }
+      }
+      if (farthestKey >= 0) {
+        const old = imagesRef.current.get(farthestKey);
+        if (old) old.close();
+        imagesRef.current.delete(farthestKey);
+      }
+    }
+    imagesRef.current.set(frame, bitmap);
+  }
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const dialWindowRef = useRef<HTMLDivElement>(null);
@@ -105,12 +125,13 @@ export default function Home() {
   // --- PRELOADER (Web Worker) ---
   useEffect(() => {
     const worker = new Worker("/preloader.worker.js");
+    const isMobile = isMobileDevice();
 
     worker.postMessage({
-      firstCount: 600,
+      firstCount: isMobile ? 150 : 600,
       totalFrames: FRAME_COUNT,
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+      mobileSkip: isMobile ? 5 : 1,
+      isMobile: isMobile,
     });
 
     let hideTimer: ReturnType<typeof setTimeout>;
@@ -132,20 +153,27 @@ export default function Home() {
     worker.onmessage = (e: MessageEvent) => {
       const { type } = e.data;
 
-      if (type === "progress") {
+      if (type === "bitmap") {
+        bitmapLruInsert(e.data.frame, e.data.bitmap, isMobile);
+      } else if (type === "progress") {
         const pct = (e.data.loaded / e.data.total) * 100;
         setLoadProgress(Math.min(pct, 100));
-      } else if (type === "firstFrameReady") {
+      } else if (type === "firstFrameBitmap") {
         // Frame 1 bitmap received — draw it to canvas immediately
+        bitmapLruInsert(e.data.frame, e.data.bitmap, isMobile);
         const bgCanvas = bgCanvasRef.current;
-        if (bgCanvas && e.data.bitmap) {
+        if (bgCanvas) {
           const ctx = bgCanvas.getContext("2d", { alpha: false });
           if (ctx) {
-            bgCanvas.width = 1920;
-            bgCanvas.height = 1080;
-            ctx.drawImage(e.data.bitmap, 0, 0, 1920, 1080);
+            const expectedW = isMobile ? Math.min(1920, window.innerWidth * (window.devicePixelRatio || 1)) : 1920;
+            const expectedH = isMobile ? Math.round(expectedW * (1080 / 1920)) : 1080;
+            if (bgCanvas.width !== expectedW || bgCanvas.height !== expectedH) {
+              bgCanvas.width = expectedW;
+              bgCanvas.height = expectedH;
+            }
+            ctx.drawImage(e.data.bitmap, 0, 0, bgCanvas.width, bgCanvas.height);
             frame1DrawnRef.current = true;
-            bitmapsRef.current.set(1, e.data.bitmap);
+            lastDrawnFrame.current = 0;
           }
         }
       } else if (type === "firstBatchComplete") {
@@ -172,10 +200,6 @@ export default function Home() {
             dismissLoader();
           }, 3000);
         }
-      } else if (type === "bitmaps") {
-        for (const item of e.data.items) {
-          bitmapsRef.current.set(item.frame, item.bitmap);
-        }
       } else if (type === "error") {
         // Worker crashed — dismiss loader anyway so site isn't stuck
         console.warn("[Preloader] Worker error:", e.data.message);
@@ -198,6 +222,7 @@ export default function Home() {
   // --- ANIMATION ENGINE ---
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const isMobile = isMobileDevice();
 
     lenisRef.current = lenis;
 
@@ -214,14 +239,20 @@ export default function Home() {
       window.scrollTo(0, 0);
       if (lenis) lenis.scrollTo(0, { immediate: true });
 
-      bgCanvas.width = 1920;
-      bgCanvas.height = 1080;
+      // Set canvas dimensions if not already at correct size
+      const expectedW = isMobile ? Math.min(1920, window.innerWidth * (window.devicePixelRatio || 1)) : 1920;
+      const expectedH = isMobile ? Math.round(expectedW * (1080 / 1920)) : 1080;
+      if (bgCanvas.width !== expectedW || bgCanvas.height !== expectedH) {
+        bgCanvas.width = expectedW;
+        bgCanvas.height = expectedH;
+      }
 
-      // Draw frame 1 immediately if already available (prevents black screen)
-      const existingFrame1 = bitmapsRef.current.get(1);
+      // Always draw frame 1 if available (guarantees no black screen)
+      const existingFrame1 = imagesRef.current.get(1);
       if (existingFrame1) {
-        bgCtx.drawImage(existingFrame1, 0, 0, 1920, 1080);
+        bgCtx.drawImage(existingFrame1, 0, 0, bgCanvas.width, bgCanvas.height);
         lastDrawnFrame.current = 0;
+        frame1DrawnRef.current = true;
       }
     }
 
@@ -257,10 +288,25 @@ export default function Home() {
       }
     };
 
-    initParticles();
+    if (!isMobile) initParticles();
     const metricsTimer = setTimeout(updateMetrics, 500);
 
-    const handleResize = () => { updateMetrics(); initParticles(); };
+    const handleResize = () => {
+      updateMetrics();
+      const nowMobile = isMobileDevice();
+      if (nowMobile) {
+        const cw = Math.min(1920, window.innerWidth * (window.devicePixelRatio || 1));
+        const ch = Math.round(cw * (1080 / 1920));
+        bgCanvas.width = cw;
+        bgCanvas.height = ch;
+      }
+      if (nowMobile) {
+        particles = [];
+        pCtx.clearRect(0, 0, partCanvas.width, partCanvas.height);
+      } else {
+        initParticles();
+      }
+    };
     const handleMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
     const handleMouseLeave = () => { mouse.x = null; mouse.y = null; };
 
@@ -314,6 +360,7 @@ export default function Home() {
 
     const renderLoop = (time: number) => {
       animationFrameRef.current = requestAnimationFrame(renderLoop);
+
       if (time - lastRenderTime < fpsInterval) return;
       lastRenderTime = time;
 
@@ -336,17 +383,44 @@ export default function Home() {
       }
 
       const frameIndex = Math.floor(sp * (FRAME_COUNT - 1));
-      const bitmap = bitmapsRef.current.get(frameIndex + 1);
+      const targetFrame = frameIndex + 1;
+      
+      const bitmap = imagesRef.current.get(targetFrame);
+
       if (bitmap) {
         if (frameIndex !== lastDrawnFrame.current) {
-          bgCtx.drawImage(bitmap, 0, 0, bgCanvas.width, bgCanvas.height);
-          lastDrawnFrame.current = frameIndex;
+          try {
+            bgCtx.drawImage(bitmap, 0, 0, bgCanvas.width, bgCanvas.height);
+            lastDrawnFrame.current = frameIndex;
+          } catch {
+            imagesRef.current.delete(targetFrame);
+          }
         }
       } else if (lastDrawnFrame.current >= 0) {
-        // Fallback: if current frame isn't loaded, keep showing the last drawn frame
-        // This prevents black frames when scrolling into unloaded regions
+        // Bitmap evicted or not yet loaded — try to load from SW cache (throttled)
+        if (!pendingLoadsRef.current.has(targetFrame) && pendingLoadsRef.current.size < 4) {
+          pendingLoadsRef.current.add(targetFrame);
+          const img = new Image();
+          img.onload = () => {
+            try {
+              bgCtx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
+              lastDrawnFrame.current = frameIndex;
+            } catch { /* ignore */ }
+            pendingLoadsRef.current.delete(targetFrame);
+          };
+          img.onerror = () => { pendingLoadsRef.current.delete(targetFrame); };
+          img.src = getFrameUrl(targetFrame, isMobile);
+        }
+      } else {
+        const f1 = imagesRef.current.get(1);
+        if (f1) {
+          try {
+            bgCtx.drawImage(f1, 0, 0, bgCanvas.width, bgCanvas.height);
+            lastDrawnFrame.current = 0;
+          } catch { /* ignore */ }
+        }
       }
-      updateParticles();
+      if (!isMobile) updateParticles();
 
       let activeIndex = 0;
       if (sp < 0.08) activeIndex = 0;
@@ -564,12 +638,15 @@ export default function Home() {
             }
             item.style.transform = `translate3d(${currentX}vw, 0, 0)`;
             item.style.opacity = currentOp.toString();
-            item.style.pointerEvents = currentOp > 0.1 ? "auto" : "none";
+            // Removed item.style.pointerEvents to avoid overriding parent's pointer-events: none
           });
         } else {
           faqLayerRef.current.style.opacity = "0";
           faqLayerRef.current.style.pointerEvents = "none";
           faqLayerRef.current.style.zIndex = "10";
+          faqItemsRef.current.forEach((item) => {
+            if (item) item.style.pointerEvents = "none";
+          });
         }
       }
 

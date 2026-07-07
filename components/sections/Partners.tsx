@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import type { PartnerRow } from "@/lib/supabase/queries";
 import { getStorageUrl } from "@/lib/supabase/queries";
 
@@ -24,14 +23,13 @@ function PartnerLogo({ src, alt, width, height, className, style }: {
   const localFallback = getLocalFallback(alt);
 
   return (
-    <Image
+    <img
       src={imgSrc}
       alt={alt}
       width={width}
       height={height}
-      unoptimized
       className={className}
-      style={style}
+      style={{ width: "auto", height: "auto", ...style }}
       onError={() => {
         if (localFallback && imgSrc !== localFallback) setImgSrc(localFallback);
       }}

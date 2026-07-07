@@ -77,7 +77,7 @@ export default function Sidebar() {
       onMouseLeave={() => setHovered(false)}
       className={cn(
         "fixed top-0 left-0 h-full z-50 flex flex-col border-r border-white/[0.06] bg-black/80 backdrop-blur-2xl transition-all duration-300",
-        expanded ? "w-[260px]" : "w-[72px]"
+        expanded ? "w-[260px] translate-x-0" : "w-[72px] -translate-x-full md:translate-x-0"
       )}
     >
       <div className="h-16 flex items-center px-5 border-b border-white/[0.06]">

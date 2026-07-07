@@ -94,6 +94,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (!swiping) {
         if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
           swiping = true;
+          // Don't preventDefault on first detection — let browser verify gesture
+          return;
         } else if (Math.abs(dy) > 10) {
           return;
         } else {
@@ -101,6 +103,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         }
       }
 
+      // Only preventDefault once confirmed horizontal swipe is in progress
       e.preventDefault();
       instance.scrollTo(instance.scroll - dx * 1.5, { duration: 0.05 });
       touchStartX = e.touches[0].clientX;

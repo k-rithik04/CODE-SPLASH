@@ -34,7 +34,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
   return (
     <section
       ref={layerRef}
-      className="fixed bottom-0 left-0 w-full h-[65vh] md:h-[60vh] z-10 flex flex-col justify-end pointer-events-none will-change-transform bg-gradient-to-t from-black via-black to-transparent"
+      className="fixed bottom-0 left-0 w-full h-[65vh] md:h-[60vh] z-10 flex flex-col justify-end pointer-events-none bg-gradient-to-t from-black via-black to-transparent"
       style={{ transform: "translate3d(0, 200%, 0)" }}
     >
       <div className="w-full flex-1 flex flex-col items-center justify-end px-[5%] pb-[100px] relative mt-[10vh]">
@@ -42,7 +42,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
           &ldquo;{data?.quote?.replace(/"/g, "") ?? "Every great journey begins with a conversation"}&rdquo;
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-4 pointer-events-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 md:gap-4 max-w-[800px] mb-4 pointer-events-auto">
           {data?.email_1 && (
             <a href={`mailto:${data.email_1}`} className="connect-btn touch-manipulation">
               <svg className="w-4 h-4 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
         </div>
 
         <div className="w-full flex justify-center mb-4">
-          <Image src={data?.cssa_logo_url ? getStorageUrl(data.cssa_logo_url) : "/CSSALogo.png"} alt="CSSA Logo" width={250} height={80} sizes="(max-width: 768px) 200px, 250px" quality={90} priority className="object-contain opacity-90" style={{ width: "auto", height: "60px" }} />
+          <img src={data?.cssa_logo_url ? getStorageUrl(data.cssa_logo_url) : "/CSSALogo.png"} alt="CSSA Logo" className="object-contain opacity-90" style={{ width: "auto", height: "60px" }} />
         </div>
 
         <div className="text-[0.65rem] md:text-[0.75rem] text-white/60 tracking-[0.5px] text-center flex items-center justify-center gap-2 flex-wrap pb-4">

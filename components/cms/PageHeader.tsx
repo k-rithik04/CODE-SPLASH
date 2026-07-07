@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRole } from "@/app/cms/RoleProvider";
+import { useSidebar } from "@/components/cms/SidebarContext";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useRef } from "react";
@@ -29,6 +30,7 @@ export default function PageHeader({
   className,
 }: PageHeaderProps) {
   const { user } = useRole();
+  const { toggleSidebar } = useSidebar();
   const headerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -62,7 +64,16 @@ export default function PageHeader({
       )}
 
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleSidebar}
+            className="md:hidden text-white/70 hover:text-white shrink-0 mt-1"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div>
           <h1 className="header-anim text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/60 drop-shadow-sm">
             {title}
           </h1>
@@ -71,6 +82,7 @@ export default function PageHeader({
               {description}
             </p>
           )}
+        </div>
         </div>
         <div className="header-anim flex items-center gap-3 shrink-0">
           {user && (

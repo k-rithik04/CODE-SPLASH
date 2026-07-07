@@ -4,7 +4,7 @@ import PageHeader from "@/components/cms/PageHeader";
 import RegistrationsClient from "./RegistrationsClient";
 
 export default async function RegistrationsPage() {
-  await requireRole("editor");
+  await requireRole("viewer");
   const supabase = createServerClient();
 
   const { data: schoolData } = await supabase

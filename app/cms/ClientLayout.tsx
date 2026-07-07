@@ -70,11 +70,19 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
 }
 
 function MainContent({ children }: { children: React.ReactNode }) {
-  const { open } = useSidebar();
+  const { open, closeSidebar } = useSidebar();
   return (
-    <main className={cn("h-screen p-6 md:p-8 transition-all duration-300 overflow-y-auto custom-scrollbar", open ? "ml-[260px]" : "ml-[72px]")}>
-      <GSAPWrapper>{children}</GSAPWrapper>
-    </main>
+    <>
+      {open && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+      <main className={cn("h-screen p-6 md:p-8 transition-all duration-300 overflow-y-auto custom-scrollbar relative z-0", open ? "md:ml-[260px]" : "md:ml-[72px]")}>
+        <GSAPWrapper>{children}</GSAPWrapper>
+      </main>
+    </>
   );
 }
 

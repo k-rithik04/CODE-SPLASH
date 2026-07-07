@@ -51,7 +51,7 @@ export default function RegistrationsClient({ schoolData, universityData }: Regi
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
+      <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit max-w-full">
         {tabs.map((t) => (
           <button
             key={t.key}

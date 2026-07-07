@@ -17,11 +17,11 @@ const Chapters = React.forwardRef<HTMLDivElement, ChaptersProps>(
   ({ contentRef, titleRef, cardsRef, data }, layerRef) => {
     return (
       <section ref={layerRef} className="fixed inset-0 w-screen h-screen opacity-0 pointer-events-none z-10 flex justify-center items-center overflow-hidden">
-        <div ref={contentRef} className="w-[90%] md:w-full max-w-[1200px] flex flex-col justify-center text-center">
+        <div ref={contentRef} className="w-[90%] md:w-full max-w-[1200px] flex flex-col justify-center text-center pb-[10vh] md:pb-0">
           <h2 ref={titleRef} className="font-rebeca text-[clamp(1.5rem,4vw,3.5rem)] font-extrabold tracking-tight mb-4 md:mb-12 shrink-0">
             <span className="text-orange font-rebeca">Chapters</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 [@media(min-height:750px)]:gap-4 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
             {data.map((ch, i) => (
               <Card
                 key={i}
