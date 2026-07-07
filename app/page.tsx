@@ -640,10 +640,10 @@ export default function Home() {
       // 7. FAQ
       if (faqLayerRef.current && faqTitleRef.current) {
         if (sp >= t.faq.start && sp <= t.faq.end) {
-          const opMain = sp > t.faq.pointerStart && sp < t.faq.pointerEnd ? 1 : 0;
+          const interactive = sp >= t.faq.inEnd && sp <= t.faq.outStart;
           faqLayerRef.current.style.opacity = "1";
-          faqLayerRef.current.style.pointerEvents = opMain ? "auto" : "none";
-          faqLayerRef.current.style.zIndex = opMain ? "50" : "10";
+          faqLayerRef.current.style.pointerEvents = interactive ? "auto" : "none";
+          faqLayerRef.current.style.zIndex = interactive ? "50" : "10";
           let titleOp = 1;
           if (sp < t.faq.inEnd) titleOp = mapRange(sp, t.faq.start, t.faq.inEnd, 0, 1);
           else if (sp > t.faq.outStart) titleOp = mapRange(sp, t.faq.outStart, t.faq.outEnd, 1, 0);
@@ -665,7 +665,7 @@ export default function Home() {
             }
             item.style.transform = `translate3d(${currentX}vw, 0, 0)`;
             item.style.opacity = currentOp.toString();
-            // Removed item.style.pointerEvents to avoid overriding parent's pointer-events: none
+            item.style.pointerEvents = interactive ? "auto" : "none";
           });
         } else {
           faqLayerRef.current.style.opacity = "0";
