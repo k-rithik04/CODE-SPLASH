@@ -22,6 +22,7 @@ import { useCMSData } from "@/lib/useCMSData";
 import { useLenis } from "@/components/SmoothScroll";
 import { isMobileDevice } from "@/lib/device-detection";
 import { getFrameUrl } from "@/lib/frame-resolver";
+import { gsap } from "gsap";
 import {
   Loader,
   Background,
@@ -383,9 +384,8 @@ export default function Home() {
     let lastRenderTime = 0;
     const fpsInterval = 1000 / 60;
 
-    const renderLoop = (time: number) => {
-      animationFrameRef.current = requestAnimationFrame(renderLoop);
-
+    const renderLoop = (timeInSeconds: number) => {
+      const time = timeInSeconds * 1000;
       if (time - lastRenderTime < fpsInterval) return;
       lastRenderTime = time;
 
@@ -713,17 +713,16 @@ export default function Home() {
           connectLayerRef.current.style.transform = `translate3d(0, 200%, 0)`;
         }
       }
-
     };
 
-    animationFrameRef.current = requestAnimationFrame(renderLoop);
+    gsap.ticker.add(renderLoop);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
       clearTimeout(metricsTimer);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      gsap.ticker.remove(renderLoop);
     };
   }, [lenis]);
 

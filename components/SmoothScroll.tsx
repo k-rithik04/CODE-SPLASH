@@ -3,6 +3,7 @@
 import { createContext, useEffect, useSyncExternalStore, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
+import { gsap } from "gsap";
 
 const LenisContext = createContext<Lenis | null>(null);
 
@@ -54,10 +55,12 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     listeners.forEach((l) => l());
 
     function raf(time: number) {
-      instance.raf(time);
-      requestAnimationFrame(raf);
+      // time passed by GSAP is in seconds, Lenis expects milliseconds
+      instance.raf(time * 1000);
     }
-    requestAnimationFrame(raf);
+    
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
 
     // --- Horizontal swipe → vertical scroll conversion ---
     function handleWheel(e: WheelEvent) {
@@ -117,6 +120,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
+      gsap.ticker.remove(raf);
       instance.destroy();
       lenisInstance = null;
       listeners.forEach((l) => l());
