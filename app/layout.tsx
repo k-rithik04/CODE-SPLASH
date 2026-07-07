@@ -54,19 +54,16 @@ export const metadata: Metadata = {
     "Agentic AI challenge",
   ],
   authors: [
+    {
+      name: "CSSA — Computer Science Students' Association, University of Kelaniya",
+      url: "https://github.com/cssa-uok",
+    },
     { name: "Rithika", url: "https://github.com/k-rithik04" },
     { name: "Pahan" },
     { name: "Yasiru" },
   ],
-  creator: "Rithika",
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "32x32" },
-    ],
-    apple: [
-      { url: "/CodeSplash.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
+  creator:
+    "CSSA — Computer Science Students' Association, University of Kelaniya",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -128,7 +125,7 @@ const JSON_LD = {
       parentOrganization: {
         "@type": "CollegeOrUniversity",
         name: "University of Kelaniya",
-        url: "https://kelaniya.ac.lk",
+        url: "https://fct.kln.ac.lk",
       },
     },
     {
@@ -149,7 +146,7 @@ const JSON_LD = {
           addressRegion: "Western Province",
         },
       },
-      startDate: "2026-07-04",
+      startDate: "2026-07-07",
       endDate: "2026-09-02",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       eventStatus: "https://schema.org/EventScheduled",
@@ -158,7 +155,7 @@ const JSON_LD = {
         price: "0",
         priceCurrency: "LKR",
         availability: "https://schema.org/InStock",
-        validFrom: "2026-07-04",
+        validFrom: "2026-07-07",
       },
     },
     {
@@ -233,13 +230,13 @@ const JSON_LD = {
         {
           "@type": "Person",
           name: "Rithika",
-          url: "https://github.com/k-rithik04",
+          url: "https://github.com/cssa-uok",
         },
       ],
       copyrightHolder: {
         "@type": "Person",
         name: "Rithika",
-        url: "https://github.com/k-rithik04",
+        url: "https://github.com/cssa-uok",
       },
     },
   ],
@@ -253,32 +250,37 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        poppins.variable,
-        rebeca.variable
-      )}
+      className={cn("h-full", "antialiased", poppins.variable, rebeca.variable)}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://kcfwibhzmfwipipwbzrw.supabase.co" />
-        <link rel="preconnect" href="https://gcymcwaocowoczvvsaxw.supabase.co" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://kcfwibhzmfwipipwbzrw.supabase.co"
+        />
+        <link
+          rel="preconnect"
+          href="https://gcymcwaocowoczvvsaxw.supabase.co"
+        />
         <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
       </head>
-      <body className={cn(
-        "min-h-full flex flex-col",
-        "bg-bg text-white font-main"
-      )}>
+      <body
+        className={cn("min-h-full flex flex-col", "bg-bg text-white font-main")}
+      >
         <div
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
-            __html: '<!-- Originally developed by Rithika (github.com/k-rithik04/CODE-SPLASH) | Production deployment at cssa-uok/code-splash -->',
+            __html:
+              "<!-- Originally developed by Rithika (github.com/k-rithik04/CODE-SPLASH) | Production deployment at cssa-uok/code-splash -->",
           }}
         />
         <SmoothScroll>
