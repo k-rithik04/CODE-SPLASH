@@ -13,12 +13,12 @@ export default function Background({ canvasWrapperRef, bgCanvasRef, partCanvasRe
     <div
       ref={canvasWrapperRef}
       style={{ opacity: 1 }}
-      className="fixed inset-0 w-screen h-screen pointer-events-none overflow-visible z-[-1]"
+      className="fixed inset-0 w-full h-screen pointer-events-none overflow-visible z-[-1]"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-bg via-[#110600] to-bg z-0"></div>
       <canvas
         ref={bgCanvasRef}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-[100vw] min-h-[100vh] max-md:min-w-full max-md:min-h-full w-auto h-auto max-w-none block z-10"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-[100vh] max-md:min-w-full max-md:min-h-full w-auto h-auto max-w-none block z-10"
       ></canvas>
       <div className="absolute inset-0 bg-gradient-to-b from-bg/10 to-bg/50 z-20"></div>
       <canvas

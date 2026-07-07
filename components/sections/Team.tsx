@@ -35,15 +35,15 @@ function TeamCard({ member }: { member: TeamMember }) {
   const src = getStorageUrl(member.image_url) || "";
 
   return (
-    <div className="w-[280px] md:w-[320px] h-[380px] md:h-[420px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border transition-transform hover:-translate-y-2 group">
-      <div className="h-[65%] w-full border-b border-white/10 relative overflow-hidden bg-white/5">
+    <div className="w-[280px] md:w-[300px] h-[380px] md:h-[400px] shrink-0 rounded-2xl flex flex-col overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] bg-glass-bg backdrop-blur-[40px] border border-glass-border transition-transform hover:-translate-y-2 group">
+      <div className="h-[60%] w-full border-b border-white/10 relative overflow-hidden bg-white">
         {!loaded && !error && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 border-3 border-white/10 border-t-orange rounded-full animate-spin" />
+            <div className="w-10 h-10 border-3 border-black/10 border-t-orange rounded-full animate-spin" />
           </div>
         )}
         {error || !src ? (
-          <div className="absolute inset-0 flex items-center justify-center text-white/30 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-black/30 text-sm">
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
@@ -55,7 +55,7 @@ function TeamCard({ member }: { member: TeamMember }) {
             loading="lazy"
             onLoad={() => setLoaded(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-cover object-center ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 w-full h-full object-contain object-bottom p-0 scale-110 origin-bottom ${loaded ? "opacity-100" : "opacity-0"}`}
           />
         )}
         <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 right-4 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 rounded-full text-white/90 transition-all duration-300 hover:scale-110 hover:text-orange z-50 drop-shadow-md cursor-pointer">
@@ -65,13 +65,13 @@ function TeamCard({ member }: { member: TeamMember }) {
         </a>
       </div>
 
-      <div className="h-[35%] w-full p-4 flex flex-col justify-center">
+      <div className="h-[40%] w-full p-4 flex flex-col justify-center">
         <div className="text-center mb-3.5 md:mb-4 w-full px-2">
           <h4 className="font-bold text-white text-md md:text-xl leading-tight mb-1 truncate" title={member.name}>{member.name}</h4>
           <p className="text-orange text-[0.7rem] md:text-[0.8rem] uppercase tracking-[1.5px] font-semibold truncate" title={member.role}>{member.role}</p>
         </div>
 
-        <div className="flex flex-col gap-2 md:gap-2.5 text-[0.8rem] md:text-[0.9rem] text-white/80 w-full px-4 mx-auto">
+        <div className="flex flex-col gap-2 md:gap-2.5 text-[0.7rem] md:text-[0.75rem] text-white/80 w-full px-3 mx-auto">
           <span className="flex items-center gap-3 overflow-hidden" title={member.email}>
             <svg className="w-4 h-4 md:w-5 md:h-5 text-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>

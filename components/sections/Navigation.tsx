@@ -23,7 +23,7 @@ export default function Navigation({ dialWindowRef, dialItemsRef, onDialClick }:
   return (
     <div
       ref={dialWindowRef}
-      className="fixed bottom-0 left-0 w-full h-[70px] md:h-[80px] overflow-x-auto hide-scrollbar z-[100] pointer-events-auto flex items-center scroll-smooth"
+      className="fixed bottom-0 left-0 w-full h-[70px] md:h-[80px] overflow-x-auto scrollbar-none z-[100] pointer-events-auto flex items-center scroll-smooth"
     >
       <nav className="flex items-center gap-[40px] md:gap-[60px] w-max px-[50vw]">
         {NAV_ITEMS.map((item, index) => (
