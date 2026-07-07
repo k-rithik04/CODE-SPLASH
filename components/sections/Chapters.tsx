@@ -2,7 +2,13 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
+import { Download } from "lucide-react";
 import type { Chapter } from "@/lib/supabase/queries";
+
+const BOOKLET_URLS: Record<string, string> = {
+  "University Hackathon": "https://drive.google.com/file/d/1LXyuuJ-osS4hzOMwXFqd62KYLr-MkNPP/view?usp=sharing",
+  "School Hackathon": "https://drive.google.com/file/d/1oGqWq-rDDwHzlrdjbuwif1hEVCwyUKmt/view?usp=sharing",
+};
 
 const DOT_CLASSES = ["dot-animate-1", "dot-animate-2", "dot-animate-3"];
 
@@ -32,9 +38,20 @@ const Chapters = React.forwardRef<HTMLDivElement, ChaptersProps>(
                 <h3 className="text-[clamp(1rem,3vw,1.5rem)] [@media(min-height:750px)]:text-[1.15rem] whitespace-nowrap tracking-tight font-bold text-white mb-0 [@media(min-height:750px)]:mb-1 md:mb-2 group-hover:text-orange transition-colors">
                   {ch.title}
                 </h3>
-                <p className="text-white/60 text-[clamp(0.75rem,2vw,1rem)] [@media(min-height:750px)]:text-[0.85rem] md:text-sm leading-tight md:leading-normal mt-0.5">
+                <p className="text-white/60 text-[clamp(0.75rem,2vw,1rem)] [@media(min-height:750px)]:text-[0.85rem] md:text-sm leading-tight md:leading-normal mt-0.5 mb-3">
                   {ch.description}
                 </p>
+                {BOOKLET_URLS[ch.title] && (
+                  <a
+                    href={BOOKLET_URLS[ch.title]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-auto mb-2 inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-black hover:bg-orange/80 transition-colors"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download Booklet
+                  </a>
+                )}
               </Card>
             ))}
           </div>
