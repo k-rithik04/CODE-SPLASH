@@ -94,8 +94,13 @@ const Hero = React.forwardRef<HTMLDivElement, HeroProps>(
           ref={scrollArrowRef}
           className="fixed bottom-8 mb-12 md:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-auto z-50"
         >
-          <div className="w-[24px] h-[40px] border-[2px] border-white/40 rounded-full flex justify-center pt-1.5">
+          <div className="hidden md:flex w-[24px] h-[40px] border-[2px] border-white/40 rounded-full justify-center pt-1.5">
             <div className="w-[3px] h-[10px] bg-white/40 rounded-full animate-bounce"></div>
+          </div>
+          <div className="flex md:hidden flex-col items-center animate-bounce">
+            <svg className="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
           </div>
         </div>
       </>

@@ -47,6 +47,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 2,
       infinite: false,
+      gestureOrientation: "both",
     });
 
     lenisInstance = instance;
@@ -58,7 +59,61 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     }
     requestAnimationFrame(raf);
 
+    // --- Horizontal swipe → vertical scroll conversion ---
+    function handleWheel(e: WheelEvent) {
+      const dx = Math.abs(e.deltaX);
+      const dy = Math.abs(e.deltaY);
+      if (dx > dy * 2) {
+        e.preventDefault();
+        let delta: number;
+        if (e.deltaMode === 1) {
+          delta = e.deltaX * 40;
+        } else if (e.deltaMode === 2) {
+          delta = e.deltaX * 800;
+        } else {
+          delta = e.deltaX;
+        }
+        instance.scrollTo(instance.scroll + delta, { duration: 0.15 });
+      }
+    }
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let swiping = false;
+
+    function handleTouchStart(e: TouchEvent) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      swiping = false;
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+      const dx = e.touches[0].clientX - touchStartX;
+      const dy = e.touches[0].clientY - touchStartY;
+
+      if (!swiping) {
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+          swiping = true;
+        } else if (Math.abs(dy) > 10) {
+          return;
+        } else {
+          return;
+        }
+      }
+
+      e.preventDefault();
+      instance.scrollTo(instance.scroll - dx * 1.5, { duration: 0.05 });
+      touchStartX = e.touches[0].clientX;
+    }
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
     return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
       instance.destroy();
       lenisInstance = null;
       listeners.forEach((l) => l());

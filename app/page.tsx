@@ -577,7 +577,6 @@ export default function Home() {
       if (ctaLayerRef.current && ctaTextRef.current && canvasWrapperRef.current && connectLayerRef.current) {
         if (sp >= t.cta.start) {
           ctaLayerRef.current.style.opacity = "1";
-          ctaLayerRef.current.style.pointerEvents = "auto";
           let op = 1, s = 1;
           if (sp < t.cta.inEnd) {
             op = mapRange(sp, t.cta.start, t.cta.inEnd, 0, 1);
@@ -595,9 +594,13 @@ export default function Home() {
             const connectY = mapRange(sp, t.cta.inEnd, t.cta.end, 120, 0);
             connectLayerRef.current.style.transform = `translate3d(0, ${connectY}%, 0)`;
             connectLayerRef.current.style.pointerEvents = "auto";
+            connectLayerRef.current.style.zIndex = "60";
+            ctaLayerRef.current.style.pointerEvents = "none";
           } else {
             connectLayerRef.current.style.transform = `translate3d(0, 120%, 0)`;
             connectLayerRef.current.style.pointerEvents = "none";
+            connectLayerRef.current.style.zIndex = "10";
+            ctaLayerRef.current.style.pointerEvents = "auto";
           }
         } else {
           ctaLayerRef.current.style.opacity = "0";

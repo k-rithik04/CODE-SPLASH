@@ -34,7 +34,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
   return (
     <section
       ref={layerRef}
-      className="fixed bottom-0 left-0 w-full h-[65vh] md:h-[60vh] z-30 flex flex-col justify-end pointer-events-none will-change-transform bg-gradient-to-t from-black via-black to-transparent"
+      className="fixed bottom-0 left-0 w-full h-[65vh] md:h-[60vh] z-10 flex flex-col justify-end pointer-events-none will-change-transform bg-gradient-to-t from-black via-black to-transparent"
       style={{ transform: "translate3d(0, 200%, 0)" }}
     >
       <div className="w-full flex-1 flex flex-col items-center justify-end px-[5%] pb-[100px] relative mt-[10vh]">
@@ -42,9 +42,9 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
           &ldquo;{data?.quote?.replace(/"/g, "") ?? "Every great journey begins with a conversation"}&rdquo;
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-4">
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-4 pointer-events-auto">
           {data?.email_1 && (
-            <a href={`mailto:${data.email_1}`} className="connect-btn">
+            <a href={`mailto:${data.email_1}`} className="connect-btn touch-manipulation">
               <svg className="w-4 h-4 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
@@ -52,7 +52,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
             </a>
           )}
           {data?.email_2 && (
-            <a href={`mailto:${data.email_2}`} className="connect-btn">
+            <a href={`mailto:${data.email_2}`} className="connect-btn touch-manipulation">
               <svg className="w-4 h-4 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
@@ -61,7 +61,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-8">
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-[800px] mb-8 pointer-events-auto">
           {socialLinks.map((link, i) => (
             <a
               key={i}
@@ -69,7 +69,7 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(({ data }, layerR
               target="_blank"
               rel="noopener noreferrer"
               aria-label={link.ariaLabel}
-              className={`connect-btn !px-3 md:!px-4${link.hasTooltip ? " group relative" : ""}`}
+              className={`connect-btn !px-3 md:!px-4 touch-manipulation${link.hasTooltip ? " group relative" : ""}`}
             >
               <Image
                 src={link.imgSrc}

@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { STORAGE_BASE_URL } from "@/lib/utils";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,7 +10,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [shakeError, setShakeError] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,9 +34,9 @@ export default function LoginPage() {
       }
 
       if (data.user.must_change_password) {
-        router.push("/cms/change-password");
+        window.location.href = "/cms/change-password";
       } else {
-        router.push("/cms/dashboard");
+        window.location.href = "/cms/dashboard";
       }
     } catch {
       setError("Something went wrong. Please try again.");
