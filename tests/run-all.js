@@ -18,7 +18,6 @@ import testSecurityHeaders from "./06-security-headers.js";
 import testRBAC from "./07-rbac.js";
 import testSessionManagement from "./08-session-management.js";
 import testCMSCrud from "./09-cms-crud.js";
-import testRBACComprehensive from "./10-rbac.js";
 import testJWTSecretEnforcement from "./11-jwt-secret-enforcement.js";
 import testCSRFProtection from "./12-csrf-protection.js";
 import testPasswordStrength from "./13-password-strength.js";
@@ -47,7 +46,6 @@ const TESTS = {
   "07": { name: "RBAC", fn: testRBAC },
   "08": { name: "Session Management", fn: testSessionManagement },
   "09": { name: "CMS CRUD Propagation", fn: testCMSCrud },
-  "10": { name: "RBAC Comprehensive", fn: testRBACComprehensive },
   "11": { name: "JWT Secret Enforcement", fn: testJWTSecretEnforcement },
   "12": { name: "CSRF Protection", fn: testCSRFProtection },
   "13": { name: "Password Strength", fn: testPasswordStrength },

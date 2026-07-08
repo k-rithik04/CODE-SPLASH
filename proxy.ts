@@ -23,13 +23,14 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const COOKIE_NAME = "cms_session";
 
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("FATAL: JWT_SECRET environment variable is not set.");
+function getSecret(): Uint8Array {
+  if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
+    throw new Error("FATAL: JWT_SECRET environment variable is not set.");
+  }
+  return new TextEncoder().encode(
+    process.env.JWT_SECRET || "ci-build-placeholder-not-for-production"
+  );
 }
-
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "ci-build-placeholder-not-for-production"
-);
 
 const ROLE_HIERARCHY: Record<string, number> = { viewer: 0, editor: 1, admin: 2 };
 
@@ -97,7 +98,7 @@ function checkGlobalRateLimit(key: string): boolean {
 
 async function verifyToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, SECRET, {
+    const { payload } = await jwtVerify(token, getSecret(), {
       issuer: "codesplash-cms",
     });
     return payload;

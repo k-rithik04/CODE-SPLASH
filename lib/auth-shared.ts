@@ -16,15 +16,16 @@
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
-const rawSecret = typeof process !== "undefined" ? process.env?.JWT_SECRET : undefined;
-
-if (!rawSecret && process.env.NODE_ENV === "production") {
-  throw new Error("FATAL: JWT_SECRET environment variable is not set. Refusing to start without it in production.");
-}
-
-const SECRET = new TextEncoder().encode(rawSecret || "ci-build-placeholder-not-for-production");
 const ALGORITHM = "HS256";
 const EXPIRY = "1h";
+
+function getSecret(): Uint8Array {
+  const raw = process.env?.JWT_SECRET;
+  if (!raw && process.env.NODE_ENV === "production") {
+    throw new Error("FATAL: JWT_SECRET environment variable is not set. Refusing to start without it in production.");
+  }
+  return new TextEncoder().encode(raw || "ci-build-placeholder-not-for-production");
+}
 
 export interface SessionPayload extends JWTPayload {
   id: string;
@@ -48,13 +49,13 @@ export async function createSession(payload: Omit<SessionPayload, "iat" | "exp" 
     .setIssuedAt()
     .setIssuer("codesplash-cms")
     .setExpirationTime(EXPIRY)
-    .sign(SECRET);
+    .sign(getSecret());
   return token;
 }
 
 export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET, { issuer: "codesplash-cms" });
+    const { payload } = await jwtVerify(token, getSecret(), { issuer: "codesplash-cms" });
     return payload as SessionPayload;
   } catch {
     return null;
@@ -71,12 +72,12 @@ export async function createUnlockToken(): Promise<string> {
     .setIssuedAt()
     .setIssuer("codesplash-cms-unlock")
     .setExpirationTime("1h")
-    .sign(SECRET);
+    .sign(getSecret());
 }
 
 export async function verifyUnlockToken(token: string): Promise<boolean> {
   try {
-    const { payload } = await jwtVerify(token, SECRET, { issuer: "codesplash-cms-unlock" });
+    const { payload } = await jwtVerify(token, getSecret(), { issuer: "codesplash-cms-unlock" });
     return (payload as UnlockPayload).scope === "admin-unlock";
   } catch {
     return false;
