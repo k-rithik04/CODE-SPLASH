@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import type { TeamMember } from "@/lib/supabase/queries";
 import { getStorageUrl } from "@/lib/supabase/queries";
 
@@ -47,10 +48,12 @@ function TeamCard({ member }: { member: TeamMember }) {
             </svg>
           </div>
         ) : (
-          <img
+          <Image
             src={src}
             alt={member.name}
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            unoptimized
             onLoad={() => setLoaded(true)}
             onError={() => setError(true)}
             className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}

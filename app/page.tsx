@@ -59,6 +59,7 @@ export default function Home() {
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [isLoaderRemoved, setIsLoaderRemoved] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const isDropdownOpenRef = useRef(false);
   const frame1DrawnRef = useRef(false);
   const cmsIsLoadedRef = useRef(false);
 
@@ -66,9 +67,13 @@ export default function Home() {
     cmsIsLoadedRef.current = cms.isLoaded;
   }, [cms.isLoaded]);
 
+  useEffect(() => {
+    isDropdownOpenRef.current = isDropdownOpen;
+  }, [isDropdownOpen]);
+
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const partCanvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>(0);
+
   const lenisRef = useRef<Lenis | null>(null);
   const engineInitRef = useRef(false);
   const lastDrawnFrame = useRef(-1);
@@ -434,7 +439,7 @@ export default function Home() {
             pendingLoadsRef.current.delete(targetFrame);
           };
           img.onerror = () => { pendingLoadsRef.current.delete(targetFrame); };
-          img.src = getFrameUrl(targetFrame, isMobile);
+          img.src = getFrameUrl(targetFrame);
         }
       } else {
         const f1 = imagesRef.current.get(1);
@@ -697,14 +702,16 @@ export default function Home() {
           if (sp >= t.cta.inEnd) {
             const connectY = mapRange(sp, t.cta.inEnd, t.cta.end, 120, 0);
             connectLayerRef.current.style.transform = `translate3d(0, ${connectY}%, 0)`;
-            connectLayerRef.current.style.pointerEvents = "auto";
-            connectLayerRef.current.style.zIndex = "60";
-            ctaLayerRef.current.style.pointerEvents = "none";
+            connectLayerRef.current.style.pointerEvents = isDropdownOpenRef.current ? "none" : "auto";
+            connectLayerRef.current.style.zIndex = isDropdownOpenRef.current ? "10" : "60";
+            ctaLayerRef.current.style.pointerEvents = "auto";
+            ctaLayerRef.current.style.zIndex = isDropdownOpenRef.current ? "70" : "40";
           } else {
             connectLayerRef.current.style.transform = `translate3d(0, 120%, 0)`;
             connectLayerRef.current.style.pointerEvents = "none";
             connectLayerRef.current.style.zIndex = "10";
             ctaLayerRef.current.style.pointerEvents = "auto";
+            ctaLayerRef.current.style.zIndex = "40";
           }
         } else {
           ctaLayerRef.current.style.opacity = "0";

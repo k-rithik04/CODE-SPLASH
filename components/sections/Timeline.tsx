@@ -31,7 +31,7 @@ const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(
                   style={{ backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)' }}
                 >
                   {node.position === "center" && (
-                    <img src="/crown.png" alt="Crown" className="w-12 md:w-20 absolute -top-5 -right-5 md:-top-7 md:-right-7 z-20 drop-shadow-[0_0_15px_rgba(255,107,0,0.8)] rotate-[25deg] object-contain" />
+                    <Image src="/crown.png" alt="Crown" width={80} height={80} unoptimized className="w-12 md:w-20 absolute -top-5 -right-5 md:-top-7 md:-right-7 z-20 drop-shadow-[0_0_15px_rgba(255,107,0,0.8)] rotate-[25deg] object-contain" />
                   )}
                   {node.is_current && node.position !== "center" && (
                     <span className="current-badge absolute -top-[12px] -left-[8px] bg-orange text-black uppercase tracking-[1px] text-[0.65rem] font-extrabold px-3 py-1 rounded-full whitespace-nowrap z-20 shadow-[0_0_10px_rgba(255,107,0,0.5)]">

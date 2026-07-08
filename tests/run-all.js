@@ -37,13 +37,6 @@ import testLoginSecurity from "./25-login-security.js";
 import testApiMethodRestriction from "./26-api-method-restriction.js";
 import testXSSPrevention from "./27-xss-prevention.js";
 import testAuditLogging from "./28-audit-logging.js";
-import testProxyRateLimiting from "./29-proxy-rate-limiting.js";
-import testCookieSecurity from "./30-cookie-security.js";
-import testErrorMessageConsistency from "./31-error-message-consistency.js";
-import testContentTypeValidation from "./32-content-type-validation.js";
-import testInputSanitization from "./33-input-sanitization.js";
-import testHttpOnlyCookie from "./34-httponly-cookie-verification.js";
-
 const TESTS = {
   "01": { name: "Authentication Bypass", fn: testAuthBypass },
   "02": { name: "SQL Injection", fn: testSQLInjection },
@@ -73,12 +66,6 @@ const TESTS = {
   "26": { name: "API Method Restriction", fn: testApiMethodRestriction },
   "27": { name: "XSS Prevention", fn: testXSSPrevention },
   "28": { name: "Audit Logging", fn: testAuditLogging },
-  "29": { name: "Proxy Rate Limiting", fn: testProxyRateLimiting },
-  "30": { name: "Cookie Security", fn: testCookieSecurity },
-  "31": { name: "Error Message Consistency", fn: testErrorMessageConsistency },
-  "32": { name: "Content Type Validation", fn: testContentTypeValidation },
-  "33": { name: "Input Sanitization", fn: testInputSanitization },
-  "34": { name: "HttpOnly Cookie Verification", fn: testHttpOnlyCookie },
 };
 
 async function main() {

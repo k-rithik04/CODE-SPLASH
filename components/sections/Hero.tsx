@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+
 import Image from "next/image";
 import type { HeroContent } from "@/lib/supabase/queries";
 
