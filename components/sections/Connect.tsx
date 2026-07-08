@@ -152,20 +152,9 @@ const Connect = React.forwardRef<HTMLDivElement, ConnectProps>(
             ))}
           </div>
 
-          <div className="w-full flex justify-center mb-4">
-            <Image
-              src={
-                data?.cssa_logo_url
-                  ? getStorageUrl(data.cssa_logo_url)
-                  : "/CSSALogo.png"
-              }
-              alt="CSSA Logo"
-              width={200}
-              height={60}
-              className="object-contain opacity-90"
-              style={{ width: "auto", height: "60px" }}
-            />
-          </div>
+        <div className="w-full flex justify-center mb-4">
+          <Image src={data?.cssa_logo_url ? getStorageUrl(data.cssa_logo_url) : "/CSSALogo.png"} alt="CSSA Logo" width={200} height={60} unoptimized className="object-contain opacity-90" style={{ width: "auto", height: "60px" }} />
+        </div>
 
           <div className="text-[0.65rem] md:text-[0.75rem] text-white/60 tracking-[0.5px] text-center flex items-center justify-center gap-2 flex-wrap pb-4">
             <span>&copy; CodeSplash 2026.</span>
